@@ -34,3 +34,22 @@ class UserCreate(schemas.BaseUserCreate):
 
 class UserUpdate(schemas.BaseUserUpdate):
     nickname: Optional[str]
+
+
+class ScoreBase(ModelBase):
+    accuracy: float
+    created_at: int
+    max_combo: int
+    mode_int: int
+    mods: int
+    rank: str
+    score: int
+    count_300: int
+    count_100: int
+    count_50: int
+    count_miss: int
+    map_md5: str
+
+
+class ScoreCreate(ScoreBase):
+    server_id: int
