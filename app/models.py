@@ -1,5 +1,5 @@
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, Boolean, func
+from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP, Boolean, func, DOUBLE, ARRAY
 from sqlalchemy.orm import declarative_base, relationship, backref, Mapped
 
 Base = declarative_base()
@@ -30,6 +30,31 @@ class Beatmap(Base):
     md5 = Column(String, primary_key=True)
     # beatmap fields
     # use beatmap md5 as primary key, and we don't store beatmapsets
+    beatmapset_id = Column(Integer, ForeignKey('beatmapset.id'), nullable=False)
+    difficulty_rating = Column(DOUBLE, nullable=False)
+    id = Column(Integer, nullable=False)
+    mode = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    total_length = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)  # Refer to the creator id
+    version = Column(String, nullable=False)
+    accuracy = Column(DOUBLE, nullable=False)
+    ar = Column(DOUBLE, nullable=False)
+    bpm = Column(DOUBLE, nullable=False)
+    convert = Column(Boolean, nullable=False)
+    count_circles = Column(Integer, nullable=False)
+    count_sliders = Column(Integer, nullable=False)
+    count_spinners = Column(Integer, nullable=False)
+    cs = Column(Integer, nullable=False)
+    deleted_at = Column(TIMESTAMP)
+    drain = Column(Integer, nullable=False)
+    hit_length = Column(Integer, nullable=False)
+    is_scoreable = Column(Boolean, nullable=False)
+    last_updated = Column(TIMESTAMP, nullable=False)
+    mode_int = Column(Integer, nullable=False)
+    ranked = Column(Boolean, nullable=False)
+    url = Column(String, nullable=False)
+    max_combo = Column(Integer, nullable=False)
 
 
 class Pool(Base):
@@ -110,3 +135,19 @@ class StageScore(Base):
     server_id = Column(Integer, ForeignKey('server.id'), index=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), index=True, nullable=False)
     # score fields
+    accuracy = Column(DOUBLE, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False)
+    max_combo = Column(Integer, nullable=False)
+    mode_int = Column(Integer, nullable=False)
+    mods = Column(String, nullable=False)
+    passed = Column(Boolean, nullable=False)
+    perfect = Column(Boolean, nullable=False)
+    pp = Column(DOUBLE, nullable=False)
+    rank = Column(String, nullable=False)
+    replay_available = Column(Boolean, nullable=False)
+    score = Column(Integer, nullable=False)
+    count_300 = Column(Integer, nullable=False)
+    count_100 = Column(Integer, nullable=False)
+    count_50 = Column(Integer, nullable=False)
+    count_miss = Column(Integer, nullable=False)
+    beatmap = Column(String, ForeignKey('beatmap.md5'), index=True, nullable=False)
