@@ -1,0 +1,45 @@
+// This file include osu api v2 requests we need in dev
+
+###
+
+// @name Client Credentials Grant
+
+// ReferenceLink: https://osu.ppy.sh/docs/index.html#client-credentials-grant
+
+POST https://osu.ppy.sh/oauth/token
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+// Fill in it for yourself
+client_id={{client_id}}&client_secret={{client_secret}}&grant_type=client_credentials&scope=public
+
+> {% // Will set global AuthorizationToken. So just run it once for oneday.
+    client.log("accessToken: " + response.body.access_token);
+
+    client.global.set("AuthorizationToken", response.body.access_token);
+%}
+
+>>! Response\ClientCredentialsGrant.json
+
+###
+
+// @name Get Beatmap
+
+// ReferenceLink: https://osu.ppy.sh/docs/index.html#get-beatmap
+// https://osu.ppy.sh/api/v2/beatmaps/{beatmap}
+
+// Set url parameter "beatmap"
+// 364990: Scarlet Faith - 仲村芽衣子
+< {%
+    request.variables.set("beatmap", "364990")
+%}
+
+
+GET https://osu.ppy.sh/api/v2/beatmaps/{{beatmap}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{AuthorizationToken}}
+
+>>! Response\Beatmap\GetBeatmap.json
+
+###
