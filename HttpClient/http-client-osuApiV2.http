@@ -6,9 +6,9 @@
 
 // ReferenceLink: https://osu.ppy.sh/docs/index.html#client-credentials-grant
 
-POST https://osu.ppy.sh/oauth/token
-Content-Type: application/x-www-form-urlencoded
+POST {{BASE_URL}}/oauth/token
 Accept: application/json
+Content-Type: application/x-www-form-urlencoded
 
 // Fill in it for yourself
 client_id={{client_id}}&client_secret={{client_secret}}&grant_type=client_credentials&scope=public
@@ -26,16 +26,17 @@ client_id={{client_id}}&client_secret={{client_secret}}&grant_type=client_creden
 // @name Get Beatmap
 
 // ReferenceLink: https://osu.ppy.sh/docs/index.html#get-beatmap
-// https://osu.ppy.sh/api/v2/beatmaps/{beatmap}
+// /beatmaps/{beatmap}
 
-// Set url parameter "beatmap"
-// 364990: Scarlet Faith - 仲村芽衣子
 < {%
     request.variables.set("beatmap", "364990")
 %}
 
+// Set url parameter "beatmap"
+// 364990: Scarlet Faith - 仲村芽衣子
 
-GET https://osu.ppy.sh/api/v2/beatmaps/{{beatmap}}
+
+GET {{BASE_API_URL}}/beatmaps/{{beatmap}}
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{AuthorizationToken}}
@@ -43,3 +44,25 @@ Authorization: Bearer {{AuthorizationToken}}
 >>! Response\Beatmap\GetBeatmap.json
 
 ###
+
+// @name Get User Scores
+
+// ReferenceLink: https://osu.ppy.sh/docs/index.html#get-user-scores
+// /users/{user}/scores/{type}
+
+< {%
+    request.variables.set("user", "11350021")  // wanna accuracy
+    request.variables.set("type", "best")
+%}
+
+GET {{BASE_API_URL}}/users/{{user}}/scores/{{type}}
+    ?include_fails=0
+#    &mode=
+#    &limit=
+#    &offset=
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{AuthorizationToken}}
+
+>>! Response\Users\GetUserScores.json
+
