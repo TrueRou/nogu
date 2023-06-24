@@ -1,9 +1,11 @@
+import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-
-from app.schemas import UserFull, UserUpdate, UserCreate
 from app.users import fastapi_users, auth_backend
+import services
+from app.schemas import UserFull, UserUpdate, UserCreate
+
 
 app = FastAPI()
 scheduler = AsyncIOScheduler()
@@ -23,3 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def on_startup():
+    await services.create_db_and_tables()
+
+
+if __name__ == '__main__':
+    uvicorn.run("main:app", reload=True, port=8000)

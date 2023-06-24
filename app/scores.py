@@ -16,7 +16,7 @@ scores_router = APIRouter(prefix='/scores', tags=['scores'])
 async def upload_score(score: schemas.ScoreCreate, user=Depends(current_user), stage=Depends(current_stage)):
     async with db_session() as session:
         condition = and_(models.StageMap.stage_id == stage.id, models.StageMap.map_md5 == score.map_md5)
-        stage_maps: list[models.StageMap] = (await services.select_models(session, models.StageMap, condition)).all()
+        stage_maps = await services.select_models(session, models.StageMap, condition)
         variables = {
             "acc": score.accuracy,
             "max_combo": score.max_combo,
