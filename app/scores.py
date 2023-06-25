@@ -12,7 +12,7 @@ from services import db_session
 scores_router = APIRouter(prefix='/scores', tags=['scores'])
 
 
-@scores_router.put('/', response_model=schemas.ScoreBase)
+@scores_router.post('/', response_model=schemas.ScoreBase)
 async def upload_score(score: schemas.ScoreCreate, user=Depends(current_user), stage=Depends(current_stage)):
     async with db_session() as session:
         condition = and_(models.StageMap.stage_id == stage.id, models.StageMap.map_md5 == score.map_md5)
@@ -42,7 +42,7 @@ async def upload_score(score: schemas.ScoreCreate, user=Depends(current_user), s
                 )
 
 
-@scores_router.put('/abstract', response_model=schemas.ScoreBase)
+@scores_router.post('/abstract', response_model=schemas.ScoreBase)
 async def upload_score_abstract(beatmap_md5: str, mods: int, description: str, user=Depends(current_user),
                                 stage=Depends(get_stage)):
     async with db_session() as session:

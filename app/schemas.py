@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from fastapi_users import schemas
@@ -24,7 +25,7 @@ class UserAccount(BaseModel):
 class UserFull(schemas.BaseUser):
     nickname: str
     privilege: int
-    creation_time: int
+    creation_time: datetime
     accounts: list[UserAccount]
 
 
