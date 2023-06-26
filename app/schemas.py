@@ -37,6 +37,52 @@ class UserUpdate(schemas.BaseUserUpdate):
     nickname: Optional[str]
 
 
+class Pool(ModelBase):
+    id: int
+    name: str
+    mode_int: int
+    description: str
+    privacy: int
+    creation_time: datetime
+    last_updated: datetime
+    owner_id: int
+
+
+class Stage(ModelBase):
+    id: int
+    name: str
+    mode_int: int
+    creation_time: datetime
+    last_updated: datetime
+    pool_id: int
+    team_id: int
+
+
+class Beatmap(ModelBase):
+    md5: str
+    # beatmap fields
+    set_id: int
+    id: int
+    status: str
+    total_length: int
+    user_id: int
+    version: str
+    accuracy: float
+    ar: float
+    cs: float
+    hp: float
+    od: float
+    bpm: float
+    convert: bool
+    count_circles: int
+    count_sliders: int
+    count_spinners: int
+    hit_length: int
+    last_updated: datetime
+    mode_int: int
+    max_combo: int
+
+
 class ScoreBase(ModelBase):
     accuracy: float
     created_at: int
@@ -54,3 +100,9 @@ class ScoreBase(ModelBase):
 
 class ScoreCreate(ScoreBase):
     server_id: int
+
+
+class ScoreFull(ScoreBase):
+    server_id: int
+    stage: Stage
+    beatmap: Beatmap

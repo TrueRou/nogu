@@ -1,4 +1,5 @@
 import ast
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_
@@ -66,3 +67,16 @@ async def upload_score_abstract(beatmap_md5: str, mods: int, description: str, u
                              max_combo=combo, mode_int=stage.ruleset, mods=mods, score=score, count_miss=miss,
                              count_50=0, count_100=n100, count_300=n300)
         await services.add_model(session, score)
+
+
+@scores_router.get('', response_model=list[schemas.ScoreFull])
+async def get_scores(score_id: Optional[int], stage_id: Optional[int], user=Depends(current_user)):
+    async with db_session() as session:
+        if not score_id:
+            score = await services.get_model(session, score_id, models.Score)
+            return [score]
+        if not stage_id:
+            user_stage = await get_stage(stage_id, user)
+            scores = await services.query_models(session, user_stage.scores)
+            return scores.all()
+

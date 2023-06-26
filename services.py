@@ -56,8 +56,26 @@ async def get_model(session: AsyncSession, ident, model: V) -> V:
     return model
 
 
-def _build_select_sentence(obj, condition, offset=-1, limit=-1, order_by=None):
-    base = select(obj)
+async def get_user_model(session: AsyncSession, ident, model: V, user_id: int) -> V:
+    model = await session.get(model, ident)
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='There is no model on the provided ident.',
+        )
+    if model.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You have no permission to access that model.',
+        )
+    return model
+
+
+def _build_select_sentence(obj, condition=None, offset=-1, limit=-1, order_by=None):
+    return _enlarge_sentence(select(obj), condition, offset, limit, order_by)
+
+
+def _enlarge_sentence(base, condition=None, offset=-1, limit=-1, order_by=None):
     if condition is not None:
         base = base.where(condition)
     if order_by is not None:
@@ -69,19 +87,31 @@ def _build_select_sentence(obj, condition, offset=-1, limit=-1, order_by=None):
     return base
 
 
-async def select_model(session: AsyncSession, obj: V, condition, offset=-1, limit=-1, order_by=None) -> V:
+async def select_model(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> V:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     model = await session.scalar(sentence)
     return model
 
 
-async def select_models(session: AsyncSession, obj: V, condition, offset=-1, limit=-1, order_by=None) -> ScalarResult[V]:
+async def query_model(session: AsyncSession, sentence, condition=None, offset=-1, limit=-1, order_by=None):
+    sentence = _enlarge_sentence(sentence, condition, offset, limit, order_by)
+    model = await session.scalar(sentence)
+    return model
+
+
+async def select_models(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> ScalarResult[V]:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     model = await session.scalars(sentence)
     return model
 
 
-async def select_models_count(session: AsyncSession, obj: V, condition, offset=-1, limit=-1, order_by=None) -> int:
+async def query_models(session: AsyncSession, sentence, condition=None, offset=-1, limit=-1, order_by=None):
+    sentence = _enlarge_sentence(sentence, condition, offset, limit, order_by)
+    model = await session.scalars(sentence)
+    return model
+
+
+async def select_models_count(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> int:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     sentence = sentence.with_only_columns(func.count(obj.id)).order_by(None)
     model = await session.scalar(sentence)

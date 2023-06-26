@@ -24,8 +24,10 @@ class Team(Base):
     achieved = Column(Boolean, nullable=False, default=False)
     availability = Column(Integer, nullable=True)
     creation_time = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
-    # active_stage = relationship('Stage', lazy='selectin')
+    active_stage_id = Column(Integer, ForeignKey('stage.id'), nullable=True)
+    active_stage = relationship('Stage', lazy='selectin')
     users = relationship('User', lazy='dynamic', secondary='team_member', back_populates="teams")
+    stages = relationship('Stage', lazy='dynamic')
 
 
 class Beatmap(Base):
@@ -33,29 +35,24 @@ class Beatmap(Base):
     md5 = Column(String(64), primary_key=True)
     # beatmap fields
     set_id = Column(Integer, nullable=False)
-    difficulty_rating = Column(Float, nullable=False)
     id = Column(Integer, nullable=False)
-    mode = Column(String(64), nullable=False)
     status = Column(String(64), nullable=False)
     total_length = Column(Integer, nullable=False)
     user_id = Column(Integer, nullable=False)  # Refer to the creator id
     version = Column(String(64), nullable=False)
     accuracy = Column(Float, nullable=False)
     ar = Column(Float, nullable=False)
+    cs = Column(Float, nullable=False)
+    hp = Column(Float, nullable=False)
+    od = Column(Float, nullable=False)
     bpm = Column(Float, nullable=False)
     convert = Column(Boolean, nullable=False)
     count_circles = Column(Integer, nullable=False)
     count_sliders = Column(Integer, nullable=False)
     count_spinners = Column(Integer, nullable=False)
-    cs = Column(Integer, nullable=False)
-    deleted_at = Column(TIMESTAMP)
-    drain = Column(Integer, nullable=False)
     hit_length = Column(Integer, nullable=False)
-    is_scoreable = Column(Boolean, nullable=False)
     last_updated = Column(TIMESTAMP, nullable=False)
     mode_int = Column(Integer, nullable=False)
-    ranked = Column(Boolean, nullable=False)
-    url = Column(String(64), nullable=False)
     max_combo = Column(Integer, nullable=False)
 
 
@@ -63,7 +60,7 @@ class Pool(Base):
     __tablename__ = "pool"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False)
-    ruleset = Column(Integer, nullable=False, default=0)
+    mode_int = Column(Integer, nullable=False, default=0)
     description = Column(String(64), nullable=True)
     privacy = Column(Integer, nullable=False, default=0)
     creation_time = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
@@ -75,11 +72,13 @@ class Stage(Base):
     __tablename__ = "stage"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False)
-    ruleset = Column(Integer, nullable=False, default=0)
+    active = Column(Boolean, nullable=False, default=False)
+    mode_int = Column(Integer, nullable=False, default=0)
     creation_time = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     last_updated = Column(TIMESTAMP, nullable=False)
     pool_id = Column(Integer, ForeignKey('pool.id'), nullable=False)  # originated from which pool
     team_id = Column(Integer, ForeignKey('team.id'), nullable=False)  # which team owned the stage
+    scores = relationship('Score', lazy='dynamic')
 
 
 class Server(Base):
@@ -98,7 +97,7 @@ class Formula(Base):
     author = Column(String(64), nullable=False)
     origin = Column(String(64), nullable=False)
     home_page = Column(String(64), nullable=False)
-    supported_ruleset = Column(Integer, nullable=False)
+    supported_mode = Column(Integer, nullable=False)
 
 
 class Score(Base):
@@ -152,6 +151,7 @@ class StageMap(Base):
     description = Column(String(64), nullable=False)
     condition_ast = Column(String(64), nullable=False)
     condition_name = Column(String(64), nullable=False)
+    beatmap = relationship('Beatmap', lazy='selectin')
 
 
 class TeamMember(Base):
