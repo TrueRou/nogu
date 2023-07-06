@@ -1,3 +1,4 @@
+from sqlalchemy.orm import declarative_base
 import contextlib
 from typing import TypeVar, AsyncContextManager
 
@@ -8,7 +9,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
 import config
-from app.models import Base
+
+Base = declarative_base()
 
 engine = create_async_engine(config.mysql_url, echo=config.debug, future=True)
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -46,7 +48,7 @@ async def delete_models(session: AsyncSession, obj, condition):
     await session.execute(sentence)
 
 
-async def get_model(session: AsyncSession, ident, model: V) -> V:
+async def get_model(session: AsyncSession, ident, model: V):
     model = await session.get(model, ident)
     if not model:
         raise HTTPException(
