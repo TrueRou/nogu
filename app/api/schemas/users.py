@@ -30,7 +30,7 @@ class UserFull(UserRead):
     accounts: list[UserAccount]
 
 
-class UserUpdate:
+class UserUpdate(ModelBase):
     password: Optional[str]
     email: Optional[EmailStr]
     nickname: Optional[str]
