@@ -24,15 +24,15 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     username = Column(String(64), nullable=False, unique=True)
-    privileges = Column(Integer, nullable=False)
+    privileges = Column(Integer, nullable=False, default=1)
     country = Column(String(64), nullable=False)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     active_team_id = Column(Integer, ForeignKey('teams.id'), nullable=True)
 
     accounts = relationship('UserAccount', lazy='selectin', uselist=True)
-    active_team = relationship('Team', lazy='dynamic')
-    teams = relationship('TeamMember', lazy='dynamic', back_populates="member")
+    active_team = relationship('Team', lazy='selectin', uselist=False)
+    teams = relationship('TeamMember', lazy='dynamic', back_populates="member", uselist=True)
 
 
 class Beatmap(Base):
@@ -84,8 +84,8 @@ class Score(Base):
     server_id = Column(Integer, nullable=False, default=Server.LOCAL)
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
 
-    beatmap = relationship('Beatmap', lazy='dynamic')
-    stage = relationship('Stage', lazy='dynamic')
+    beatmap = relationship('Beatmap', lazy='selectin')
+    stage = relationship('Stage', lazy='selectin', back_populates='scores')
 
 
 class Team(Base):
@@ -99,9 +99,9 @@ class Team(Base):
     finish_at = Column(DateTime(True), nullable=True)
     active_stage_id = Column(Integer, ForeignKey('stages.id'), nullable=True)
 
-    active_stage = relationship('Stage', lazy='dynamic')
+    active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
     member = relationship('TeamMember', lazy='dynamic', back_populates="teams")
-    stages = relationship('Stage', lazy='dynamic')
+    stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
 
 
 class Stage(Base):
@@ -116,9 +116,9 @@ class Stage(Base):
     pool_id = Column(Integer, ForeignKey('pools.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
 
-    pool = relationship('Pool', lazy='dynamic')  # originated from which pool
-    team = relationship('Team', lazy='dynamic')  # which team owned the stage
-    scores = relationship('Score', lazy='dynamic', uselist=True)
+    pool = relationship('Pool', lazy='selectin')  # originated from which pool
+    team = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id', viewonly=True)  # which team owned the stage
+    scores = relationship('Score', lazy='dynamic', uselist=True, back_populates='stage')
     maps = relationship('StageMap', lazy='dynamic', uselist=True)
 
 
@@ -134,7 +134,7 @@ class Pool(Base):
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    creator = relationship('User', lazy='dynamic')
+    creator = relationship('User', lazy='selectin')
     maps = relationship('PoolMap', lazy='dynamic', uselist=True)
 
 

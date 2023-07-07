@@ -20,6 +20,10 @@ class UserBase(schemas.BaseUser):
     country: str
 
 
+class UserWrite(UserBase):
+    password: str
+
+
 class UserRead(UserBase):
     privileges: int
     created_at: datetime
