@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends
 
 from .schemas.scores import ScoreBase, ScoreRead
 from .users import current_user
-from ..objects.score import Score
-from ..objects.user import User
+from ..interaction import User, Score
 
 router = APIRouter(prefix='/scores')
 

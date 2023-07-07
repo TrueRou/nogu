@@ -7,7 +7,7 @@ from fastapi_users.authentication import (
 from fastapi_users.db import SQLAlchemyUserDatabase
 
 from app.database import db_session
-from app.objects.user import User
+from app.interaction import User
 from config import jwt_secret
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")

@@ -1,12 +1,17 @@
+from typing import Optional, Any
+
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean
+from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
-from app.constants.formulas import bancho_formula
+from app import database
+from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
 from app.database import Base
+from app.definition import Raw, AstChecker
 
 
 class UserAccount(Base):
@@ -33,6 +38,11 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     accounts = relationship('UserAccount', lazy='selectin', uselist=True)
     active_team = relationship('Team', lazy='selectin', uselist=False)
     teams = relationship('TeamMember', lazy='dynamic', back_populates="member", uselist=True)
+
+    @property
+    def active_stage(self) -> Optional['Stage']:
+        team = self.active_team
+        return team.active_stage if team else None
 
 
 class Beatmap(Base):
@@ -87,6 +97,26 @@ class Score(Base):
     beatmap = relationship('Beatmap', lazy='selectin')
     stage = relationship('Stage', lazy='selectin', back_populates='scores')
 
+    @staticmethod
+    async def from_id(session: AsyncSession, score_id: int) -> Optional['Score']:
+        return await database.get_model(session, score_id, Score)
+
+    @staticmethod
+    async def from_web(info: dict, stage: 'Stage') -> Raw['Score']:
+        pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
+        score = Score(**info, stage_id=stage.id, performance_points=pp)
+        return Raw['Score'](score)
+
+    async def submit_raw(self, session: AsyncSession, condition: str) -> Optional['Score']:
+        variables = {
+            "acc": self.accuracy,
+            "max_combo": self.highest_combo,
+            "mods": self.mods,
+            "score": self.score
+        }
+        if AstChecker(condition).check(variables):
+            return await database.add_model(session, self)
+
 
 class Team(Base):
     __tablename__ = "teams"
@@ -103,6 +133,14 @@ class Team(Base):
     member = relationship('TeamMember', lazy='dynamic', back_populates="teams")
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
 
+    async def position_of(self, user_id: int) -> MemberPosition:
+        session = object_session(self)
+        team = await session.scalar(self.team)
+        member = await database.query_model(session, team.users, User.id == user_id)
+        if member is None:
+            return MemberPosition.EMPTY
+        return MemberPosition.MEMBER  # TODO: from association
+
 
 class Stage(Base):
     __tablename__ = "stages"
@@ -117,9 +155,18 @@ class Stage(Base):
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
 
     pool = relationship('Pool', lazy='selectin')  # originated from which pool
-    team = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id', viewonly=True)  # which team owned the stage
+    team = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id',
+                        viewonly=True)  # which team owned the stage
     scores = relationship('Score', lazy='dynamic', uselist=True, back_populates='stage')
     maps = relationship('StageMap', lazy='dynamic', uselist=True)
+
+    @staticmethod
+    async def from_id(session: AsyncSession, stage_id: int) -> Optional['Stage']:
+        return await session.get(Stage, stage_id)
+
+    async def get_map(self, beatmap_md5: str) -> Optional['StageMap']:
+        session = object_session(self)
+        return await database.query_model(session, self.maps, StageMap.map_md5 == beatmap_md5)
 
 
 class Pool(Base):

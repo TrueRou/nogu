@@ -2,11 +2,9 @@ from sqlalchemy.orm import declarative_base
 import contextlib
 from typing import TypeVar, AsyncContextManager
 
-from fastapi import HTTPException
 from sqlalchemy import select, ScalarResult, delete, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from starlette import status
 
 import config
 
@@ -49,28 +47,7 @@ async def delete_models(session: AsyncSession, obj, condition):
 
 
 async def get_model(session: AsyncSession, ident, model: V):
-    model = await session.get(model, ident)
-    if not model:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='There is no model on the provided ident.',
-        )
-    return model
-
-
-async def get_user_model(session: AsyncSession, ident, model: V, user_id: int) -> V:
-    model = await session.get(model, ident)
-    if not model:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='There is no model on the provided ident.',
-        )
-    if model.user_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='You have no permission to access that model.',
-        )
-    return model
+    return await session.get(model, ident)
 
 
 def _build_select_sentence(obj, condition=None, offset=-1, limit=-1, order_by=None):
