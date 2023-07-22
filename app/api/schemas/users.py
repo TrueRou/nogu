@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi_users import schemas
+from fastapi_users.schemas import CreateUpdateDictModel
 from pydantic import EmailStr
 
 from . import ModelBase
@@ -15,22 +15,21 @@ class UserAccount(ModelBase):
     checked_at: int
 
 
-class UserBase(schemas.BaseUser):
+class UserBase(ModelBase):
+    email: EmailStr
     username: str
     country: str
 
 
-class UserWrite(UserBase):
+class UserWrite(UserBase, CreateUpdateDictModel):
     password: str
 
 
 class UserRead(UserBase):
+    id: int
     privileges: int
     created_at: datetime
     updated_at: datetime
-
-
-class UserFull(UserRead):
     accounts: list[UserAccount]
 
 
