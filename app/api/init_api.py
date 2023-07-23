@@ -14,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
-from app import database, sessions
+from app import database
 from app.api import router
 from app.database import db_session
 from app.logging import log, Ansi

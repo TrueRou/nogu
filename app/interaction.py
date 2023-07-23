@@ -116,7 +116,14 @@ class Beatmap(Base):
             await database.add_model(session, beatmap)
 
     @staticmethod
-    async def request_api(**params: Any) -> Optional['Beatmap']:
+    async def request_api(ident: str) -> Optional['Beatmap']:
+        params = {}
+
+        if definition.MD5_PATTERN.match(ident):
+            params['md5'] = ident
+        if ident.isnumeric():
+            params['id'] = int(ident)
+
         if config.debug:
             log(f"Doing api (getbeatmaps) request {params}", Ansi.LMAGENTA)
         if config.osu_api_v1_key != "":
