@@ -1,10 +1,14 @@
 import ast
 import inspect
+import re
 from typing import TypeVar, Generic
 
 from app.logging import log
 
 T = TypeVar('T')
+
+IGNORED_BEATMAP_CHARS = dict.fromkeys(map(ord, r':\/*<>?"|'), None)
+MD5_PATTERN = re.compile(r'^[a-fA-F0-9]{32}$')
 
 
 # define the object without orm session

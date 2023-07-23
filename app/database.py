@@ -1,6 +1,6 @@
 from sqlalchemy.orm import declarative_base
 import contextlib
-from typing import TypeVar, AsyncContextManager
+from typing import TypeVar, AsyncContextManager, Generic
 
 from sqlalchemy import select, ScalarResult, delete, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -41,16 +41,16 @@ async def delete_model(session: AsyncSession, ident, model):
     await session.commit()  # Ensure deletion were operated
 
 
-async def delete_models(session: AsyncSession, obj, condition):
+async def delete_models(session: AsyncSession, obj: Generic[V], condition):
     sentence = delete(obj).where(condition)
     await session.execute(sentence)
 
 
-async def get_model(session: AsyncSession, ident, model: V):
+async def get_model(session: AsyncSession, ident, model: Generic[V]):
     return await session.get(model, ident)
 
 
-def _build_select_sentence(obj, condition=None, offset=-1, limit=-1, order_by=None):
+def _build_select_sentence(obj: Generic[V], condition=None, offset=-1, limit=-1, order_by=None):
     return _enlarge_sentence(select(obj), condition, offset, limit, order_by)
 
 
@@ -66,7 +66,7 @@ def _enlarge_sentence(base, condition=None, offset=-1, limit=-1, order_by=None):
     return base
 
 
-async def select_model(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> V:
+async def select_model(session: AsyncSession, obj: Generic[V], condition=None, offset=-1, limit=-1, order_by=None) -> V:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     model = await session.scalar(sentence)
     return model
@@ -78,7 +78,7 @@ async def query_model(session: AsyncSession, sentence, condition=None, offset=-1
     return model
 
 
-async def select_models(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> ScalarResult[V]:
+async def select_models(session: AsyncSession, obj: Generic[V], condition=None, offset=-1, limit=-1, order_by=None) -> ScalarResult[V]:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     model = await session.scalars(sentence)
     return model
@@ -90,14 +90,14 @@ async def query_models(session: AsyncSession, sentence, condition=None, offset=-
     return model
 
 
-async def select_models_count(session: AsyncSession, obj: V, condition=None, offset=-1, limit=-1, order_by=None) -> int:
+async def select_models_count(session: AsyncSession, obj: Generic[V], condition=None, offset=-1, limit=-1, order_by=None) -> int:
     sentence = _build_select_sentence(obj, condition, offset, limit, order_by)
     sentence = sentence.with_only_columns(func.count(obj.id)).order_by(None)
     model = await session.scalar(sentence)
     return model
 
 
-async def partial_update(session: AsyncSession, item: V, updates) -> V:
+async def partial_update(session: AsyncSession, item: Generic[V], updates) -> V:
     update_data = updates.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(item, key, value)

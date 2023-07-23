@@ -39,3 +39,5 @@ websockets==11.0.2
 requests==2.31.0
 fastapi-users[sqlalchemy]
 orjson
+aiohttp
+sse-starlette

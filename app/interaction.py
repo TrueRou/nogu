@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Any
 
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
@@ -5,13 +6,15 @@ from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Floa
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
-from app import database
+import config
+from app import database, sessions, definition
 from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
-from app.database import Base
+from app.database import Base, db_session, async_session_maker
 from app.definition import Raw, AstChecker
+from app.logging import log, Ansi
 
 
 class UserAccount(Base):
@@ -48,7 +51,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 class Beatmap(Base):
     __tablename__ = "beatmaps"
     md5 = Column(String(64), primary_key=True)
-    id = Column(Integer, nullable=True)  # null if beatmap is on local server
+    id = Column(Integer, nullable=True, index=True)  # null if beatmap is on local server
     set_id = Column(Integer, nullable=True)  # null if beatmap is on local server
     ranked_status = Column(Integer, nullable=False)
     artist = Column(String(64), nullable=False)
@@ -68,6 +71,77 @@ class Beatmap(Base):
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_updated_at = Column(DateTime(True), nullable=False)
     server_id = Column(Integer, nullable=False, default=Server.BANCHO)
+
+    @staticmethod
+    async def _save_response(session: AsyncSession, response_data: list[dict[str, Any]]):
+        for entry in response_data:
+            filename = (
+                "{artist} - {title} ({creator}) [{version}].osu"
+                .format(**entry)
+                .translate(definition.IGNORED_BEATMAP_CHARS)
+            )
+
+            _last_update = entry["last_update"]
+            last_update = datetime(
+                year=int(_last_update[0:4]),
+                month=int(_last_update[5:7]),
+                day=int(_last_update[8:10]),
+                hour=int(_last_update[11:13]),
+                minute=int(_last_update[14:16]),
+                second=int(_last_update[17:19]),
+            )
+
+            beatmap = Beatmap(
+                md5=entry["file_md5"],
+                id=entry["beatmap_id"],
+                set_id=entry["beatmapset_id"],
+                ranked_status=entry["approved"],
+                artist=entry["artist"],
+                title=entry["title"],
+                version=entry["version"],
+                creator=entry["creator"],
+                filename=filename,
+                total_length=int(entry["total_length"]),
+                max_combo=int(entry["max_combo"]),
+                mode=int(entry["mode"]),
+                bpm=float(entry["bpm"] if entry["bpm"] is not None else 0),
+                cs=float(entry["diff_size"]),
+                od=float(entry["diff_overall"]),
+                ar=float(entry["diff_approach"]),
+                hp=float(entry["diff_drain"]),
+                star_rating=float(entry["difficultyrating"]),
+                server_updated_at=last_update
+            )
+
+            await database.add_model(session, beatmap)
+
+    @staticmethod
+    async def request_api(**params: Any) -> Optional['Beatmap']:
+        if config.debug:
+            log(f"Doing api (getbeatmaps) request {params}", Ansi.LMAGENTA)
+        if config.osu_api_v1_key != "":
+            url = "https://old.ppy.sh/api/get_beatmaps"
+            params["k"] = str(config.osu_api_v1_key)
+        else:
+            url = "https://osu.direct/api/get_beatmaps"
+
+        async with sessions.http_client.get(url, params=params) as response:
+            response_data = await response.json()
+            if response.status == 200 and response_data:
+                session: AsyncSession = await async_session_maker()
+                await Beatmap._save_response(session, response_data)
+                if params['id']:
+                    return await Beatmap.from_id(session, params['id'])
+                if params['md5']:
+                    return await Beatmap.from_md5(session, params['md5'])
+
+    @staticmethod
+    async def from_id(session: AsyncSession, beatmap_id: int) -> Optional['Beatmap']:
+        return await database.select_model(session, Beatmap, Beatmap.id == beatmap_id)
+
+    @staticmethod
+    async def from_md5(session: AsyncSession, md5: str) -> Optional['Beatmap']:
+        return await database.get_model(session, md5, Beatmap)
 
 
 class Score(Base):
@@ -102,7 +176,7 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    async def from_web(info: dict, stage: 'Stage') -> Raw['Score']:
+    def from_web(info: dict, stage: 'Stage') -> Raw['Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
         score = Score(**info, stage_id=stage.id, performance_points=pp)
         return Raw['Score'](score)
