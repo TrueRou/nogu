@@ -1,4 +1,5 @@
 /.idea
 /unit-test/Response
+/venv
 
 /config.py
