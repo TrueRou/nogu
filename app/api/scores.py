@@ -8,6 +8,12 @@ from ..interaction import User, Score
 router = APIRouter(prefix='/scores', tags=['scores'])
 
 
+@router.get('/{score_id}', response_model=ScoreRead)
+async def get_score(score_id: int):
+    async with db_session() as session:
+        return await Score.from_id(session, score_id)
+
+
 @router.post('/', response_model=ScoreRead)
 async def submit_score(info: ScoreBase, user: User = Depends(current_user)):
     stage = user.active_stage
@@ -18,14 +24,8 @@ async def submit_score(info: ScoreBase, user: User = Depends(current_user)):
             return await score_raw.submit_raw(score_raw, session, stage_map.condition_ast)
 
 
-@router.get('/{score_id}', response_model=ScoreRead)
-async def get_score(score_id: int):
-    async with db_session() as session:
-        return await Score.from_id(session, score_id)
-
-
 # TODO: move to stages api
-@router.post('/make', response_model=ScoreRead)
+@router.post('/make/', response_model=ScoreRead)
 async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(current_user)):
     stage = user.active_stage
     stage_map = await stage.get_map(beatmap_md5)

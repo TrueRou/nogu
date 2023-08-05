@@ -12,16 +12,27 @@ beatmap_failures: dict[int, asyncio.Queue[str]] = {}
 inspecting_matches: list[int] = []
 
 
+async def dump(queue: asyncio.Queue) -> list:
+    result = []
+    while not queue.empty():
+        result.append(await queue.get())
+    return result
+
+
 def schedule_tasks():
     asyncio.create_task(consume_beatmap_tasks())
 
 
-async def produce_beatmap_tasks(session: AsyncSession, client_id: int, ident: str):
+def prepare_beatmap_tasks(client_id: int):
     if client_id not in beatmap_results:
         beatmap_results[client_id] = asyncio.Queue()
     if client_id not in beatmap_failures:
         beatmap_failures[client_id] = asyncio.Queue()
-    beatmap = Beatmap.from_ident(session, ident)
+
+
+async def produce_beatmap_tasks(session: AsyncSession, client_id: int, ident: str):
+    prepare_beatmap_tasks(client_id)
+    beatmap = await Beatmap.from_ident(session, ident)
     if beatmap is not None:
         await beatmap_results[client_id].put(BeatmapBase.from_orm(beatmap))
     else:

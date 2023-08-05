@@ -1,8 +1,6 @@
 from datetime import datetime
 
 from app.api.schemas import ModelBase
-from app.constants import tasks
-from app.interaction import User
 
 
 class BeatmapBase(ModelBase):
@@ -32,10 +30,3 @@ class BeatmapBase(ModelBase):
 class QueuedBeatmaps(ModelBase):
     results: list[BeatmapBase]
     failures: list[str]
-
-    @staticmethod
-    async def generate_now(user: User):
-        return QueuedBeatmaps(
-            results=await tasks.beatmap_results[user.id].get(),
-            failures=await tasks.beatmap_failures[user.id].get()
-        )
