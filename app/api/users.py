@@ -31,8 +31,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         return await super().create(user_create, safe, request)
 
 
-
-
 async def get_user_manager():
     async with db_session() as session:
         yield UserManager(SQLAlchemyUserDatabase(session, User))
