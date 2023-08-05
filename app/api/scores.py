@@ -5,7 +5,7 @@ from .users import current_user
 from ..database import db_session
 from ..interaction import User, Score
 
-router = APIRouter(prefix='/scores')
+router = APIRouter(prefix='/scores', tags=['scores'])
 
 
 @router.post('/', response_model=ScoreRead)

@@ -1,46 +1,31 @@
 from typing import Optional
 
-from fastapi import APIRouter
-from sqlalchemy.ext.asyncio import AsyncSession
-from sse_starlette import EventSourceResponse
-from starlette.requests import Request
+from fastapi import APIRouter, Depends
 
-from app import definition
-from app.api.schemas.beatmaps import BeatmapRead
+from app.api.schemas.beatmaps import BeatmapBase, QueuedBeatmaps
+from app.api.users import current_user
 from app.constants import tasks
-from app.constants.tasks import beatmap_tasks
 from app.database import db_session
-from app.interaction import Beatmap
+from app.interaction import Beatmap, User
 
-router = APIRouter(prefix='/beatmaps')
-
-
-async def _fetch_single_beatmap(session: AsyncSession, ident: str) -> Optional[Beatmap]:
-    if ident.isnumeric():
-        return await Beatmap.from_id(session, int(ident))
-    if definition.MD5_PATTERN.match(ident):
-        return await Beatmap.from_md5(session, ident)
+router = APIRouter(prefix='/beatmaps', tags=['beatmaps'])
 
 
-@router.post('/{ident}', response_model=Optional[BeatmapRead])
+@router.post('/{ident}', response_model=Optional[BeatmapBase])
 async def get_beatmap(ident: str):
     async with db_session() as session:
-        return await _fetch_single_beatmap(session, ident)
+        return await Beatmap.from_ident(session, ident)
 
 
-@router.post('/sse/{client_id}')
-async def push_beatmaps(client_id: str, idents: list[str]):
-    for ident in idents:
-        await beatmap_tasks.put((client_id, ident))
+@router.post('/queue', response_model=QueuedBeatmaps)
+async def queue_beatmaps(idents: list[str], user: User = Depends(current_user)):
+    async with db_session() as session:
+        for ident in idents:
+            await tasks.produce_beatmap_tasks(session, user.id, ident)
+        return await QueuedBeatmaps.generate_now(user)
 
 
-@router.get('/sse/{client_id}')
-async def open_stream(client_id: str, request: Request):
-    async def event_generator():
-        while True:
-            if await request.is_disconnected():
-                break
-            if not tasks.is_empty_queue(tasks.beatmap_results, client_id):
-                yield await tasks.beatmap_results[client_id].get()
-    return EventSourceResponse(event_generator())
+@router.get('/queue', response_model=QueuedBeatmaps)
+async def dequeue_beatmaps(user: User = Depends(current_user)):
+    return await QueuedBeatmaps.generate_now(user)
 

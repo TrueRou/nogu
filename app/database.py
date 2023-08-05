@@ -34,6 +34,13 @@ async def add_model(session: AsyncSession, obj: V) -> V:
     return obj
 
 
+async def merge_model(session: AsyncSession, obj: V) -> V:
+    obj = await session.merge(obj)
+    await session.commit()
+    await session.refresh(obj)
+    return obj
+
+
 async def delete_model(session: AsyncSession, ident, model):
     target = await session.get(model, ident)
     await session.delete(target)

@@ -54,11 +54,11 @@ class Beatmap(Base):
     id = Column(Integer, nullable=True, index=True)  # null if beatmap is on local server
     set_id = Column(Integer, nullable=True)  # null if beatmap is on local server
     ranked_status = Column(Integer, nullable=False)
-    artist = Column(String(64), nullable=False)
-    title = Column(String(64), nullable=False)
-    version = Column(String(64), nullable=False)
-    creator = Column(String(64), nullable=False)
-    filename = Column(String(64), nullable=False)
+    artist = Column(String(256), nullable=False)
+    title = Column(String(256), nullable=False)
+    version = Column(String(256), nullable=False)
+    creator = Column(String(256), nullable=False)
+    filename = Column(String(1024), nullable=False)
     total_length = Column(Integer, nullable=False)
     max_combo = Column(Integer, nullable=False)
     mode = Column(Integer, nullable=False)
@@ -70,7 +70,7 @@ class Beatmap(Base):
     star_rating = Column(Float, nullable=False)
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_updated_at = Column(DateTime(True), nullable=False)
-    server_id = Column(Integer, nullable=False, default=Server.BANCHO)
+    server_id = Column(Integer, nullable=False, default=int(Server.BANCHO))
 
     @staticmethod
     async def _save_response(session: AsyncSession, response_data: list[dict[str, Any]]):
@@ -113,34 +113,31 @@ class Beatmap(Base):
                 server_updated_at=last_update
             )
 
-            await database.add_model(session, beatmap)
+            await database.merge_model(session, beatmap)
 
     @staticmethod
     async def request_api(ident: str) -> Optional['Beatmap']:
         params = {}
 
         if definition.MD5_PATTERN.match(ident):
-            params['md5'] = ident
-        if ident.isnumeric():
-            params['id'] = int(ident)
+            params['h'] = ident
+        elif ident.isnumeric():
+            params['b'] = int(ident)
+        else:
+            return None  # wrong format of ident
 
         if config.debug:
             log(f"Doing api (getbeatmaps) request {params}", Ansi.LMAGENTA)
-        if config.osu_api_v1_key != "":
-            url = "https://old.ppy.sh/api/get_beatmaps"
-            params["k"] = str(config.osu_api_v1_key)
-        else:
-            url = "https://osu.direct/api/get_beatmaps"
+
+        url = "https://old.ppy.sh/api/get_beatmaps"
+        params["k"] = str(config.osu_api_v1_key)
 
         async with sessions.http_client.get(url, params=params) as response:
             response_data = await response.json()
             if response.status == 200 and response_data:
-                session: AsyncSession = await async_session_maker()
+                session: AsyncSession = async_session_maker()
                 await Beatmap._save_response(session, response_data)
-                if params['id']:
-                    return await Beatmap.from_id(session, params['id'])
-                if params['md5']:
-                    return await Beatmap.from_md5(session, params['md5'])
+                return await Beatmap.from_ident(session, ident)
 
     @staticmethod
     async def from_id(session: AsyncSession, beatmap_id: int) -> Optional['Beatmap']:
@@ -149,6 +146,13 @@ class Beatmap(Base):
     @staticmethod
     async def from_md5(session: AsyncSession, md5: str) -> Optional['Beatmap']:
         return await database.get_model(session, md5, Beatmap)
+
+    @staticmethod
+    async def from_ident(session: AsyncSession, ident: str) -> Optional['Beatmap']:
+        if ident.isnumeric():
+            return await Beatmap.from_id(session, int(ident))
+        if definition.MD5_PATTERN.match(ident):
+            return await Beatmap.from_md5(session, ident)
 
 
 class Score(Base):
@@ -172,7 +176,7 @@ class Score(Base):
     grade = Column(String(64), nullable=False)
     mode = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
-    server_id = Column(Integer, nullable=False, default=Server.LOCAL)
+    server_id = Column(Integer, nullable=False, default=int(Server.LOCAL))
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
 
     beatmap = relationship('Beatmap', lazy='selectin')
@@ -204,7 +208,7 @@ class Team(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False)
-    privacy = Column(Integer, nullable=False, default=Privacy.PROTECTED)
+    privacy = Column(Integer, nullable=False, default=int(Privacy.PROTECTED))
     achieved = Column(Boolean, nullable=False, default=False)
     create_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     finish_at = Column(DateTime(True), nullable=True)
@@ -257,7 +261,7 @@ class Pool(Base):
     name = Column(String(64), nullable=False)
     description = Column(String(64), nullable=True)
     mode = Column(Integer, nullable=False)
-    privacy = Column(Integer, nullable=False, default=Privacy.PUBLIC)
+    privacy = Column(Integer, nullable=False, default=int(Privacy.PUBLIC))
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -297,7 +301,7 @@ class TeamMember(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     team_id = Column(Integer, ForeignKey('teams.id'), index=True, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
-    member_position = Column(Integer, nullable=False, default=MemberPosition.MEMBER)
+    member_position = Column(Integer, nullable=False, default=int(MemberPosition.MEMBER))
 
     teams = relationship("Team", back_populates="member")
     member = relationship("User", back_populates="teams")
