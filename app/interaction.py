@@ -12,7 +12,7 @@ from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
-from app.database import Base, db_session, async_session_maker
+from app.database import Base, async_session_maker
 from app.definition import Raw, AstChecker
 from app.logging import log, Ansi
 

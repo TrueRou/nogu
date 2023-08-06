@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from app.api.schemas import ModelBase
 
@@ -27,6 +28,7 @@ class BeatmapBase(ModelBase):
     server_id: int
 
 
-class QueuedBeatmaps(ModelBase):
-    results: list[BeatmapBase]
-    failures: list[str]
+class BeatmapEvent(ModelBase):
+    status: str
+    info: str
+    beatmap: Optional[BeatmapBase]
