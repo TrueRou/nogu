@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from app.api.schemas import ModelBase
-from app.api.schemas.beatmaps import BeatmapBase
+from app.api.schemas.beatmap import BeatmapBase
 from app.constants.servers import Server
 
 
@@ -51,6 +51,7 @@ class ScoreBase(ModelBase):
 
 
 class ScoreRead(ScoreBase):
+    id: int
     performance_points: float
     created_at: datetime
     stage_id: int

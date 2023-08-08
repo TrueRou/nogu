@@ -10,7 +10,7 @@ import config
 
 Base = declarative_base()
 
-engine = create_async_engine(config.mysql_url, echo=config.debug, future=True)
+engine = create_async_engine(config.mysql_url, echo=False, future=True)
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 V = TypeVar("V")

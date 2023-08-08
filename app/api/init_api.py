@@ -1,39 +1,32 @@
 from __future__ import annotations
 
 import asyncio
-import pprint
 
-from fastapi import status, FastAPI
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
-from fastapi.requests import Request
-from fastapi.responses import ORJSONResponse
-from fastapi.responses import Response
+from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
-from app import database, tasks
+from app import database
 from app.api import router
 from app.database import db_session
 from app.logging import log, Ansi
 from app.tasks import consume_beatmap_tasks
 
 
-def init_exception_handlers(asgi_app: FastAPI) -> None:
-    @asgi_app.exception_handler(RequestValidationError)
-    async def handle_validation_error(
-            request: Request,
-            exc: RequestValidationError,
-    ) -> Response:
-        """Wrapper around 422 validation errors to print out info for devs."""
-        log(f"Validation error on {request.url}", Ansi.LRED)
-        pprint.pprint(exc.errors())
-
-        return ORJSONResponse(
-            content={"detail": jsonable_encoder(exc.errors())},
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
+def init_openapi(asgi_app: FastAPI) -> None:
+    asgi_app.openapi_schema = get_openapi(
+        title="nogu-nekko",
+        version="",
+        routes=asgi_app.routes,
+    )
+    for _, method_item in asgi_app.openapi_schema.get('paths').items():
+        for _, param in method_item.items():
+            responses = param.get('responses')
+            # remove 422 response, also can remove other status code
+            if '422' in responses:
+                del responses['422']
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
@@ -73,9 +66,10 @@ def init_api() -> FastAPI:
     asgi_app = FastAPI()
 
     init_middlewares(asgi_app)
-    init_exception_handlers(asgi_app)
     init_events(asgi_app)
     init_routes(asgi_app)
+
+    init_openapi(asgi_app)
 
     return asgi_app
 

@@ -158,7 +158,7 @@ class Beatmap(Base):
 class Score(Base):
     __tablename__ = 'scores'
 
-    score_id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False, index=True)
     beatmap_md5 = Column(String(64), ForeignKey('beatmaps.md5'), nullable=False, index=True)
     score = Column(Integer, nullable=False)
@@ -215,8 +215,15 @@ class Team(Base):
     active_stage_id = Column(Integer, ForeignKey('stages.id'), nullable=True)
 
     active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
-    member = relationship('TeamMember', lazy='dynamic', back_populates="teams")
+    member = relationship('TeamMember', lazy='selectin', back_populates="teams")
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
+
+    @staticmethod
+    async def from_id(session: AsyncSession, team_id: int) -> Optional['Team']:
+        return await database.get_model(session, team_id, Team)
+
+    async def set_position(self, user_id: int, position: MemberPosition):
+        a = self.member
 
     async def position_of(self, user_id: int) -> MemberPosition:
         session = object_session(self)

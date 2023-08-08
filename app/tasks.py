@@ -4,11 +4,11 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.api.schemas.beatmaps import BeatmapBase, BeatmapEvent
+from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
 from app.interaction import Beatmap
 
 beatmap_tasks: asyncio.Queue[tuple[str, str]] = asyncio.Queue()
-beatmap_events: dict[str, asyncio.Queue[BeatmapEvent]] = {}
+beatmap_events: dict[str, asyncio.Queue[BeatmapEvent]] = {}  # replace with redis expired
 
 inspecting_matches: list[int] = []
 
@@ -31,7 +31,7 @@ async def produce_beatmap_tasks(db_session: AsyncSession, session: str, ident: s
     beatmap = await Beatmap.from_ident(db_session, ident)
 
     if beatmap is not None:
-        event = BeatmapEvent(status="success", info="offline", beatmap=BeatmapBase.from_orm(beatmap))
+        event = BeatmapEvent(success="true", info="offline", beatmap=BeatmapBase.from_orm(beatmap))
         await beatmap_events[session].put(event)
     else:
         await beatmap_tasks.put((session, ident))
@@ -43,7 +43,7 @@ async def consume_beatmap_tasks():
         if ident is not None:
             beatmap = await Beatmap.request_api(ident)
             if beatmap is not None:
-                event = BeatmapEvent(status="success", info="online", beatmap=BeatmapBase.from_orm(beatmap))
+                event = BeatmapEvent(success="true", info="online", beatmap=BeatmapBase.from_orm(beatmap))
             else:
-                event = BeatmapEvent(status="failure", info="Beatmap identifier was not found online.")
+                event = BeatmapEvent(success="false", info="Beatmap identifier was not found online.")
             await beatmap_events[session].put(event)
