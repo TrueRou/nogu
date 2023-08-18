@@ -14,18 +14,18 @@ from app.interaction import Beatmap
 
 class Operator(metaclass=ABCMeta):
     tasks: asyncio.Queue[tuple[Any, Any]] = asyncio.Queue()
-    events: dict[Any, asyncio.Queue[Any]] = {}
-    interval: float = 1.0
+    events: dict[Any, asyncio.Queue[BaseModel]] = {}
+    interval: float
 
-    def __init__(self, interval: float):
+    def __init__(self, interval=1.0):
         self.interval = interval
 
     async def event_generator(self, request: Request, session: Any):
         while True:
             if await request.is_disconnected():
                 break
-            content: BaseModel = await self.events[session].get()
-            yield content.json()
+            content = await self.events[session].get()
+            yield content
 
     def new_operation(self, session: Any, args: Any):
         if session not in self.events:

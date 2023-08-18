@@ -76,6 +76,15 @@ Leaderboard are redesigned, global board will show scores made by your active te
 
 Bots are special made for your convenience, suggesting you to play stage maps currently. Auto-hosted rooms are automatically running for you to practice your weakness.
 
+### Collector
+
+Collector combined with gosumemory running in the background when launched by player. Scores are listened and uploaded to nogu backend automatically through memory reader.
+
+Surprisingly, headless client can also download maps that you need. All you need to do is subscribe your favorite pools through web. It works like steam workshop subscribe.
+
+Thanks to URI, you can invite your team member running collector to multiplayer room directly without any clicking.
+
+
 ## Development
 
 All the staff are still in development. Feel free to participate in the project.
