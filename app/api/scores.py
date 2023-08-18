@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from fastapi.responses import ORJSONResponse
 
 from .schemas import APIResponse, docs
 from .schemas.score import ScoreBase, ScoreRead

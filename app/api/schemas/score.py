@@ -1,4 +1,7 @@
 from datetime import datetime
+from typing import Optional
+
+from ossapi import Score
 
 from app.api.schemas import ModelBase
 from app.api.schemas.beatmap import BeatmapBase
@@ -24,6 +27,12 @@ class ScoreBase(ModelBase):
     server_id: int
 
     @staticmethod
+    def from_ossapi(score: Score, beatmap_md5: str, user_id: int) -> Optional['ScoreBase']:
+        return ScoreBase(user_id=user_id, beatmap_md5=beatmap_md5, score=score.score, accuracy=score.accuracy, highest_combo=score.max_combo,
+                         full_combo=score.perfect, mods=score.mods.value, num_300s=score.statistics.count_300, num_100s=score.statistics.count_100, num_misses=score.statistics.count_miss, num_gekis=score.statistics.count_geki,
+                         num_katus=score.statistics.count_katu, num_50s=score.statistics.count_50, mode=score.mode_int, server_id=Server.BANCHO, grade=score.rank.value)
+
+    @staticmethod
     def from_abs(beatmap_md5: str, user_id: int, keywords: str, max_combo: int, mods: int, mode: int) -> 'ScoreBase':
         data = keywords.split()
         # 5miss 96.5acc 600c 100w
@@ -47,7 +56,7 @@ class ScoreBase(ModelBase):
         full_combo = miss == 0
         return ScoreBase(user_id=user_id, beatmap_md5=beatmap_md5, score=score, accuracy=acc, highest_combo=combo,
                          full_combo=full_combo, mods=mods, num_300s=n300, num_100s=n100, num_misses=miss, num_gekis=0,
-                         num_katus=0, mode=mode, server_id=Server.LOCAL, grade='R')
+                         num_katus=0, num_50s=0, mode=mode, server_id=Server.LOCAL, grade='R')
 
 
 class ScoreRead(ScoreBase):

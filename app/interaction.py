@@ -47,6 +47,13 @@ class User(SQLAlchemyBaseUserTable[int], Base):
         team = self.active_team
         return team.active_stage if team else None
 
+    @staticmethod
+    def from_id(session: AsyncSession, user_id: int, server=Server.LOCAL) -> Optional['User']:
+        if server == Server.LOCAL:
+            return await database.get_model(session, user_id, User)
+        if server == Server.BANCHO:
+            return None  # TODO... Mapped user between servers
+
 
 class Beatmap(Base):
     __tablename__ = "beatmaps"
