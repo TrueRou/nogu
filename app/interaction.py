@@ -26,6 +26,19 @@ class UserAccount(Base):
     server_user_name = Column(String(64), nullable=False)
     checked_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
 
+    @staticmethod
+    async def prepare_avatar(user: 'User', avatar_url: str):
+        # TODO... if avatar not exists, prepare avatar for the first time
+        pass
+
+    @staticmethod
+    def from_bancho(server_user: dict, user: 'User') -> Raw['UserAccount']:
+        return UserAccount(user_id=user.id, server_id=Server.BANCHO.value, server_user_id=server_user['id'],
+                           server_user_name=server_user['username'])
+
+    async def create_raw(self, session: AsyncSession) -> 'UserAccount':
+        return await database.add_model(session, self)
+
 
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "users"
