@@ -12,7 +12,6 @@ from app import database
 from app.api import router
 from app.database import db_session
 from app.logging import log, Ansi
-from app.tasks import consume_beatmap_tasks
 
 
 def init_openapi(asgi_app: FastAPI) -> None:
@@ -50,7 +49,6 @@ def init_events(asgi_app: FastAPI) -> None:
             async with db_session() as session:
                 await session.execute(text('SELECT 1'))
                 # TODO: Sql migration
-                asyncio.create_task(consume_beatmap_tasks())
                 await database.create_db_and_tables()
             log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:

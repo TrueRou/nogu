@@ -1,7 +1,12 @@
 import ast
+import asyncio
 import inspect
 import re
-from typing import TypeVar, Generic
+from abc import abstractmethod, ABCMeta
+from typing import TypeVar, Generic, Any
+
+from pydantic import BaseModel
+from starlette.requests import Request
 
 from app.logging import log
 
@@ -41,3 +46,100 @@ class AstChecker:
             return eval(compile(tree, filename='<ast>', mode='eval'), namespace)
         except SyntaxError:
             return False
+
+
+class Inspector(metaclass=ABCMeta):
+    inspecting_targets: list[Any] = []
+    polling_cursor: dict[Any, int] = {}
+    events: dict[Any, asyncio.Queue[Any]] = {}
+    disable_cursor: bool = False
+    use_events = False
+    stop_when_disconnected = True
+    interval: float = 1.0
+
+    def __init__(self, disable_cursor: bool, interval: float, use_events: bool, stop_when_disconnected: bool):
+        self.disable_cursor = disable_cursor
+        self.interval = interval
+        self.use_events = use_events
+        self.stop_when_disconnected = stop_when_disconnected
+
+    def new_target(self, target: Any):
+        if target not in self.inspecting_targets:
+            self.inspecting_targets.append(target)
+        if target not in self.polling_cursor:
+            self.polling_cursor[target] = 0
+        if self.use_events and target not in self.events:
+            self.events[target] = asyncio.Queue()
+
+    def remove_target(self, target: Any):
+        self.inspecting_targets.remove(target)
+        if self.use_events:
+            del (self.events[target])
+
+    async def event_generator(self, request: Request, target: Any):
+        while True:
+            if await request.is_disconnected():
+                if self.use_events and self.stop_when_disconnected:
+                    self.remove_target(target)
+                break
+            content = await self.events[target].get()
+            yield content
+
+    @abstractmethod
+    async def process_result(self, target: Any, obj: Any) -> Any:
+        pass
+
+    @abstractmethod
+    async def consume(self, target: Any) -> int:
+        pass
+
+    async def resulting(self, target: Any, cursor: int, obj: Any):
+        if cursor > self.polling_cursor[target] or self.disable_cursor:
+            result = await self.process_result(target, obj)
+            if self.use_events:
+                await self.events[target].put(result)
+
+    async def _consume(self, target: Any):
+        cursor = await self.consume(target)
+        self.polling_cursor[target] = cursor
+
+    async def inspect_async(self):
+        while True:
+            for target in self.inspecting_targets:
+                await self._consume(target)
+                await asyncio.sleep(self.interval)
+
+
+class Operator(metaclass=ABCMeta):
+    tasks: asyncio.Queue[tuple[Any, Any]] = asyncio.Queue()
+    events: dict[Any, asyncio.Queue[BaseModel]] = {}
+    interval: float
+
+    def __init__(self, interval=1.0):
+        self.interval = interval
+
+    async def event_generator(self, request: Request, session: Any):
+        while True:
+            if await request.is_disconnected():
+                break
+            content = await self.events[session].get()
+            yield content
+
+    async def new_operation(self, session: Any, args: Any):
+        if session not in self.events:
+            self.events[session] = asyncio.Queue()
+        await self.tasks.put((session, args))
+
+    @abstractmethod
+    async def operate(self, session: Any, args: Any) -> Any:
+        pass
+
+    async def _operate(self, session: Any, args: Any):
+        result = await self.operate(session, args)
+        await self.events[session].put(result)
+
+    async def operate_async(self):
+        while True:
+            (session, args) = await self.tasks.get()
+            await self._operate(session, args)
+            await asyncio.sleep(self.interval)

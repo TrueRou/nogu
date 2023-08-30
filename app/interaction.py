@@ -48,7 +48,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
         return team.active_stage if team else None
 
     @staticmethod
-    def from_id(session: AsyncSession, user_id: int, server=Server.LOCAL) -> Optional['User']:
+    async def from_id(session: AsyncSession, user_id: int, server=Server.LOCAL) -> Optional['User']:
         if server == Server.LOCAL:
             return await database.get_model(session, user_id, User)
         if server == Server.BANCHO:
@@ -229,16 +229,26 @@ class Team(Base):
     async def from_id(session: AsyncSession, team_id: int) -> Optional['Team']:
         return await database.get_model(session, team_id, Team)
 
+    async def get_stages(self, limit=20, offset=0):
+        session = object_session(self)
+        return await database.query_models(session=session, sentence=self.stages, limit=limit, offset=offset)
+
     async def set_position(self, user_id: int, position: MemberPosition):
-        a = self.member
+        session = object_session(self)
+        member: TeamMember = await database.query_model(session, self.member, TeamMember.user_id == user_id)
+        if member is None:
+            await database.add_model(session,
+                                     TeamMember(team_id=self.id, user_id=user_id, member_position=position.value))
+        else:
+            member.member_position = position.value
+            await session.commit()
 
     async def position_of(self, user_id: int) -> MemberPosition:
         session = object_session(self)
-        team = await session.scalar(self.team)
-        member = await database.query_model(session, team.users, User.id == user_id)
+        member: TeamMember = await database.query_model(session, self.member, TeamMember.user_id == user_id)
         if member is None:
             return MemberPosition.EMPTY
-        return MemberPosition.MEMBER  # TODO: from association
+        return MemberPosition(member.member_position)
 
 
 class Stage(Base):
@@ -263,9 +273,17 @@ class Stage(Base):
     async def from_id(session: AsyncSession, stage_id: int) -> Optional['Stage']:
         return await session.get(Stage, stage_id)
 
-    async def get_map(self, beatmap_md5: str) -> Optional['StageMap']:
+    async def get_beatmap(self, beatmap_md5: str) -> Optional['StageMap']:
         session = object_session(self)
         return await database.query_model(session, self.maps, StageMap.map_md5 == beatmap_md5)
+
+    async def get_beatmaps(self, limit=20, offset=0) -> list['StageMap']:
+        session = object_session(self)
+        return await database.query_models(session=session, sentence=self.maps, limit=limit, offset=offset)
+
+    async def get_scores(self, limit=20, offset=0) -> list[Score]:
+        session = object_session(self)
+        return await database.query_models(session=session, sentence=self.scores, limit=limit, offset=offset)
 
 
 class Pool(Base):

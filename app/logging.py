@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import colorsys
 import datetime
 from enum import IntEnum
@@ -148,8 +146,9 @@ TIME_ORDER_SUFFIXES = ["nsec", "μsec", "msec", "sec"]
 
 
 def magnitude_fmt_time(t: Union[int, float]) -> str:  # in nanosec
+    suffix = ""
     for suffix in TIME_ORDER_SUFFIXES:
         if t < 1000:
             break
         t /= 1000
-    return f"{t:.2f} {suffix}"  # type: ignore
+    return f"{t:.2f} {suffix}"

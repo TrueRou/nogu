@@ -1,16 +1,32 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
 from app.api.schemas import APIResponse, docs
 from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
 from app.api.users import current_user
-from app.database import db_session
+from app.database import db_session, async_session_maker
+from app.definition import Operator
 from app.interaction import Beatmap, User
 from app.logging import log, Ansi
-from app.sessions import beatmap_request_operator
+
+
+class BeatmapRequestOperator(Operator):
+    db_session: AsyncSession = async_session_maker()
+
+    async def operate(self, session: str, args: str) -> APIResponse:
+        beatmap = await Beatmap.from_ident(self.db_session, session)
+        if beatmap is not None:
+            return APIResponse(info="Located", beatmap=BeatmapBase.from_orm(beatmap))
+        beatmap = await Beatmap.request_api(args)
+        if beatmap is not None:
+            return APIResponse(info="Requested", beatmap=BeatmapBase.from_orm(beatmap))
+        return APIResponse(success=False, info="Beatmap not found.")
+
 
 router = APIRouter(prefix='/beatmaps', tags=['beatmaps'])
+beatmap_request_operator = BeatmapRequestOperator()
 
 
 @router.get('/{ident}', responses=docs(BeatmapBase))

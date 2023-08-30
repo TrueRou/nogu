@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import APIRouter
 from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin, schemas, models, exceptions
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -7,12 +8,13 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
+from oauthlib import oauth2
 from starlette.requests import Request
 
 from app import database
 from app.database import db_session
 from app.interaction import User
-from config import jwt_secret
+from config import jwt_secret, osu_api_v2_id, osu_api_v2_callback, osu_api_v2_secret
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
@@ -49,3 +51,10 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
 
 current_user = fastapi_users.current_user(active=True)
+
+router_extends = APIRouter()
+
+
+@router_extends.get("/oauth/bancho/token")
+async def oauth_token(request: Request):
+    pass
