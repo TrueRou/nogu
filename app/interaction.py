@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Any
 
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
@@ -30,6 +30,16 @@ class UserAccount(Base):
     async def prepare_avatar(user: 'User', avatar_url: str):
         # TODO... if avatar not exists, prepare avatar for the first time
         pass
+
+    @staticmethod
+    async def from_user_server(session: AsyncSession, server_id: Server, user: 'User') -> Optional['UserAccount']:
+        return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
+                                                                      UserAccount.user_id == user.id))
+
+    @staticmethod
+    async def from_server_user_id(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
+        return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
+                                                                      UserAccount.server_user_id == server_user_id))
 
     @staticmethod
     def from_bancho(server_user: dict, user: 'User') -> Raw['UserAccount']:

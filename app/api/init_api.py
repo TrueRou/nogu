@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import asyncio
-
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
