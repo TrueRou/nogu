@@ -32,22 +32,14 @@ class UserAccount(Base):
         pass
 
     @staticmethod
-    async def from_user_server(session: AsyncSession, server_id: Server, user: 'User') -> Optional['UserAccount']:
+    async def get_account(session: AsyncSession, server_id: Server, user: 'User') -> Optional['UserAccount']:
         return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
                                                                       UserAccount.user_id == user.id))
 
     @staticmethod
-    async def from_server_user_id(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
+    async def search_from_origin(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
         return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
                                                                       UserAccount.server_user_id == server_user_id))
-
-    @staticmethod
-    def from_bancho(server_user: dict, user: 'User') -> Raw['UserAccount']:
-        return UserAccount(user_id=user.id, server_id=Server.BANCHO.value, server_user_id=server_user['id'],
-                           server_user_name=server_user['username'])
-
-    async def create_raw(self, session: AsyncSession) -> 'UserAccount':
-        return await database.add_model(session, self)
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):

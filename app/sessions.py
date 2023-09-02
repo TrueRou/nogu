@@ -5,8 +5,7 @@ from ossapi import OssapiAsync
 import config
 
 
-async def new_http_client():
-    return aiohttp.ClientSession(json_serialize=lambda x: orjson.dumps(x).decode())
+request_session = aiohttp.ClientSession(json_serialize=lambda x: orjson.dumps(x).decode())
 
 
 api_client = OssapiAsync(config.osu_api_v2_id, config.osu_api_v2_secret)

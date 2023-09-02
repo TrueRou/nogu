@@ -1,7 +1,6 @@
 import asyncio
 from typing import Optional
 
-import aiohttp
 from fastapi import APIRouter, Depends
 from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin, schemas, models, exceptions
 from fastapi_users.authentication import (
@@ -60,53 +59,58 @@ current_user_optional = fastapi_users.current_user(active=True, optional=True)
 router_extends = APIRouter()
 
 
-async def get_oauth_server_user(code: str):
-    http_client = await sessions.new_http_client()
-    server_user = None
-    result = await (await http_client.post("https://osu.ppy.sh/oauth/token", data={
-        "client_id": config.osu_api_v2_id,
-        "client_secret": config.osu_api_v2_secret,
-        "redirect_uri": config.osu_api_v2_callback,
-        "code": code,
-        "grant_type": "authorization_code"
-    })).json()
-    if result["access_token"] is not None:
-        server_user = await (await http_client.get("https://osu.ppy.sh/api/v2/me", headers={
-            "Authorization": "Bearer " + result["access_token"]
+async def request_identity(code: str):
+    async with sessions.request_session as session:
+        result = await (await session.post("https://osu.ppy.sh/oauth/token", data={
+            "client_id": config.osu_api_v2_id,
+            "client_secret": config.osu_api_v2_secret,
+            "redirect_uri": config.osu_api_v2_callback,
+            "code": code,
+            "grant_type": "authorization_code"
         })).json()
-    await http_client.close()
-    return server_user
+        if result["access_token"] is not None:
+            return await (await session.get("https://osu.ppy.sh/api/v2/me", headers={
+                "Authorization": "Bearer " + result["access_token"]
+            })).json()
 
 
-# https://osu.ppy.sh/oauth/authorize?client_id=14308&redirect_uri=http://localhost:8000/users/oauth/bancho/token&response_type=code&scope=identify
-@router_extends.get("/oauth/bancho/token")
-async def oauth_token(code: str, user: User = Depends(current_user_optional)):
-    response = "/redirect?status=success&target=home"
+def generate_redirect(success: bool, **kwargs):
+    status = "success" if success else "failure"
+    path = f"/redirect?status={status}&"
+    for key, item in kwargs:
+        path += f"{key}={item}&"
+    return RedirectResponse(sessions.get_uri() + path[:-1])
+
+
+# https://osu.ppy.sh/oauth/authorize?client_id=14308&redirect_uri=http://localhost:8000/users/oauth/token&response_type=code&scope=identify
+@router_extends.get("/oauth/token")
+async def process_oauth(code: str, user: User = Depends(current_user_optional)):
     async with db_session() as session:
         if user is None:
-            response = "/redirect?status=failure&target=login&reason=not_logged"
+            return generate_redirect(success=False, target="login", reason="not_logged")
         user_account = await UserAccount.from_user_server(session, Server.BANCHO, user)
-        new_server_user = await get_oauth_server_user(code)
+        api_user = await request_identity(code)
 
-        if new_server_user is None:
-            response = "/redirect?status=failure&target=oauth&reason=oauth_failure"
-            return RedirectResponse(sessions.get_uri() + response)
+        if api_user is None:
+            return generate_redirect(success=False, target="oauth", reason="identity_failure")
 
-        # We have user account, check whether it is the original player
         if user_account is not None:
-            if user_account.server_user_id == new_server_user['id']:
-                user_account.server_user_name = new_server_user['username']
-                asyncio.ensure_future(UserAccount.prepare_avatar(user=user, avatar_url=new_server_user['avatar_url']))
+            # we have user account, check whether it is the original player
+            if user_account.server_user_id == api_user['id']:
+                # update for the newest username of the player
+                user_account.server_user_name = api_user['username']
+                await session.commit()
             else:
-                response = "/redirect?status=failure&target=login&reason=not_the_same_account"
+                return generate_redirect(success=False, target="oauth", reason="not_the_same_account")
         else:
-            # Register for the first time, check whether its occupied
-
-            if await UserAccount.from_server_user_id(session, Server.BANCHO, new_server_user['id']) is not None:
-                response = "/redirect?status=failure&target=oauth&reason=user_occupied"
-            asyncio.ensure_future(UserAccount.prepare_avatar(user=user, avatar_url=new_server_user['avatar_url']))
+            # register for the first time, check whether its occupied
+            original_account = await UserAccount.search_from_origin(session, Server.BANCHO, api_user['id'])
+            if original_account is not None:
+                return generate_redirect(success=False, target="oauth", reason="user_occupied")
+            # do the insert operation
             user_account = UserAccount(user_id=user.id, server_id=Server.BANCHO.value,
-                                       server_user_id=new_server_user['id'],
-                                       server_user_name=new_server_user['username'])
+                                       server_user_id=api_user['id'],
+                                       server_user_name=api_user['username'])
             await database.add_model(session, user_account)
-    return RedirectResponse(sessions.get_uri() + response)
+        asyncio.ensure_future(UserAccount.prepare_avatar(user=user, avatar_url=api_user['avatar_url']))
+        return generate_redirect(success=True, target="home")
