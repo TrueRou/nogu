@@ -104,7 +104,7 @@ async def process_oauth(code: str, user: User = Depends(current_user_optional)):
                 return generate_redirect(success=False, target="oauth", reason="not_the_same_account")
         else:
             # register for the first time, check whether its occupied
-            original_account = await UserAccount.search_from_origin(session, Server.BANCHO, api_user['id'])
+            original_account = await UserAccount.from_source(session, Server.BANCHO, api_user['id'])
             if original_account is not None:
                 return generate_redirect(success=False, target="oauth", reason="user_occupied")
             # do the insert operation

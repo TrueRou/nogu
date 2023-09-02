@@ -32,12 +32,12 @@ class UserAccount(Base):
         pass
 
     @staticmethod
-    async def get_account(session: AsyncSession, server_id: Server, user: 'User') -> Optional['UserAccount']:
+    async def from_user(session: AsyncSession, server_id: Server, user: 'User') -> Optional['UserAccount']:
         return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
                                                                       UserAccount.user_id == user.id))
 
     @staticmethod
-    async def search_from_origin(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
+    async def from_source(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
         return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
                                                                       UserAccount.server_user_id == server_user_id))
 
@@ -154,7 +154,7 @@ class Beatmap(Base):
         url = "https://old.ppy.sh/api/get_beatmaps"
         params["k"] = str(config.osu_api_v1_key)
 
-        async with sessions.http_client.get(url, params=params) as response:
+        async with sessions.request_session.get(url, params=params) as response:
             response_data = await response.json()
             if response.status == 200 and response_data:
                 session: AsyncSession = async_session_maker()
@@ -209,20 +209,17 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    def from_web(info: dict, stage: 'Stage') -> Raw['Score']:
+    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional['Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
-        score = Score(**info, stage_id=stage.id, performance_points=pp)
-        return Raw['Score'](score)
-
-    async def submit_raw(self, session: AsyncSession, condition: str) -> Optional['Score']:
+        score = Score(**score_info, stage_id=stage.id, performance_points=pp)
         variables = {
-            "acc": self.accuracy,
-            "max_combo": self.highest_combo,
-            "mods": self.mods,
-            "score": self.score
+            "acc": score.accuracy,
+            "max_combo": score.highest_combo,
+            "mods": score.mods,
+            "score": score.score
         }
         if AstChecker(condition).check(variables):
-            return await database.add_model(session, self)
+            return await database.add_model(session, score)
 
 
 class Team(Base):

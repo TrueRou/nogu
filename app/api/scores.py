@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from ossapi import MatchResponse, MatchEvent
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas import APIResponse, docs
+from app.api.schemas import APIResponse, docs, APIException
 from app.api.schemas.score import ScoreBase, ScoreRead
 from app.api.users import current_user
 from app.constants.servers import Server
@@ -13,14 +13,23 @@ from app.definition import Inspector
 from app.interaction import User, Score, Beatmap
 from app.sessions import api_client
 
+router = APIRouter(prefix='/scores', tags=['scores'])
 
-async def _submit_score(info: ScoreBase, user: User = Depends(current_user)):
+
+async def require_score(score_id: int, session: AsyncSession = Depends(db_session), user: User = Depends(current_user)):
+    score = await Score.from_id(session, score_id)
+    if score is None:
+        raise APIException(info="Score not found.")
+    return score
+
+
+@router.post('/', responses=docs(ScoreRead))
+async def submit_score(info: ScoreBase, user: User = Depends(current_user), session: AsyncSession = Depends(db_session)):
     stage = user.active_stage
     stage_map = await stage.get_map(info.beatmap_md5)
     if stage and stage_map:
-        async with db_session() as session:
-            score_raw = Score.from_web(info.dict(), stage)
-            return APIResponse(score=await score_raw.submit_raw(score_raw, session, stage_map.condition_ast))
+        score = await Score.conditional_submit(session, info.dict(), stage, stage_map.condition_ast)
+        return APIResponse(score=score)
 
 
 class BanchoMatchInspector(Inspector):
@@ -40,25 +49,13 @@ class BanchoMatchInspector(Inspector):
             if user is not None:
                 beatmap = await Beatmap.from_id(self.db_session, event.game.beatmap_id)
                 if beatmap is not None:
-                    await _submit_score(ScoreBase.from_ossapi(score, beatmap.md5, user.id), user)
+                    await submit_score(ScoreBase.from_ossapi(score, beatmap.md5, user.id), user)
         await self.db_session.commit()
 
 
-router = APIRouter(prefix='/scores', tags=['scores'])
-
-
 @router.get('/{score_id}', responses=docs(ScoreRead))
-async def get_score(score_id: int):
-    async with db_session() as session:
-        score = await Score.from_id(session, score_id)
-        if score is None:
-            return APIResponse(success=False, info="Score not found.")
-        return APIResponse(beatmap=ScoreRead.from_orm(score))
-
-
-@router.post('/', responses=docs(ScoreRead))
-async def submit_score(info: ScoreBase, user: User = Depends(current_user)):
-    await _submit_score(info, user)
+async def get_score(score: Score = Depends(require_score)):
+    return APIResponse(beatmap=ScoreRead.from_orm(score))
 
 
 # TODO: move to stages api

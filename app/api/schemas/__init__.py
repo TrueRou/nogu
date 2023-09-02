@@ -1,5 +1,6 @@
 from typing import Optional, Generic, TypeVar
 
+from fastapi import HTTPException
 from pydantic import BaseModel, validator
 
 T = TypeVar('T')
@@ -15,12 +16,15 @@ class ModelBase(BaseModel):
 
 
 class APIResponse:
-    def __init__(self, success=True, info="", **kwargs):
-        self.success = success
-        if info != "":
-            self.info = info
+    def __init__(self, **kwargs):
         for key in kwargs.keys():
             self.__setattr__(key, kwargs[key])
+
+
+class APIException(HTTPException):
+    def __init__(self, info: str, **kwargs):
+        kwargs['info'] = info
+        super().__init__(status_code=500, detail=kwargs)
 
 
 def docs(obj):
