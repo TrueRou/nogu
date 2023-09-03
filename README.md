@@ -12,7 +12,15 @@ Make everything in the match easier and relaxer
 
 ## Project Structure
 
-- backend: nogu-nekko with python, fastapi, sqlalchemy and mysql
+- backend (nogu-nekko) -> services center, handle requests and inspection
+- processor (nogu-nukko) -> data analysis and feedback
+- frontend (nogu-zakko) -> represent data and analysis
+- collector (nogu-pekko) -> collect realtime scores and spread data
+
+## Project Stack
+
+- backend: nogu-nekko with python, fastapi, sqlalchemy, mysql, and redis
+- processor: nogu-nukko with csharp, redis
 - frontend: nogu-zakko with vue, tailwindcss, and pinia
 - collector: nogu-pekko with gosumemory, osu-sync
 
@@ -20,7 +28,7 @@ Make everything in the match easier and relaxer
 
 "no" means keep away from something.
 
-"gu" is a onomatopoeia in respect of the sound that doves make. In traditional China, “release white doves” means standing someone up.
+"gu" is a onomatopoeia in respect of the sound that doves make. In traditional China, "release white doves" means standing someone up.
 
 "nogu" means keeping away from standing someone up (maybe your team leader, team member, or your favorite maps in the pool)
 

@@ -1,5 +1,10 @@
-/.idea
-/unit-test/Response
-/venv
+# byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-/config.py
+# nogu-nekko
+
+/nogu-nekko/.idea
+/nogu-nekko/venv
+/nogu-nekko/config.py
