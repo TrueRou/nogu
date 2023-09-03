@@ -9,7 +9,7 @@ from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
 from app import database
-from app.api import router, beatmaps
+from app.api import router, beatmaps, scores
 from app.database import db_session
 from app.logging import log, Ansi
 
@@ -51,6 +51,7 @@ def init_events(asgi_app: FastAPI) -> None:
                 # TODO: Sql migration
                 await database.create_db_and_tables()
                 asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())
+                asyncio.create_task(scores.bancho_match_inspector.inspect_async())
             log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)

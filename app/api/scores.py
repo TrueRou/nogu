@@ -47,6 +47,8 @@ class BanchoMatchInspector(Inspector):
 
     async def process_result(self, target: Any, event: MatchEvent):
         async with database_session() as db_session:
+            if event.game is None or event.game.scores is None:
+                return
             for score in event.game.scores:
                 user = await User.from_id(db_session, score.user_id, Server.BANCHO)
                 if user is not None:

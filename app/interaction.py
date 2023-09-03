@@ -13,7 +13,7 @@ from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
-from app.database import Base, async_session_maker
+from app.database import Base, async_session_maker, db_session
 from app.definition import AstChecker
 from app.logging import log, Ansi
 
@@ -69,14 +69,14 @@ class User(SQLAlchemyBaseUserTable[int], Base):
             return await database.get_model(session, user_id, User)
         if server == Server.BANCHO:
             # get relation from cache and then database
-            nogu_id = sessions.bancho_nogu_users[user_id]
+            nogu_id = sessions.bancho_nogu_users.get(user_id)
             if nogu_id is None:
                 user_account: UserAccount = await database.select_model(session, UserAccount, and_(UserAccount.server_id == server.value, UserAccount.server_user_id == user_id))
                 if user_account is not None:
                     nogu_id = user_account.user_id
                     sessions.bancho_nogu_users[user_id] = nogu_id
             if nogu_id is not None:
-                await database.get_model(session, nogu_id, User)
+                return await database.get_model(session, nogu_id, User)
 
 
 class Beatmap(Base):
@@ -167,9 +167,9 @@ class Beatmap(Base):
             response = await request_session.get(url, params=params)
             response_data = await response.json()
             if response.status == 200 and response_data:
-                session: AsyncSession = async_session_maker()
-                await Beatmap._save_response(session, response_data)
-                return await Beatmap.from_ident(session, ident)
+                async with db_session() as session:
+                    await Beatmap._save_response(session, response_data)
+                    return await Beatmap.from_ident(session, ident)
 
     @staticmethod
     async def from_id(session: AsyncSession, beatmap_id: int) -> Optional['Beatmap']:
