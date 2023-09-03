@@ -1,6 +1,7 @@
 import asyncio
 from typing import Optional
 
+import aiohttp
 from fastapi import APIRouter, Depends
 from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin, schemas, models, exceptions
 from fastapi_users.authentication import (
@@ -60,7 +61,7 @@ router_extends = APIRouter()
 
 
 async def request_identity(code: str):
-    async with sessions.request_session as session:
+    async with aiohttp.ClientSession() as session:
         result = await (await session.post("https://osu.ppy.sh/oauth/token", data={
             "client_id": config.osu_api_v2_id,
             "client_secret": config.osu_api_v2_secret,

@@ -13,10 +13,12 @@ router = APIRouter(prefix='/teams', tags=['teams'])
 
 
 async def require_team(team_id: int, session=Depends(db_session), user: User = Depends(current_user)):
-    stage = await Team.from_id(session, team_id)
-    if stage is None:
+    team = await Team.from_id(session, team_id)
+    if team is None:
         raise APIException(info="Stage not found.")
-    return stage
+    if not await team.member_of(user):
+        raise APIException(info="Not a member of the team.")
+    return team
 
 
 @router.get('/{team_id}', responses=docs(TeamRead))

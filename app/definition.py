@@ -8,6 +8,7 @@ from typing import TypeVar, Generic, Any
 from pydantic import BaseModel
 from starlette.requests import Request
 
+from app.api.schemas import ModelResponse
 from app.logging import log
 
 T = TypeVar('T')
@@ -112,8 +113,9 @@ class Inspector(metaclass=ABCMeta):
 
 class Operator(metaclass=ABCMeta):
     tasks: asyncio.Queue[tuple[Any, Any]] = asyncio.Queue()
-    events: dict[Any, asyncio.Queue[BaseModel]] = {}
+    events: dict[Any, asyncio.Queue[ModelResponse]] = {}
     interval: float
+    skip_next_interval: bool = False
 
     def __init__(self, interval=1.0):
         self.interval = interval
@@ -123,7 +125,7 @@ class Operator(metaclass=ABCMeta):
             if await request.is_disconnected():
                 break
             content = await self.events[session].get()
-            yield content
+            yield content.json()
 
     async def new_operation(self, session: Any, args: Any):
         if session not in self.events:
@@ -142,4 +144,7 @@ class Operator(metaclass=ABCMeta):
         while True:
             (session, args) = await self.tasks.get()
             await self._operate(session, args)
+            if self.skip_next_interval:
+                self.skip_next_interval = False
+                continue
             await asyncio.sleep(self.interval)

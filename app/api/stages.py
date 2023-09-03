@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app import database
 from app.api.schemas import docs, APIResponse, APIException
 from app.api.schemas.beatmap import BeatmapBase
-from app.api.schemas.stage import StageRead, StageBase, StageUpdate
+from app.api.schemas.stage import StageRead, StageBase, StageUpdate, StageMapBase
 from app.api.users import current_user
 from app.database import db_session
 from app.interaction import Stage, User
@@ -15,6 +15,8 @@ async def require_stage(stage_id: int, session=Depends(db_session), user: User =
     stage = await Stage.from_id(session, stage_id)
     if stage is None:
         raise APIException(info="Stage not found.")
+    if not await stage.team.member_of(user):
+        raise APIException(info="Not a member of the team.")
     return stage
 
 
@@ -42,6 +44,6 @@ async def get_beatmaps(limit=20, offset=0, stage: Stage = Depends(require_stage)
 
 
 @router.post("/beatmaps/", responses=docs(list[BeatmapBase]))
-async def add_beatmaps(beatmap_hashes: list[str], stage: Stage = Depends(require_stage)):
-    for md5 in beatmap_hashes:
-        pass
+async def add_beatmaps(stage_maps: list[StageMapBase], stage: Stage = Depends(require_stage)):
+    for stage_map in stage_maps:
+        await stage.add_beatmap(stage_map.dict())

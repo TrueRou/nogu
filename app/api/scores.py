@@ -20,6 +20,8 @@ async def require_score(score_id: int, session: AsyncSession = Depends(db_sessio
     score = await Score.from_id(session, score_id)
     if score is None:
         raise APIException(info="Score not found.")
+    if score.user_id != user.id:
+        raise APIException(info="No permission.")
     return score
 
 
@@ -58,7 +60,6 @@ async def get_score(score: Score = Depends(require_score)):
     return APIResponse(beatmap=ScoreRead.from_orm(score))
 
 
-# TODO: move to stages api
 @router.post('/make/', responses=docs(ScoreRead))
 async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(current_user)):
     stage = user.active_stage

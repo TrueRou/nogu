@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any
 
+import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
@@ -154,7 +155,8 @@ class Beatmap(Base):
         url = "https://old.ppy.sh/api/get_beatmaps"
         params["k"] = str(config.osu_api_v1_key)
 
-        async with sessions.request_session.get(url, params=params) as response:
+        async with aiohttp.ClientSession() as request_session:
+            response = await request_session.get(url, params=params)
             response_data = await response.json()
             if response.status == 200 and response_data:
                 session: AsyncSession = async_session_maker()
@@ -209,7 +211,8 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional['Score']:
+    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional[
+        'Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
         score = Score(**score_info, stage_id=stage.id, performance_points=pp)
         variables = {
@@ -255,12 +258,15 @@ class Team(Base):
             member.member_position = position.value
             await session.commit()
 
-    async def position_of(self, user_id: int) -> MemberPosition:
+    async def position_of(self, user: User) -> MemberPosition:
         session = object_session(self)
-        member: TeamMember = await database.query_model(session, self.member, TeamMember.user_id == user_id)
+        member: TeamMember = await database.query_model(session, self.member, TeamMember.user_id == user.id)
         if member is None:
             return MemberPosition.EMPTY
         return MemberPosition(member.member_position)
+
+    async def member_of(self, user: User) -> bool:
+        return await self.position_of(user) != MemberPosition.EMPTY
 
 
 class Stage(Base):
@@ -288,6 +294,10 @@ class Stage(Base):
     async def get_beatmap(self, beatmap_md5: str) -> Optional['StageMap']:
         session = object_session(self)
         return await database.query_model(session, self.maps, StageMap.map_md5 == beatmap_md5)
+
+    async def add_beatmap(self, info: dict):
+        session = object_session(self)
+        return await database.add_model(session, StageMap(**info, stage_id=self.id))
 
     async def get_beatmaps(self, limit=20, offset=0) -> list['StageMap']:
         session = object_session(self)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
@@ -7,7 +9,7 @@ from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
 from app import database
-from app.api import router
+from app.api import router, beatmaps
 from app.database import db_session
 from app.logging import log, Ansi
 
@@ -48,6 +50,7 @@ def init_events(asgi_app: FastAPI) -> None:
                 await session.execute(text('SELECT 1'))
                 # TODO: Sql migration
                 await database.create_db_and_tables()
+                asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())
             log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)
