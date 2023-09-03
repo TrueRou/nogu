@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
+import config
 from app.api.schemas import APIResponse, docs, ModelResponse
 from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
 from app.api.users import current_user
@@ -25,7 +26,7 @@ class BeatmapRequestOperator(Operator):
 
 
 router = APIRouter(prefix='/beatmaps', tags=['beatmaps'])
-beatmap_request_operator = BeatmapRequestOperator()
+beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_requests_interval)
 
 
 @router.get('/{ident}', responses=docs(BeatmapBase))

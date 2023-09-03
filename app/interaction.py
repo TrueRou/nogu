@@ -8,13 +8,13 @@ from sqlalchemy.ext.asyncio import async_object_session as object_session, Async
 from sqlalchemy.orm import relationship
 
 import config
-from app import database, sessions, definition
+from app import database, definition, sessions
 from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
 from app.database import Base, async_session_maker
-from app.definition import Raw, AstChecker
+from app.definition import AstChecker
 from app.logging import log, Ansi
 
 
@@ -68,7 +68,15 @@ class User(SQLAlchemyBaseUserTable[int], Base):
         if server == Server.LOCAL:
             return await database.get_model(session, user_id, User)
         if server == Server.BANCHO:
-            return None  # TODO... Mapped user between servers
+            # get relation from cache and then database
+            nogu_id = sessions.bancho_nogu_users[user_id]
+            if nogu_id is None:
+                user_account: UserAccount = await database.select_model(session, UserAccount, and_(UserAccount.server_id == server.value, UserAccount.server_user_id == user_id))
+                if user_account is not None:
+                    nogu_id = user_account.user_id
+                    sessions.bancho_nogu_users[user_id] = nogu_id
+            if nogu_id is not None:
+                await database.get_model(session, nogu_id, User)
 
 
 class Beatmap(Base):
@@ -211,8 +219,7 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional[
-        'Score']:
+    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional['Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
         score = Score(**score_info, stage_id=stage.id, performance_points=pp)
         variables = {

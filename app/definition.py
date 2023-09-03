@@ -5,7 +5,6 @@ import re
 from abc import abstractmethod, ABCMeta
 from typing import TypeVar, Generic, Any
 
-from pydantic import BaseModel
 from starlette.requests import Request
 
 from app.api.schemas import ModelResponse
@@ -56,13 +55,12 @@ class Inspector(metaclass=ABCMeta):
     disable_cursor: bool = False
     use_events = False
     stop_when_disconnected = True
-    interval: float = 1.0
+    interval: float = 10.0
+    each_interval: float = 0.1
 
-    def __init__(self, disable_cursor: bool, interval: float, use_events: bool, stop_when_disconnected: bool):
-        self.disable_cursor = disable_cursor
+    def __init__(self, interval: float, each_interval: float):
         self.interval = interval
-        self.use_events = use_events
-        self.stop_when_disconnected = stop_when_disconnected
+        self.each_interval = each_interval
 
     def new_target(self, target: Any):
         if target not in self.inspecting_targets:
@@ -108,7 +106,8 @@ class Inspector(metaclass=ABCMeta):
         while True:
             for target in self.inspecting_targets:
                 await self._consume(target)
-                await asyncio.sleep(self.interval)
+                await asyncio.sleep(self.each_interval)
+            await asyncio.sleep(self.interval)
 
 
 class Operator(metaclass=ABCMeta):
