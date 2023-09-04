@@ -12,7 +12,7 @@ class UserAccount(ModelBase):
     server_id: int
     server_user_id: int
     server_user_name: str
-    checked_at: int
+    checked_at: datetime
 
 
 class UserBase(ModelBase):

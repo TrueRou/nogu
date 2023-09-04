@@ -6,4 +6,12 @@ Welcome to our backend!
 
 ## Development
 
-To be finished.
+cd nogu-nekko
+
+pip install -r requirements.txt
+
+cp config.example.py config.py
+
+nano config.py
+
+python3.10 main.py
