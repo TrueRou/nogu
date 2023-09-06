@@ -26,7 +26,6 @@ class StageMapBase(ModelBase):
 
 
 class StageMapRead(StageMapBase):
-    id: int
     stage_id: int
 
 

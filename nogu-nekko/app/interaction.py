@@ -3,7 +3,7 @@ from typing import Optional, Any
 
 import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_, PrimaryKeyConstraint
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_, JSON
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
@@ -20,9 +20,8 @@ from app.logging import log, Ansi
 
 class UserAccount(Base):
     __tablename__ = "user_accounts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
-    server_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
+    server_id = Column(Integer, primary_key=True, nullable=False)
     server_user_id = Column(Integer, nullable=False)
     server_user_name = Column(String(64), nullable=False)
     checked_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
@@ -211,6 +210,7 @@ class Score(Base):
     mode = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_id = Column(Integer, nullable=False, default=int(Server.LOCAL))
+    analysis = Column(JSON, nullable=True)
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
 
     beatmap = relationship('Beatmap', lazy='selectin')
@@ -221,8 +221,7 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional[
-        'Score']:
+    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional['Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
         score = Score(**score_info, stage_id=stage.id, performance_points=pp)
         variables = {
@@ -288,6 +287,7 @@ class Stage(Base):
     formula = Column(Integer, nullable=False, default=bancho_formula.formula_id)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
+    analysis = Column(JSON, nullable=True)
     pool_id = Column(Integer, ForeignKey('pools.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
 
@@ -336,9 +336,8 @@ class Pool(Base):
 
 class PoolMap(Base):
     __tablename__ = "pool_maps"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    pool_id = Column(Integer, ForeignKey('pools.id'), index=True, nullable=False)
-    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), index=True, nullable=False)
+    pool_id = Column(Integer, ForeignKey('pools.id'), primary_key=True, nullable=False)
+    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
     description = Column(String(64), nullable=False)
     condition_ast = Column(String(64), nullable=False)
     condition_name = Column(String(64), nullable=False)
@@ -349,92 +348,36 @@ class PoolMap(Base):
 
 class StageMap(Base):
     __tablename__ = "stage_maps"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
-    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), index=True, nullable=False)
+    stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
+    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
     description = Column(String(64), nullable=False)
     condition_ast = Column(String(64), nullable=False)
     condition_name = Column(String(64), nullable=False)
     condition_represent_mods = Column(Integer, nullable=False)
+    analysis = Column(JSON, nullable=True)
 
     beatmap = relationship('Beatmap', lazy='selectin')
 
 
+class StageUser(Base):
+    __tablename__ = "stage_users"
+    stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
+    analysis = Column(JSON, nullable=True)
+
+
+class StageUserMap(Base):
+    stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
+    beatmap_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
+    analysis = Column(JSON, nullable=True)
+
+
 class TeamMember(Base):
     __tablename__ = "team_member"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    team_id = Column(Integer, ForeignKey('teams.id'), index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
+    team_id = Column(Integer, ForeignKey('teams.id'), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     member_position = Column(Integer, nullable=False, default=int(MemberPosition.MEMBER))
 
     teams = relationship("Team", back_populates="member")
     member = relationship("User", back_populates="teams")
-
-
-# TODO need double check
-
-class ScoreDetail(Base):
-    __tablename__ = "score_detail"
-    # should set as ForeignKey and primary_key?
-    score_id = Column(Integer, primary_key=True, nullable=False)
-    slider_break_count = Column(Integer, nullable=False, default=0)
-    stability = Column(Float, nullable=False)
-    confusion = Column(Float, nullable=False)
-    percentage = Column(Float, nullable=False)
-    message = Column(String, nullable=True)
-
-
-class StageMapUserDetail(Base):
-    __tablename__ = "stage_map_user_detail"
-    # should set as ForeignKey and primary_key?
-    stage_id = Column(Integer, primary_key=True, nullable=False)
-    beatmap_md5 = Column(String, primary_key=True, nullable=False)
-    user_id = Column(Integer, primary_key=True, nullable=False)
-
-    play_count = Column(Integer, nullable=False, default=0)
-    play_time = Column(Integer, nullable=False, default=0)
-    average_score = Column(Float, nullable=False)
-    average_accuracy = Column(Float, nullable=False)
-    average_stability = Column(Float, nullable=False)
-    average_percentage = Column(Float, nullable=False)
-    variance_score = Column(Float, nullable=False)
-    variance_accuracy = Column(Float, nullable=False)
-
-    #TODO uncheck MulitPrimaryKey
-    __table_args__ = (
-        PrimaryKeyConstraint(stage_id, beatmap_md5, user_id),
-    )
-
-
-class StageMapDetail(Base):
-    __tablename__ = "stage_map_detail"
-    # should set as ForeignKey and primary_key?
-    stage_id = Column(Integer, primary_key=True, nullable=False)
-    play_count = Column(Integer, nullable=False, default=0)
-    play_time = Column(Integer, nullable=False, default=0)
-    overall_performance = Column(Float, nullable=False)
-    prefer_factor = Column(Float, nullable=False)
-
-
-class StageUserDetail(Base):
-    __tablename__ = "stage_user_detail"
-    # should set as ForeignKey and primary_key?
-    stage_id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, primary_key=True, nullable=False)
-    play_count = Column(Integer, nullable=False, default=0)
-    play_time = Column(Integer, nullable=False, default=0)
-    harkworking_factor = Column(Float, nullable=False)
-    contribution_factor = Column(Float, nullable=False)
-
-    #TODO uncheck MulitPrimaryKey
-    __table_args__ = (
-        PrimaryKeyConstraint(stage_id, user_id),
-    )
-
-
-class StageDetail(Base):
-    __tablename__ = "stage_detail"
-    # should set as ForeignKey and primary_key?
-    stage_id = Column(Integer, primary_key=True, nullable=False)
-    play_count = Column(Integer, nullable=False, default=0)
-    play_time = Column(Integer, nullable=False, default=0)

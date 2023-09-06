@@ -45,6 +45,7 @@ the message of process complete will also be inserted into another task queue
 ### stage_map_detail
 
 - stage_id: int (primary)
+- beatmap_md5: str (primary)
 - play_count: int
 - play_time: int
 - overall_performance: float
