@@ -1,32 +1,22 @@
-# nogu-nukko PRD
+# Analysis PRD
 
 ## Summary
 
-nogu-nukko is a part of nogu backend services, which works at data analysis layer.
+analysis service is a part of nogu backend services, which works by python multiprocess
 
 ## Function
 
-nukko receives analysis requests from nekko through redis task queue.
+analysis service receives analysis requests through task queue.
 
-When requests reach, nukko will extract required data from mysql
+when requests reach, it will extract required data from mysql
 
-nukko then analyzes the data extracted and calculate for the final results
+it then analyzes the data extracted and calculate for the final results
 
-The final results will be saved to redis.
+the final results will be saved to a few tables.
 
-The message of process complete will also be inserted into another redis task queue
+the message of process complete will also be inserted into another task queue
 
 ## Database Structure
-
-### analysis_requests
-
-- stage_id: int (primary)
-- timestamp: datatime
-
-### analysis_response
-
-- stage_id: int (primary)
-- timestamp: datatime
 
 ### score_detail
 
@@ -67,10 +57,10 @@ The message of process complete will also be inserted into another redis task qu
 - user_id: int (primary)
 - play_count: int
 - play_time: int
-- avarage_score: float
-- avarage_accuracy: float
-- avarage_stability: float
-- avarage_percentage: float
+- average_score: float
+- average_accuracy: float
+- average_stability: float
+- average_percentage: float
 - variance_score: float
 - variance_accuracy: float
 
