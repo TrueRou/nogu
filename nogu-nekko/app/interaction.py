@@ -3,7 +3,7 @@ from typing import Optional, Any
 
 import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_, PrimaryKeyConstraint
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
@@ -71,7 +71,9 @@ class User(SQLAlchemyBaseUserTable[int], Base):
             # get relation from cache and then database
             nogu_id = sessions.bancho_nogu_users.get(user_id)
             if nogu_id is None:
-                user_account: UserAccount = await database.select_model(session, UserAccount, and_(UserAccount.server_id == server.value, UserAccount.server_user_id == user_id))
+                user_account: UserAccount = await database.select_model(session, UserAccount,
+                                                                        and_(UserAccount.server_id == server.value,
+                                                                             UserAccount.server_user_id == user_id))
                 if user_account is not None:
                     nogu_id = user_account.user_id
                     sessions.bancho_nogu_users[user_id] = nogu_id
@@ -219,7 +221,8 @@ class Score(Base):
         return await database.get_model(session, score_id, Score)
 
     @staticmethod
-    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional['Score']:
+    async def conditional_submit(session: AsyncSession, score_info: dict, stage: 'Stage', condition: str) -> Optional[
+        'Score']:
         pp = dict_id2obj[stage.formula].calculate(mode=stage.mode)  # TODO: provide correct args to calculate pp
         score = Score(**score_info, stage_id=stage.id, performance_points=pp)
         variables = {
@@ -366,3 +369,72 @@ class TeamMember(Base):
 
     teams = relationship("Team", back_populates="member")
     member = relationship("User", back_populates="teams")
+
+
+# TODO need double check
+
+class ScoreDetail(Base):
+    __tablename__ = "score_detail"
+    # should set as ForeignKey and primary_key?
+    score_id = Column(Integer, primary_key=True, nullable=False)
+    slider_break_count = Column(Integer, nullable=False, default=0)
+    stability = Column(Float, nullable=False)
+    confusion = Column(Float, nullable=False)
+    percentage = Column(Float, nullable=False)
+    message = Column(String, nullable=True)
+
+
+class StageMapUserDetail(Base):
+    __tablename__ = "stage_map_user_detail"
+    # should set as ForeignKey and primary_key?
+    stage_id = Column(Integer, primary_key=True, nullable=False)
+    beatmap_md5 = Column(String, primary_key=True, nullable=False)
+    user_id = Column(Integer, primary_key=True, nullable=False)
+
+    play_count = Column(Integer, nullable=False, default=0)
+    play_time = Column(Integer, nullable=False, default=0)
+    average_score = Column(Float, nullable=False)
+    average_accuracy = Column(Float, nullable=False)
+    average_stability = Column(Float, nullable=False)
+    average_percentage = Column(Float, nullable=False)
+    variance_score = Column(Float, nullable=False)
+    variance_accuracy = Column(Float, nullable=False)
+
+    #TODO uncheck MulitPrimaryKey
+    __table_args__ = (
+        PrimaryKeyConstraint(stage_id, beatmap_md5, user_id),
+    )
+
+
+class StageMapDetail(Base):
+    __tablename__ = "stage_map_detail"
+    # should set as ForeignKey and primary_key?
+    stage_id = Column(Integer, primary_key=True, nullable=False)
+    play_count = Column(Integer, nullable=False, default=0)
+    play_time = Column(Integer, nullable=False, default=0)
+    overall_performance = Column(Float, nullable=False)
+    prefer_factor = Column(Float, nullable=False)
+
+
+class StageUserDetail(Base):
+    __tablename__ = "stage_user_detail"
+    # should set as ForeignKey and primary_key?
+    stage_id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, primary_key=True, nullable=False)
+    play_count = Column(Integer, nullable=False, default=0)
+    play_time = Column(Integer, nullable=False, default=0)
+    harkworking_factor = Column(Float, nullable=False)
+    contribution_factor = Column(Float, nullable=False)
+
+    #TODO uncheck MulitPrimaryKey
+    __table_args__ = (
+        PrimaryKeyConstraint(stage_id, user_id),
+    )
+
+
+class StageDetail(Base):
+    __tablename__ = "stage_detail"
+    # should set as ForeignKey and primary_key?
+    stage_id = Column(Integer, primary_key=True, nullable=False)
+    play_count = Column(Integer, nullable=False, default=0)
+    play_time = Column(Integer, nullable=False, default=0)
