@@ -109,7 +109,6 @@ def compute_stage_users(session: Session, stage: Stage) -> list:
 
 # process: stage_detail
 def compute_stage(session: Session, stage: Stage, stage_maps: list[dict], stage_users: list[dict]):
-    # particular_scores: scores from the same user and different maps.
     computed_result = {}  # TODO: real formula
     stage.analysis = computed_result
     session.commit()
