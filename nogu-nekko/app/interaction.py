@@ -366,10 +366,10 @@ class StageUser(Base):
     analysis = Column(JSON, nullable=True)
 
 
-class StageUserMap(Base):
+class StageMapUser(Base):
     stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     beatmap_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     analysis = Column(JSON, nullable=True)
 
 
