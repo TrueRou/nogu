@@ -5,11 +5,11 @@ from sqlalchemy import select, create_engine, update, and_
 from sqlalchemy.orm import sessionmaker, Session
 
 import config
-from app.interaction import Score, Stage, StageMap, StageMapUser, StageUser
+from app.interaction import Score, Stage, StageMap, StageMapUser, StageUser, Beatmap
 
 pool = Pool(4)
-analyze_task_queue: Queue[int] = Queue()
-analyze_response_queue: Queue[int] = Queue()
+analyze_task_queue: Queue = Queue()
+analyze_response_queue: Queue = Queue()
 
 engine = create_engine(config.mysql_url, echo=False, future=True)
 session_maker = sessionmaker(engine, expire_on_commit=False)
@@ -26,7 +26,10 @@ def with_primary_key(analysis_dict: dict, **kwargs) -> dict:
 
 def compute_score(score: Score) -> dict:
     # TODO: real formula
-    return {}
+    beatmap: Beatmap = score.beatmap
+    return {
+        'percentage':  score.highest_combo / beatmap.max_combo
+    }
 
 
 def compute_scores(session: Session, stage: Stage):
@@ -43,7 +46,9 @@ def compute_scores(session: Session, stage: Stage):
 def compute_smu_scores(particular_scores: Sequence) -> dict:
     # particular_scores: scores from the same user and beatmap.
     # TODO: real formula
-    return {}
+    return {
+        'play_count': len(particular_scores)
+    }
 
 
 def compute_smu_users(session: Session, stage: Stage, stage_map: StageMap) -> list[dict]:
@@ -72,7 +77,9 @@ def compute_smu(session: Session, stage: Stage):
 def compute_stage_map(particular_scores: Sequence) -> dict:
     # particular_scores: scores from the same beatmap and different users.
     # TODO: real formula
-    return {}
+    return {
+        'play_count': len(particular_scores)
+    }
 
 
 def compute_stage_maps(session: Session, stage: Stage) -> list:
@@ -93,7 +100,9 @@ def compute_stage_maps(session: Session, stage: Stage) -> list:
 def compute_stage_user(particular_scores: Sequence) -> dict:
     # particular_scores: scores from the same user and different maps.
     # TODO: real formula
-    return {}
+    return {
+        'play_count': len(particular_scores)
+    }
 
 
 def compute_stage_users(session: Session, stage: Stage) -> list:
@@ -109,12 +118,17 @@ def compute_stage_users(session: Session, stage: Stage) -> list:
 
 # process: stage_detail
 def compute_stage(session: Session, stage: Stage, stage_maps: list[dict], stage_users: list[dict]):
-    computed_result = {}  # TODO: real formula
+    total_play_count = 0
+    for stage_map in stage_maps:
+        total_play_count += stage_map.get('play_count')
+    computed_result = {
+        'play_count': total_play_count
+    }  # TODO: real formula
     stage.analysis = computed_result
     session.commit()
 
 
-def analyze_task(analysis_requests: Queue[int]):
+def analyze_task(analysis_requests: Queue):
     while True:
         stage_id = analysis_requests.get()
         with session_maker() as session:

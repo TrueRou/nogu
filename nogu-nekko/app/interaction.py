@@ -361,12 +361,14 @@ class StageMap(Base):
 
 class StageUser(Base):
     __tablename__ = "stage_users"
-    stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
+    stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     analysis = Column(JSON, nullable=True)
 
 
 class StageMapUser(Base):
+    __tablename__ = "stage_map_user_detail"
+
     stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
     beatmap_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)

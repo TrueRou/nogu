@@ -3,9 +3,9 @@ from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
 import config
-from app.api.schemas import APIResponse, docs, ModelResponse
+from app.api.schemas import ModelResponse, APIException
 from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
-from app.api.users import current_user
+from app.api import require_user
 from app.database import db_session as database_session
 from app.definition import Operator
 from app.interaction import Beatmap, User
@@ -29,17 +29,17 @@ router = APIRouter(prefix='/beatmaps', tags=['beatmaps'])
 beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_requests_interval)
 
 
-@router.get('/{ident}', responses=docs(BeatmapBase))
+@router.get('/{ident}', response_model=BeatmapBase)
 async def get_beatmap(ident: str):
     async with database_session() as session:
         beatmap = await Beatmap.from_ident(session, ident)
         if beatmap is None:
-            return APIResponse(success=False, info="Beatmap not found.")
-        return APIResponse(beatmap=BeatmapBase.from_orm(beatmap))
+            raise APIException(message="Beatmap not found.")
+        return beatmap
 
 
-@router.post('/stream/', responses=docs(BeatmapEvent))
-async def stream_beatmap(request: Request, idents: list[str], user: User = Depends(current_user)):
+@router.post('/stream/')
+async def stream_beatmap(request: Request, idents: list[str], user: User = Depends(require_user)):
     log(f"Doing beatmap streaming: {user.username} ({str(len(idents))} maps)", Ansi.LYELLOW)
     for ident in idents:
         await beatmap_request_operator.new_operation(str(user.id), ident)

@@ -2,12 +2,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from ossapi import MatchResponse, MatchEvent
-from sqlalchemy.ext.asyncio import AsyncSession
 
 import config
-from app.api.schemas import APIResponse, docs, APIException
+from app.api import require_score, require_user
 from app.api.schemas.score import ScoreBase, ScoreRead
-from app.api.users import current_user
 from app.constants.servers import Server
 from app.database import db_session as database_session
 from app.definition import Inspector
@@ -17,23 +15,14 @@ from app.sessions import api_client
 router = APIRouter(prefix='/scores', tags=['scores'])
 
 
-async def require_score(score_id: int, session: AsyncSession = Depends(database_session), user: User = Depends(current_user)):
-    score = await Score.from_id(session, score_id)
-    if score is None:
-        raise APIException(info="Score not found.")
-    if score.user_id != user.id:
-        raise APIException(info="No permission.")
-    return score
-
-
-@router.post('/', responses=docs(ScoreRead))
-async def submit_score(info: ScoreBase, user: User = Depends(current_user),
-                       session: AsyncSession = Depends(database_session)):
-    stage = user.active_stage
-    stage_map = await stage.get_map(info.beatmap_md5)
-    if stage and stage_map:
-        score = await Score.conditional_submit(session, info.dict(), stage, stage_map.condition_ast)
-        return APIResponse(score=score)
+@router.post('/', response_model=ScoreRead)
+async def submit_score(info: ScoreBase, user: User = Depends(require_user)):
+    async with database_session() as session:
+        stage = user.active_stage
+        stage_map = await stage.get_map(info.beatmap_md5)
+        if stage and stage_map:
+            score = await Score.conditional_submit(session, info.dict(), stage, stage_map.condition_ast)
+            return score
 
 
 class BanchoMatchInspector(Inspector):
@@ -62,19 +51,19 @@ bancho_match_inspector = BanchoMatchInspector(interval=config.match_inspection_i
                                               each_interval=config.match_inspection_each_interval)
 
 
-@router.get('/{score_id}', responses=docs(ScoreRead))
+@router.get('/{score_id}', response_model=ScoreRead)
 async def get_score(score: Score = Depends(require_score)):
-    return APIResponse(beatmap=ScoreRead.from_orm(score))
+    return score
 
 
-@router.post('/make/', responses=docs(ScoreRead))
-async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(current_user)):
+@router.post('/make/', response_model=ScoreRead)
+async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(require_user)):
     stage = user.active_stage
     stage_map = await stage.get_map(beatmap_md5)
     if stage and stage_map:
         fake_score = ScoreBase.from_abs(beatmap_md5, user.id, keywords, stage_map.beatmap.max_combo,
                                         stage_map.condition_represent_mods, stage.mode)
-        return APIResponse(score=await submit_score(fake_score, user))
+        return await submit_score(fake_score, user)
 
 
 @router.post('/inspect/bancho/{match_id}')

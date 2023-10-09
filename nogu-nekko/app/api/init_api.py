@@ -8,9 +8,10 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
+import app.api.internal
 from app import database, analysis
-from app.analysis import entrance
-from app.api import router, beatmaps, scores
+from app.api import router
+from app.api.internal import scores, beatmaps
 from app.database import db_session
 from app.logging import log, Ansi
 
@@ -60,7 +61,8 @@ def init_events(asgi_app: FastAPI) -> None:
 
 
 def init_routes(asgi_app: FastAPI) -> None:
-    asgi_app.include_router(router)
+    asgi_app.include_router(app.api.internal.router)
+    asgi_app.include_router(app.api.router)
 
 
 def init_api() -> FastAPI:
