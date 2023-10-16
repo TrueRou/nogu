@@ -19,10 +19,9 @@ Make everything in the match easier and relaxer
 
 ## Project Stack
 
-- backend: nogu-nekko with python, fastapi, sqlalchemy, mysql, and redis
-- processor: nogu-nukko with csharp, redis
-- frontend: nogu-zakko with vue, tailwindcss, and pinia
-- collector: nogu-pekko with gosumemory, osu-sync
+- backend: python, fastapi, sqlalchemy, mysql
+- frontend: vue, tailwindcss, and pinia
+- client: c#, wpf, gosumemory, osu-sync
 
 ## Why "nogu"
 
