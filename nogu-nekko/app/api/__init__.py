@@ -9,8 +9,8 @@ from app.interaction import User, Team, Stage, Score
 router = APIRouter()
 
 user_router = users.fastapi_users.get_users_router(UserRead, UserUpdate)
-user_router.include_router(users.fastapi_users.get_auth_router(users.auth_backend), prefix="/auth/jwt")
-user_router.include_router(users.fastapi_users.get_register_router(UserBase, UserWrite), prefix="/auth")
+router.include_router(users.fastapi_users.get_auth_router(users.auth_backend), prefix="/auth/jwt")
+router.include_router(users.fastapi_users.get_register_router(UserBase, UserWrite), prefix="/auth")
 
 router.include_router(user_router, prefix="/users", tags=["users"])
 

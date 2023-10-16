@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, Depends
 
 from app import database, analysis
@@ -30,7 +32,7 @@ async def patch_stage(info: StageUpdate, stage: Stage = Depends(require_stage)):
 
 @router.post('/{stage_id}')
 async def begin_analysis_debug(stage_id: int):
-    analysis.analyze_task_queue.put(stage_id)
+    asyncio.ensure_future(analysis.process_async(stage_id))
 
 
 @router.get("/beatmaps/", response_model=list[BeatmapBase])
