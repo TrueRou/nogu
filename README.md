@@ -12,10 +12,10 @@ Make everything in the match easier and relaxer
 
 ## Project Structure
 
-- backend (nogu-nekko) -> services center, handle requests and inspection
-- processor (nogu-nukko) -> data analysis and feedback
-- frontend (nogu-zakko) -> represent data and analysis
-- collector (nogu-pekko) -> collect realtime scores and spread data
+- backend -> services center, handle requests and inspection
+- frontend -> represent data and analysis
+- client -> collect realtime scores and spread data
+- documents -> stored all documents about the ongoing project
 
 ## Project Stack
 
