@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "command": "npm run dev",
+            "name": "Run Frontend",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/frontend"
+        },
+        {
+            "name": "Run Backend",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1"
+            }
+        }
+    ]
+}
