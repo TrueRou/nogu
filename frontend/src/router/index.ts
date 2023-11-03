@@ -1,4 +1,4 @@
-import HomePage from '@/views/HomePage.vue'
+import IntroVue from '@/views/pages/Intro.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomePage
+      component: IntroVue
     }
   ]
 })

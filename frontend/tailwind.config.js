@@ -13,7 +13,8 @@ export default {
           'brighter-purple': '#714CE0',
         },
         'background': {
-          'brown': '#18171C'
+          'brown': '#18171C',
+          'brighter-brown': '#382E32'
         },
       },
     },

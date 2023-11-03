@@ -21,10 +21,14 @@ body {
 }
 
 button {
+    display: flex;
     height: 32px;
     width: 64px;
     background-color: whitesmoke;
     border-radius: 0.4rem;
+    color: black;
+    align-items: center;
+    justify-content: center;
     transition: background-color 0.2s ease-in-out;
     /* Add a transition effect to the background-color property */
 }
