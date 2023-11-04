@@ -2,15 +2,13 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { Transition } from 'vue';
 import { useUIStore } from './stores/user_interface';
-import Button from './components/Button.vue'
-import Login from './views/dialogs/Login.vue';
-import Register from './views/dialogs/Register.vue';
 
 const ui = useUIStore();
 </script>
 
 <template>
-  <div class="bg-background-brown w-full flex flex-1">
+  <div :class="ui.dialog.isOpen ? 'saturate-50' : ''"
+    class="bg-background-brown w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col m-1 mt-2 mb-2 flex-1">
       <header class="mb-2 flex">
         <nav class="flex flex-1">
@@ -24,8 +22,9 @@ const ui = useUIStore();
       </div>
     </div>
   </div>
-  <Transition name="gradual">
-    <div v-if="ui.dialog.isOpen" class="dialog-mask absolute" @click="ui.closeDialog()"></div>
+  <Transition name="fade">
+    <div v-if="ui.dialog.isOpen" class="dialog-mask absolute" @click="ui.closeDialog()">
+    </div>
   </Transition>
   <div class="dialog-container">
     <Transition name="bounce">
@@ -42,19 +41,24 @@ const ui = useUIStore();
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  /* hide dialog by default */
   z-index: 1000;
 }
 
 .dialog-mask {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   height: 100%;
   width: 100%;
   z-index: 999;
 }
 
-.gradual-leave-active {
-  transition: all 0.5s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .bounce-enter-active {

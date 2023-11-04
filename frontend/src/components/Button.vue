@@ -4,7 +4,7 @@ import { ButtonKinds } from './typedef';
 
 const kind_sets = {
     'primary': ['bg-primary-purple', 'hover:bg-primary-brighter-purple', 'text-white'],
-    'secondary': ['bg-slate-100', 'hover:bg-white', 'text-black'],
+    'secondary': ['bg-pink-200', 'hover:bg-pink-300', 'text-black'],
     'normal': ['bg-slate-100', 'hover:bg-white', 'text-black'],
 }
 
@@ -18,12 +18,12 @@ const props = defineProps({
     },
     height: {
         type: String,
-        default: '2.25',
+        default: '2.25rem',
         required: false,
     },
     width: {
         type: String,
-        default: '5',
+        default: '5rem',
         required: false,
     },
     weight: {
@@ -38,8 +38,8 @@ const props = defineProps({
 })
 
 const styles = ref({
-    'height': `${props.height}rem`,
-    'width': `${props.width}rem`,
+    'height': `${props.height}`,
+    'width': `${props.width}`,
     'font-weight': `${props.weight}`,
 })
 

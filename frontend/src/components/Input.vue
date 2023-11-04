@@ -39,8 +39,8 @@ const props = defineProps({
 })
 
 const styles = ref({
-    'height': `${props.height}rem`,
-    'width': `${props.width}rem`,
+    'height': `${props.height}`,
+    'width': `${props.width}`,
     'font-weight': `${props.weight}`,
 })
 
