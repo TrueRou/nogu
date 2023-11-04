@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { useUIStore } from '@/stores/user_interface';
+import Button from '@/components/Button.vue';
+import Input from '@/components/Input.vue';
+import { ButtonKinds, InputKinds } from '@/components/typedef';
 import { ref } from 'vue';
+import Login from '../dialogs/Login.vue';
 
+const value = ref('');
 
 const ui = useUIStore();
 const features = ref(
@@ -20,6 +25,10 @@ const features = ref(
         }
     ]);
 
+const print = () => {
+    ui.openDialog(Login);
+}
+
 </script>
 
 <template>
@@ -30,10 +39,9 @@ const features = ref(
                     <img src="../../assets/title.svg" class="flex h-16 w-40" />
                     <h2 class="text-xl font-bold text-white">Focusing on collecting, sorting, analyzing scores</h2>
                     <div class="flex mt-2">
-                        <button
-                            class="bg-primary-purple w-20 h-9 hover:bg-primary-brighter-purple mr-2 text-white font-semibold">Try</button>
-                        <button class="bg-whitesmoke w-20 h-9 hover:bg-white text-black font-semibold"
-                            @click="ui.openDialog('Login')">Login</button>
+                        <Button class="mr-2" :kind="ButtonKinds.Primary" text="Try" weight="600" @click="print"></Button>
+                        <Button class="mr-2" :kind="ButtonKinds.Normal" text="Login" weight="600"></Button>
+                        <Input v-model="value" :kind="InputKinds.Dark" placeholder="Search"></Input>
                     </div>
                 </div>
                 <img class="hidden h-64 sm:flex md:ml-24" src="https://s2.loli.net/2023/11/01/mrZisGMnxqtC8Tv.png">

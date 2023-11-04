@@ -4,11 +4,11 @@ import { defineStore } from 'pinia'
 export const useUIStore = defineStore('user_interface', () => {
     const dialog = ref({
         'isOpen': false,
-        'component': '',
+        'component': null,
         'data': {}
     })
 
-    function openDialog(component: string) {
+    function openDialog(component: any) {
         dialog.value.isOpen = true
         dialog.value.component = component
         dialog.value.data = {}
@@ -16,7 +16,7 @@ export const useUIStore = defineStore('user_interface', () => {
 
     function closeDialog() {
         dialog.value.isOpen = false
-        dialog.value.component = ''
+        dialog.value.component = null
     }
 
     function showNotification(type: string, message: string, i18n_node: string = '') {

@@ -14,7 +14,9 @@ export default {
         },
         'background': {
           'brown': '#18171C',
-          'brighter-brown': '#382E32'
+          'brighter-brown': '#382E32',
+          'pink': '#382E32',
+          'brighter-pink': '#4A3D42'
         },
       },
     },
