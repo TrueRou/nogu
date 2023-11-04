@@ -1,9 +1,8 @@
-import { markRaw, ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import qs from 'qs'
 import { useUIStore } from './user_interface'
-import LoginVue from '@/views/dialogs/Login.vue'
 
 const API_URL = 'http://localhost:8000/'
 
@@ -30,13 +29,7 @@ export const useUserStore = defineStore('user_information', () => {
     const isLoggedIn = ref(false)
     const userInfo = ref({})
 
-    function requests(requireAccess: boolean = true) {
-        if (requireAccess && !isLoggedIn.value) {
-            ui.showNotification('error', 'You must be logged in to perform this operation.')
-            ui.openDialog(markRaw(LoginVue))
-            return
-        }
-        
+    function requests() {
         return axiosInstance
     }
 
@@ -56,19 +49,23 @@ export const useUserStore = defineStore('user_information', () => {
         }
     }
 
-    async function login(username: string, password: string) {
+    async function login(username: string, password: string, mute: boolean = false) {
         try {
             const response = await axiosGenerator(false, null).post('/auth/jwt/login', qs.stringify({
                 'username': username,
                 'password': password
             }))
+            if (!mute) {
+                ui.showNotification('info', 'Successfully logged in.')
+                ui.closeDialog()
+            }
             await refreshInstance(response.data['access_token'])
         } catch (exception: any) {
             ui.showNotification('error', 'Invalid credentials.')
         }
     }
 
-    async function register(email: string, username: string, country: string, password: string) {
+    async function register(email: string, username: string, country: string, password: string, mute: boolean = false) {
         try {
             await axiosGenerator(true, null).post('/auth/register', {
                 'email': email,
@@ -76,8 +73,11 @@ export const useUserStore = defineStore('user_information', () => {
                 'country': country,
                 'password': password
             })
-            await login(email, password)
-            ui.showNotification('info', 'Successfully registered.')
+            await login(email, password, true)
+            if (!mute) {
+                ui.showNotification('info', 'Successfully registered.')
+                ui.closeDialog()
+            }
         } catch (exception: any) {
             ui.showNotification('error', 'Bad requests.')
         }
