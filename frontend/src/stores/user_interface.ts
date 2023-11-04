@@ -21,6 +21,7 @@ export const useUIStore = defineStore('user_interface', () => {
 
     function showNotification(type: string, message: string, i18n_node: string = '') {
         // if (i18n_node != '') message = handle(i18n_node)
+        alert(`${type}: ${message}`)
     }
 
     return { dialog, openDialog, closeDialog, showNotification }

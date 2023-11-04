@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { useUIStore } from '@/stores/user_interface';
 import Button from '@/components/Button.vue';
-import Input from '@/components/Input.vue';
-import { ButtonKinds, InputKinds } from '@/components/typedef';
-import { ref } from 'vue';
+import { ButtonKinds } from '@/components/typedef';
+import { markRaw, ref } from 'vue';
 import Login from '../dialogs/Login.vue';
 import Register from '../dialogs/Register.vue';
-
-const value = ref('');
 
 const ui = useUIStore();
 const features = ref(
@@ -36,10 +33,9 @@ const features = ref(
                     <h2 class="text-xl font-bold text-white">Focusing on collecting, sorting, analyzing scores</h2>
                     <div class="flex mt-2">
                         <Button class="mr-2" :kind="ButtonKinds.Primary" text="Try" weight="600"
-                            @click="ui.openDialog(Register);"></Button>
+                            @click="ui.openDialog(markRaw(Register));"></Button>
                         <Button class="mr-2" :kind="ButtonKinds.Normal" text="Login" weight="600"
-                            @click="ui.openDialog(Login);"></Button>
-                        <Input v-model="value" :kind="InputKinds.Dark" placeholder="Search"></Input>
+                            @click="ui.openDialog(markRaw(Login));"></Button>
                     </div>
                 </div>
                 <img class="hidden h-64 sm:flex md:ml-24" src="https://s2.loli.net/2023/11/01/mrZisGMnxqtC8Tv.png">
