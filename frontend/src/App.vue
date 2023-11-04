@@ -23,6 +23,14 @@ const ui = useUIStore();
     </div>
   </div>
   <Transition name="fade">
+    <div v-if="ui.toast.isOpen" class="toast w-72 h-12 bg-pink-200 rounded-xl items-center text-black text-lg font-semibold">
+      <div class=" mt-2.5 ml-2.5">
+        {{ ui.toast.message }}
+      </div>
+    </div>
+  </Transition>
+  
+  <Transition name="fade">
     <div v-if="ui.dialog.isOpen" class="dialog-mask absolute" @click="ui.closeDialog()">
     </div>
   </Transition>
@@ -36,6 +44,14 @@ const ui = useUIStore();
 </template>
 
 <style scoped>
+
+.toast {
+  position: fixed;
+  top: 3.5rem;
+  right: 0.5rem;
+  z-index: 2000;
+
+}
 .dialog-container {
   position: fixed;
   left: 50%;

@@ -16,8 +16,8 @@ I'm going to spend a wonderful night here to make hugh progress of our frontend.
 
 ### Projects
 
-1. Make a toast view
-1. Make login and register dialog really works
+1. Make a toast view (finish 1:28)
+1. Make login and register dialog really works (finish 0:52)
 1. Design for private/public teams page
 1. Design for beatmaps page
 1. Design for mappools page
