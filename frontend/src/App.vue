@@ -29,7 +29,7 @@ const ui = useUIStore();
         <span>{{ ui.toast.message }}</span>
       </div>
       <div v-if="ui.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
-        <i class="fa-solid fa-circle-exclamation"></i>
+        <i class="fa-solid fa-triangle-exclamation"></i>
         <span>{{ ui.toast.message }}</span>
       </div>
     </div>
