@@ -1,23 +1,52 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
-import { Transition } from 'vue';
+import { Transition, ref } from 'vue';
 import { useUIStore } from './stores/user_interface';
 
 const ui = useUIStore();
+const scrollTop = ref(0);
+
+const onScroll = () => {
+  scrollTop.value = document.documentElement.scrollTop;
+};
+
+window.addEventListener('scroll', onScroll)
+
 </script>
 
 <template>
-  <div :class="ui.dialog.isOpen ? 'saturate-50' : ''"
-    class="w-full flex flex-1 transition-all ease-in-out">
-    <div class="flex flex-col m-1 mt-2 mb-2 flex-1">
-      <header class="mb-2 flex">
-        <nav class="flex flex-1">
-          <div class="flex flex-1 justify-center content-center items-center bg-primary rounded-xl h-10">
-            <RouterLink class="flex m-1" to="/">Home</RouterLink>
+  <div :class="ui.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
+    <div class="flex flex-col mb-2 flex-1">
+      <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0">
+        <div class="navbar bg-primary min-h-12">
+          <div class="navbar-start">
+            <RouterLink class="btn btn-ghost normal-case text-xl h-10 min-h-0 rounded-3xl" to="/">NOGU</RouterLink>
           </div>
-        </nav>
-      </header>
-      <div class="flex flex-1 justify-center content-center flex-wrap">
+          <div class="navbar-center">
+            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Team
+            </RouterLink>
+            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Stage
+            </RouterLink>
+            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Pool
+            </RouterLink>
+          </div>
+          <div class="navbar-end">
+            <div class="dropdown dropdown-end">
+              <label tabindex="0" class="btn btn-ghost btn-circle avatar h-10 min-h-0 p-0 w-10">
+                <div class="w-10 rounded-full">
+                  <img src="https://a.ppy.sb/1094" />
+                </div>
+              </label>
+              <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
+                <li><a>Profile</a></li>
+                <li><a>Settings</a></li>
+                <li><a>Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-1 flex-wrap">
         <RouterView />
       </div>
     </div>
@@ -49,6 +78,25 @@ const ui = useUIStore();
 </template>
 
 <style scoped>
+.navbar-container {
+  /* Thank you guccho! */
+  transition-duration: .15s;
+  transition-property: padding;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+.detached {
+  /* Thank you guccho! */
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.detached .navbar {
+  /* Thank you guccho! */
+  border-radius: 1rem;
+}
+
 .dialog-container {
   position: fixed;
   left: 50%;
@@ -92,4 +140,5 @@ const ui = useUIStore();
   100% {
     transform: scale(1);
   }
-}</style>
+}
+</style>

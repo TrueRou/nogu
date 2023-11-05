@@ -23,17 +23,17 @@ const features = ref(
 </script>
 
 <template>
-    <div class="flex flex-col ml-4 mr-4 mt-6 md:mt-0 justify-center">
-        <div class="flex flex-col">
+    <div class="flex flex-col ml-4 mr-4 mt-6 md:mt-0 justify-center w-full">
+        <div class="flex flex-col justify-center content-center flex-wrap">
             <div class="flex">
                 <div class="flex flex-col justify-center">
-                    <span class="text-5xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
+                    <span class="text-5xl font-extrabold bg-clip-text text-transparent"
+                        style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                     <h2 class="text-xl font-bold ">Focusing on collecting, sorting, analyzing scores</h2>
                     <div class="flex mt-2">
                         <button class="btn btn-primary mr-2 font-bold"
                             @click="ui.openDialog(markRaw(Register));">Try</button>
-                        <button class="btn btn-accent mr-2 font-bold"
-                            @click="ui.openDialog(markRaw(Login));">Login</button>
+                        <button class="btn btn-accent mr-2 font-bold" @click="ui.openDialog(markRaw(Login));">Login</button>
                     </div>
                 </div>
                 <img class="hidden h-64 sm:flex md:ml-24" src="https://s2.loli.net/2023/11/01/mrZisGMnxqtC8Tv.png">

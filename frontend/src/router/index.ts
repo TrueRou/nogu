@@ -1,4 +1,5 @@
-import IntroVue from '@/views/pages/Intro.vue'
+import LeadinVue from '@/views/pages/Leadin.vue'
+import TeamVue from '@/views/pages/Team.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -6,9 +7,14 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: IntroVue
-    }
+      name: 'leadin',
+      component: LeadinVue
+    },
+    {
+      path: '/team',
+      name: 'team',
+      component: TeamVue
+    },
   ]
 })
 

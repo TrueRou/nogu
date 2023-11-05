@@ -3,7 +3,7 @@ from typing import Optional, Any
 
 import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, text, Float, Boolean, and_, JSON
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, ScalarResult, String, text, Float, Boolean, and_, JSON
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
@@ -248,12 +248,28 @@ class Team(Base):
     active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
     member = relationship('TeamMember', lazy='selectin', back_populates="teams")
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
+    
+    @staticmethod
+    async def fetch_all(session: AsyncSession, limit=20, offset=0, with_private = False, active_only = False) -> ScalarResult['Team']:
+        condition = None
+        if with_private and active_only:
+            condition = Team.achieved == False
+        if not with_private and active_only:
+            condition = and_(Team.achieved == False, Team.privacy <= int(Privacy.PROTECTED))
+        if with_private and not active_only:
+            condition = Team.privacy <= int(Privacy.PROTECTED)
+        return await database.select_models(session=session, obj=Team, condition=condition, offset=offset, limit=limit)
+    
+    @staticmethod
+    async def fetch_me(session: AsyncSession, user: User, limit=20, offset=0, active_only = False) -> ScalarResult['TeamMember']:
+        condition = Team.achieved == False if active_only else None
+        return await database.query_models(session=session, condition=condition, sentence=user.teams, limit=limit, offset=offset)
 
     @staticmethod
     async def from_id(session: AsyncSession, team_id: int) -> Optional['Team']:
         return await database.get_model(session, team_id, Team)
 
-    async def get_stages(self, limit=20, offset=0):
+    async def get_stages(self, limit=20, offset=0) -> ScalarResult['Stage']:
         session = object_session(self)
         return await database.query_models(session=session, sentence=self.stages, limit=limit, offset=offset)
 
@@ -309,11 +325,11 @@ class Stage(Base):
         session = object_session(self)
         return await database.add_model(session, StageMap(**info, stage_id=self.id))
 
-    async def get_beatmaps(self, limit=20, offset=0) -> list['StageMap']:
+    async def get_beatmaps(self, limit=20, offset=0) -> ScalarResult['StageMap']:
         session = object_session(self)
         return await database.query_models(session=session, sentence=self.maps, limit=limit, offset=offset)
 
-    async def get_scores(self, limit=20, offset=0) -> list[Score]:
+    async def get_scores(self, limit=20, offset=0) -> ScalarResult[Score]:
         session = object_session(self)
         return await database.query_models(session=session, sentence=self.scores, limit=limit, offset=offset)
 
@@ -381,5 +397,5 @@ class TeamMember(Base):
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     member_position = Column(Integer, nullable=False, default=int(MemberPosition.MEMBER))
 
-    teams = relationship("Team", back_populates="member")
-    member = relationship("User", back_populates="teams")
+    teams = relationship("Team", back_populates="member", lazy='selectin')
+    member = relationship("User", back_populates="teams", lazy='selectin')

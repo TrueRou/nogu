@@ -19,3 +19,10 @@ body {
     flex-direction: column;
     color: white;
 }
+
+.flex-panel {
+    @apply w-full;
+    @media (min-width: 640px) {
+        width: 48rem;
+    }
+}

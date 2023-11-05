@@ -25,6 +25,14 @@ class UserWrite(UserBase, CreateUpdateDictModel):
     password: str
 
 
+# for simple display of user
+class UserSimple(ModelBase):
+    id: int
+    username: str
+    country: str
+    privileges: int
+
+
 class UserRead(UserBase):
     id: int
     privileges: int

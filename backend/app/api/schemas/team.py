@@ -3,7 +3,11 @@ from typing import Optional
 
 from app.api.schemas import ModelBase, convert_to_optional
 from app.api.schemas.stage import StageRead
+from app.api.schemas.user import UserSimple
 
+class TeamMember(ModelBase):
+    member: UserSimple
+    member_position: int
 
 class TeamBase(ModelBase):
     name: str
@@ -17,6 +21,7 @@ class TeamRead(TeamBase):
     id: int
     create_at: datetime
     active_stage: Optional[StageRead]
+    member: list[TeamMember]
 
 
 class TeamUpdate(ModelBase):
