@@ -8,11 +8,11 @@ const ui = useUIStore();
 
 <template>
   <div :class="ui.dialog.isOpen ? 'saturate-50' : ''"
-    class="bg-background-brown w-full flex flex-1 transition-all ease-in-out">
+    class="w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col m-1 mt-2 mb-2 flex-1">
       <header class="mb-2 flex">
         <nav class="flex flex-1">
-          <div class="flex flex-1 justify-center content-center items-center bg-primary-purple rounded-xl h-10">
+          <div class="flex flex-1 justify-center content-center items-center bg-primary rounded-xl h-10">
             <RouterLink class="flex m-1" to="/">Home</RouterLink>
           </div>
         </nav>
@@ -23,20 +23,25 @@ const ui = useUIStore();
     </div>
   </div>
   <Transition name="fade">
-    <div v-if="ui.toast.isOpen" class="toast w-72 h-12 bg-pink-200 rounded-xl items-center text-black text-lg font-semibold">
-      <div class=" mt-2.5 ml-2.5">
-        {{ ui.toast.message }}
+    <div v-if="ui.toast.isOpen">
+      <div v-if="ui.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>{{ ui.toast.message }}</span>
+      </div>
+      <div v-if="ui.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ ui.toast.message }}</span>
       </div>
     </div>
   </Transition>
-  
+
   <Transition name="fade">
-    <div v-if="ui.dialog.isOpen" class="dialog-mask absolute" @click="ui.closeDialog()">
+    <div v-if="ui.dialog.isOpen" class="dialog-mask absolute z-30" @click="ui.closeDialog()">
     </div>
   </Transition>
-  <div class="dialog-container">
+  <div class="dialog-container z-40">
     <Transition name="bounce">
-      <div v-if="ui.dialog.isOpen" class="bg-background-brighter-brown rounded-xl">
+      <div v-if="ui.dialog.isOpen" class="bg-neutral rounded-xl">
         <component :is="ui.dialog.component"></component>
       </div>
     </Transition>
@@ -44,27 +49,17 @@ const ui = useUIStore();
 </template>
 
 <style scoped>
-
-.toast {
-  position: fixed;
-  top: 3.5rem;
-  right: 0.5rem;
-  z-index: 2000;
-
-}
 .dialog-container {
   position: fixed;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
 }
 
 .dialog-mask {
   background-color: rgba(0, 0, 0, 0.8);
   height: 100%;
   width: 100%;
-  z-index: 999;
 }
 
 .fade-enter-active,
@@ -97,5 +92,4 @@ const ui = useUIStore();
   100% {
     transform: scale(1);
   }
-}
-</style>
+}</style>

@@ -4,22 +4,30 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx,vue}",
   ],
-  theme: {
-    extend: {
-      colors: {
-        'primary': {
-          'pink': '#FF99CC',
-          'purple': '#5639AC',
-          'brighter-purple': '#714CE0',
-        },
-        'background': {
-          'brown': '#18171C',
-          'brighter-brown': '#382E32',
-          'pink': '#382E32',
-          'brighter-pink': '#4A3D42'
+  daisyui: {
+    themes: [
+      {
+        nogu: {
+          "primary": "#5639AC", // guweb purple colorsets
+          "primary-focus": "#714CE0",
+          "primary-content": "#ffffff",
+          "secondary": "#FF99CC", // guweb pink colorsets
+          "secondary-focus": "#FF99CC",
+          "secondary-content": "#000000",
+          "accent": "#E2E8F0", // white colorsets
+          "accent-focus": "#ffffff",
+          "accent-content": "#000000",
+          "neutral": "#382E32", // osu! darkpink colorsets
+          "neutral-focus": "#382E32",
+          "neutral-content": "#4A3D42",
+          "base-100": "#18171C", // guweb dark colorsets
+          "info": "#3abff8",
+          "success": "#36d399",
+          "warning": "#fbbd23",
+          "error": "#f87272",
         },
       },
-    },
+    ],
   },
-  plugins: [],
+  plugins: [require("daisyui")],
 }

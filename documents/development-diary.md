@@ -18,17 +18,18 @@ I'm going to spend a wonderful night here to make hugh progress of our frontend.
 
 1. Make a toast view (finish 1:28)
 1. Make login and register dialog really works (finish 0:52)
-1. Design for private/public teams page
-1. Design for beatmaps page
+1. Design for private/public teams page (finish 2:33)
+1. Design for beatmaps page (finish 3:28)
 1. Design for mappools page
 1. Design for team base layout
-1. Play GINKA for a period of time
+1. Play GINKA for a period of time (2:00)
 1. Achieve private/public teams page
 1. Achieve for beatmaps page
-1. Watch anime for a period of time
+1. Watch anime for a period of time (4:15)
 1. Achieve for mappools page
 1. Achieve for team base layout
 1. Play GINKA for a period of time
 1. Continue to learn data structure
 1. make all pages logically running (optional)
-1. meet the sunrise of the next day
+1. meet the sunrise of the next day (6:00)
+1. rebuild the project with daisyui (8:13)
