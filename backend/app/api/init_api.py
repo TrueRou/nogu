@@ -3,17 +3,20 @@ from __future__ import annotations
 import asyncio
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException
 
 import app.api.internal
-from app import database, analysis
-from app.api import router
+from app import database
 from app.api.internal import scores, beatmaps
 from app.database import db_session
 from app.logging import log, Ansi
+from app.api.schemas import APIException
+from app.api.users import parse_exception
 
 
 def init_openapi(asgi_app: FastAPI) -> None:
@@ -57,6 +60,27 @@ def init_events(asgi_app: FastAPI) -> None:
             log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)
+            
+def init_exception_handlers(asgi_app: FastAPI) -> None:
+    @asgi_app.exception_handler(APIException)
+    async def api_exception_handler(request, exception: APIException):
+        return exception.response()
+    
+    @asgi_app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request, error: RequestValidationError):
+        error_detail = []
+        for each_error in error.errors():
+            error_detail.append({
+                'message': each_error['msg'],
+                'i18n_node': each_error['type']
+            })
+        return APIException('Validation error', 'validation', details=error_detail).response()
+    
+    @asgi_app.exception_handler(HTTPException)
+    async def exception_handler(request, error: HTTPException):
+        if (error.headers == {'exception-source': 'internal'}):
+            return error
+        return parse_exception(error).response({'exception-source': 'fastapi-users'})
 
 
 def init_routes(asgi_app: FastAPI) -> None:
@@ -70,6 +94,7 @@ def init_api() -> FastAPI:
 
     init_middlewares(asgi_app)
     init_events(asgi_app)
+    init_exception_handlers(asgi_app)
     init_routes(asgi_app)
 
     init_openapi(asgi_app)

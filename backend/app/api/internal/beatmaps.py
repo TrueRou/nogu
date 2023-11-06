@@ -34,7 +34,7 @@ async def get_beatmap(ident: str):
     async with database_session() as session:
         beatmap = await Beatmap.from_ident(session, ident)
         if beatmap is None:
-            raise APIException(message="Beatmap not found.")
+            raise APIException(message="Beatmap not found.", i18n_node="beatmap.exists")
         return beatmap
 
 

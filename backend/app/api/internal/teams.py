@@ -48,7 +48,7 @@ async def patch_team(info: TeamUpdate, team: Team = Depends(require_team)):
 @router.get("/scores/", response_model=list[ScoreRead])
 async def get_recent_scores(limit: int = 20, offset: int = 0, team: Team = Depends(require_team)):
     if team.active_stage is None:
-        raise APIException(message="Team has no active stage.")
+        raise APIException(message="Team has no active stage.", i18n_node="team.active_stage.exists")
     return team.active_stage.get_scores(limit, offset)
 
 
