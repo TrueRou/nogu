@@ -55,11 +55,11 @@ window.addEventListener('scroll', onScroll)
     <div v-if="ui.toast.isOpen">
       <div v-if="ui.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
         <i class="fa-solid fa-circle-info"></i>
-        <span>{{ ui.toast.message }}</span>
+        <p class="whitespace-pre-line">{{ ui.toast.message }}</p>
       </div>
       <div v-if="ui.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>{{ ui.toast.message }}</span>
+        <p class="whitespace-pre-line">{{ ui.toast.message }}</p>
       </div>
     </div>
   </Transition>
@@ -78,6 +78,13 @@ window.addEventListener('scroll', onScroll)
 </template>
 
 <style scoped>
+.alert {
+  grid-auto-flow: row;
+  grid-template-columns: auto minmax(auto,1fr);
+  justify-items: start;
+  text-align: left;
+}
+
 .navbar-container {
   /* Thank you guccho! */
   transition-duration: .15s;

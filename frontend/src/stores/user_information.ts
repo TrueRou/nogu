@@ -1,33 +1,48 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import axios, { type AxiosResponse } from 'axios'
 import qs from 'qs'
 import { useUIStore } from './user_interface'
+import type { ExceptionNode, Token, UserBase } from '@/schema'
 
 const API_URL = 'http://localhost:8000/'
-
-const axiosGenerator = (useJson: boolean = true, token: string | null = null) => {
-    const authorization = token == null ? {} : {Authorization: `Bearer ${token}`}
-    const headers = {
-        'Content-Type': useJson ? 'application/json' : 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
-        ...authorization
-    }
-
-    return axios.create({
-        baseURL: API_URL,
-        headers: headers,
-        timeout: 5000,
-    });
-}
-
-let axiosInstance = axiosGenerator(true, null)
 
 export const useUserStore = defineStore('user_information', () => {
     const ui = useUIStore()
 
     const isLoggedIn = ref(false)
     const userInfo = ref({})
+    
+    const axiosGenerator = (useJson: boolean = true, token: string | null = null) => {
+        const authorization = token == null ? {} : {Authorization: `Bearer ${token}`}
+        const headers = {
+            'Content-Type': useJson ? 'application/json' : 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+            ...authorization
+        }
+    
+        const instance = axios.create({
+            baseURL: API_URL,
+            headers: headers,
+            timeout: 5000,
+        });
+    
+        instance.interceptors.response.use(
+            (response: AxiosResponse) => {
+                const { data } = response
+                return data
+            },
+            (error) => {
+                const exception: ExceptionNode = error.response.data
+                ui.showException(exception)
+                return Promise.resolve(null)
+            }
+          )
+    
+        return instance
+    }
+    
+    let axiosInstance = axiosGenerator(true, null)
 
     function requests() {
         return axiosInstance
@@ -50,36 +65,34 @@ export const useUserStore = defineStore('user_information', () => {
     }
 
     async function login(username: string, password: string, mute: boolean = false) {
-        try {
-            const response = await axiosGenerator(false, null).post('/auth/jwt/login', qs.stringify({
-                'username': username,
-                'password': password
-            }))
+        const token: Token = await axiosGenerator(false, null).post('/auth/jwt/login', qs.stringify({
+            'username': username,
+            'password': password
+        }))
+
+        if (token != null) {
             if (!mute) {
                 ui.showNotification('info', 'Successfully logged in.')
                 ui.closeDialog()
             }
-            await refreshInstance(response.data['access_token'])
-        } catch (exception: any) {
-            ui.showNotification('error', 'Invalid credentials.')
+            await refreshInstance(token.access_token)
         }
     }
 
     async function register(email: string, username: string, country: string, password: string, mute: boolean = false) {
-        try {
-            await axiosGenerator(true, null).post('/auth/register', {
-                'email': email,
-                'username': username,
-                'country': country,
-                'password': password
-            })
+
+        const user: UserBase = await axiosGenerator(true, null).post('/auth/register', {
+            'email': email,
+            'username': username,
+            'country': country,
+            'password': password
+        })
+        if (user != null) {
             await login(email, password, true)
             if (!mute) {
                 ui.showNotification('info', 'Successfully registered.')
                 ui.closeDialog()
             }
-        } catch (exception: any) {
-            ui.showNotification('error', 'Bad requests.')
         }
     }
 

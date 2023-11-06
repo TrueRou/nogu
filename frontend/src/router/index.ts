@@ -1,5 +1,5 @@
 import LeadinVue from '@/views/pages/Leadin.vue'
-import TeamVue from '@/views/pages/Team.vue'
+import TeamVue from '@/views/pages/Teams.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({

@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
+from pydantic.error_wrappers import _display_error_loc
 
 import app.api.internal
 from app import database
@@ -31,6 +32,8 @@ def init_openapi(asgi_app: FastAPI) -> None:
             # remove 422 response, also can remove other status code
             if '422' in responses:
                 del responses['422']
+            if '401' in responses:
+                del responses['401']
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
@@ -62,19 +65,20 @@ def init_events(asgi_app: FastAPI) -> None:
             log("Failed to connect to the database.", Ansi.RED)
             
 def init_exception_handlers(asgi_app: FastAPI) -> None:
+    
     @asgi_app.exception_handler(APIException)
     async def api_exception_handler(request, exception: APIException):
-        return exception.response()
+        return exception.response() # normalize response (with header)
     
     @asgi_app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request, error: RequestValidationError):
-        error_detail = []
-        for each_error in error.errors():
-            error_detail.append({
-                'message': each_error['msg'],
-                'i18n_node': each_error['type']
+        details_list = []
+        for error in error.errors():
+            details_list.append({
+                'message': _display_error_loc(error),
+                'i18n_node': ''
             })
-        return APIException('Validation error', 'validation', details=error_detail).response()
+        return APIException(f'Validation error ', 'validation', details=details_list).response()
     
     @asgi_app.exception_handler(HTTPException)
     async def exception_handler(request, error: HTTPException):
@@ -84,8 +88,11 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
 
 
 def init_routes(asgi_app: FastAPI) -> None:
-    asgi_app.include_router(app.api.internal.router)
-    asgi_app.include_router(app.api.router)
+    response = {
+        400: { "content": {"application/json": {"example": {'message': 'Request body is invalid.', 'i18n_node': 'glob.request.invalid'}}}}
+    }
+    asgi_app.include_router(app.api.internal.router, responses=response)
+    asgi_app.include_router(app.api.router, responses=response)
 
 
 def init_api() -> FastAPI:

@@ -1,5 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import type { list } from 'postcss'
+import type { ExceptionNode } from '@/schema'
 
 export const useUIStore = defineStore('user_interface', () => {
     const dialog = ref({
@@ -25,8 +27,22 @@ export const useUIStore = defineStore('user_interface', () => {
         dialog.value.component = null
     }
 
-    function showNotification(type: string, message: string, i18n_node: string = '') {
-        // if (i18n_node != '') message = handle(i18n_node)
+    function translate(i18n_node: string, fallback?: string) {
+        return fallback || ''
+    }
+
+    function showException(exception_node: ExceptionNode) {
+        let message = translate(exception_node.i18n_node, exception_node.message)
+        if (exception_node.details != null) {
+            message += ': \n'
+            for (const detail of exception_node.details) {
+                message += translate(detail.i18n_node, detail.message) + '\n'
+            }
+        }
+        showNotification('error', message)
+    }
+
+    function showNotification(type: string, message: string, i18n_node?: string) {
         toast.value.isOpen = true
         toast.value.type = type
         toast.value.message = message
@@ -35,5 +51,5 @@ export const useUIStore = defineStore('user_interface', () => {
         }, 3000)
     }
 
-    return { dialog, toast, openDialog, closeDialog, showNotification }
+    return { dialog, toast, openDialog, closeDialog, showNotification, showException }
 })

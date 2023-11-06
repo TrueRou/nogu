@@ -1,3 +1,14 @@
+export interface Token {
+    access_token: string;
+    token_type: string;
+}
+
+export interface ExceptionNode {
+    message: string;
+    i18n_node: string;
+    details?: [ExceptionNode];
+}
+
 export interface Account {
     user_id: number;
     server_id: number;
@@ -16,6 +27,12 @@ export interface User {
     created_at: Date;
     updated_at: Date;
     accounts: Account[];
+}
+
+export interface UserBase {
+    username: string;
+    email: string;
+    country: string;
 }
 
 export interface UserSimple {
