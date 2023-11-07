@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { format } from 'timeago.js';
 import type { Team } from '@/schema';
 import { MemberPosition } from '@/constants';
+import 
 
 const user = useUserStore()
 
@@ -18,6 +19,8 @@ const entrypoint = computed(() => {
 const getLeader = (team: Team) => {
     return team.member.find(member => member.member_position == MemberPosition.OWNER)
 }
+
+fetchOne
 
 const fetch = async () => {
     const response = await user.requests().get(entrypoint.value, {

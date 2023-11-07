@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { list } from 'postcss'
-import type { ExceptionNode } from '@/schema'
+import type { IExceptionNode } from '@/schema'
 
 export const useUIStore = defineStore('user_interface', () => {
     const dialog = ref({
@@ -31,7 +30,7 @@ export const useUIStore = defineStore('user_interface', () => {
         return fallback || ''
     }
 
-    function showException(exception_node: ExceptionNode) {
+    function showException(exception_node: IExceptionNode) {
         let message = translate(exception_node.i18n_node, exception_node.message)
         if (exception_node.details != null) {
             message += ': \n'

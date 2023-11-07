@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends
 
 from app import database
-from app.api import require_team, require_user
+from app.api import require_team, require_user_optional
 from app.api.schemas import APIException
 from app.api.schemas.score import ScoreRead
 from app.api.schemas.stage import StageRead
 from app.api.schemas.team import TeamBase, TeamRead, TeamUpdate
 from app.database import db_session
 from app.interaction import Team, User
+from app.constants.privacy import Privacy
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 
@@ -16,21 +17,19 @@ router = APIRouter(prefix='/teams', tags=['teams'])
 async def get_team(team: Team = Depends(require_team)):
     return team
 
-@router.get('/me/', response_model=list[TeamRead])
-async def get_teams_me(limit: int = 20, offset: int = 0, active_only: bool = False, user: User = Depends(require_user)):
+
+@router.get('/', response_model=list[TeamRead])
+async def get_teams(privacy_limit: int, active_only: bool, limit: int = 20, offset: int = 0, user: User = Depends(require_user_optional)):
     async with db_session() as session:
-        scalars = await Team.fetch_me(session, user, limit, offset, active_only)
-        temp = scalars.all()
-        teams = [relationship.teams for relationship in scalars.all()]
+        if privacy_limit == Privacy.PUBLIC: # the lowest scope
+            teams = (await Team.fetch_all(session, limit, offset, with_private=False, active_only=active_only)).all()
+        if privacy_limit > Privacy.PUBLIC: # the user's own teams
+            if user is None:
+                return APIException('Unauthorized.', 'user.unauthorized')
+            columns = (await Team.fetch_me(session, user, limit, offset, active_only)).all()
+            teams = [relationship.teams for relationship in columns]
         return teams
-
-
-@router.get('/all/', response_model=list[TeamRead])
-async def get_teams_all(limit: int = 20, offset: int = 0, active_only: bool = False):
-    async with db_session() as session:
-        scalars = await Team.fetch_all(session, limit, offset, with_private=False, active_only=active_only)
-        return scalars.all()
-
+    
 
 @router.post('/{team_id}', response_model=TeamRead)
 async def create_team(info: TeamBase):

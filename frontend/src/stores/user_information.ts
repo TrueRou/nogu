@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from 'axios'
 import qs from 'qs'
 import { useUIStore } from './user_interface'
-import type { ExceptionNode, Token, UserBase } from '@/schema'
+import type { IToken, IUserBase } from '@/objects/user'
+import type { IExceptionNode } from '@/objects/object'
 
 const API_URL = 'http://localhost:8000/'
 
@@ -12,36 +13,36 @@ export const useUserStore = defineStore('user_information', () => {
 
     const isLoggedIn = ref(false)
     const userInfo = ref({})
-    
+
     const axiosGenerator = (useJson: boolean = true, token: string | null = null) => {
-        const authorization = token == null ? {} : {Authorization: `Bearer ${token}`}
+        const authorization = token == null ? {} : { Authorization: `Bearer ${token}` }
         const headers = {
             'Content-Type': useJson ? 'application/json' : 'application/x-www-form-urlencoded',
             Accept: 'application/json',
             ...authorization
         }
-    
+
         const instance = axios.create({
             baseURL: API_URL,
             headers: headers,
             timeout: 5000,
         });
-    
+
         instance.interceptors.response.use(
             (response: AxiosResponse) => {
                 const { data } = response
                 return data
             },
             (error) => {
-                const exception: ExceptionNode = error.response.data
+                const exception: IExceptionNode = error.response.data
                 ui.showException(exception)
                 return Promise.resolve(null)
             }
-          )
-    
+        )
+
         return instance
     }
-    
+
     let axiosInstance = axiosGenerator(true, null)
 
     function requests() {
@@ -65,7 +66,7 @@ export const useUserStore = defineStore('user_information', () => {
     }
 
     async function login(username: string, password: string, mute: boolean = false) {
-        const token: Token = await axiosGenerator(false, null).post('/auth/jwt/login', qs.stringify({
+        const token: IToken = await axiosGenerator(false, null).post('/auth/jwt/login', qs.stringify({
             'username': username,
             'password': password
         }))
@@ -81,7 +82,7 @@ export const useUserStore = defineStore('user_information', () => {
 
     async function register(email: string, username: string, country: string, password: string, mute: boolean = false) {
 
-        const user: UserBase = await axiosGenerator(true, null).post('/auth/register', {
+        const user: IUserBase = await axiosGenerator(true, null).post('/auth/register', {
             'email': email,
             'username': username,
             'country': country,
