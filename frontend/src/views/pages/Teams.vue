@@ -1,38 +1,16 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user_information';
-import { computed, ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { format } from 'timeago.js';
-import type { Team } from '@/schema';
-import { MemberPosition } from '@/constants';
-import 
+import { Team, type ITeam, type ITeamArgs as ITeamParams } from '@/objects/team';
 
-const user = useUserStore()
+const statelessTeam = new Team() // Create stateless instance for axios lifetime
+const teams = ref<ITeam[]>([])
+const teamParams = reactive({
+    privacy_limit: 0,
+    active_only: false,
+} as ITeamParams)
 
-const active_only = ref(false)
-const homewide = ref(false)
-const teams = ref<Team[]>([])
-
-const entrypoint = computed(() => {
-    return homewide.value ? '/teams/me/' : '/teams/all/'
-})
-
-const getLeader = (team: Team) => {
-    return team.member.find(member => member.member_position == MemberPosition.OWNER)
-}
-
-fetchOne
-
-const fetch = async () => {
-    const response = await user.requests().get(entrypoint.value, {
-        params: {
-            active_only: active_only.value
-        }
-    })
-    teams.value = response.data
-}
-
-fetch()
-watch([active_only, homewide], async () => await fetch())
+watch([teamParams], async () => teams.value = await statelessTeam.fetchAll(teamParams), { immediate: true })
 
 </script>
 
@@ -63,7 +41,7 @@ watch([active_only, homewide], async () => await fetch())
                                 <span class="flex items-center w-4 rounded-full">
                                     <img class="rounded-full" src="https://a.ppy.sb/1094" />
                                 </span>
-                                <span class="flex text-sm items-center">{{ getLeader(team)?.member.username }}</span>
+                                <span class="flex text-sm items-center">{{ statelessTeam.getLeaderUsername(team) }}</span>
                             </div>
                             <div class="flex">
                                 <span class="text-sm">Stage on {{ team.active_stage.name }}</span>

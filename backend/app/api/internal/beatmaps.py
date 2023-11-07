@@ -3,8 +3,8 @@ from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
 import config
-from app.api.schemas import APIExceptions, ModelResponse, APIException
-from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
+from app.api.schemas import APIExceptions, ModelResponse
+from app.api.schemas.beatmap import BeatmapBase
 from app.api import require_user
 from app.database import db_session as database_session
 from app.definition import Operator

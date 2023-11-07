@@ -1,3 +1,4 @@
+import { useUserStore } from "@/stores/user_information";
 import type { AxiosInstance } from "axios";
 
 export interface IExceptionNode {
@@ -7,18 +8,18 @@ export interface IExceptionNode {
 }
 
 export interface IBackendArgs {
-    limit: number;
-    offset: number;
+    limit?: number;
+    offset?: number;
 }
 
 export abstract class BackendObject<T> {
     axios: AxiosInstance;
 
-    constructor(axios_context: AxiosInstance) {
-        this.axios = axios_context
+    constructor() {
+        this.axios = useUserStore().requests()
     }
 
-    abstract fetchOne(id: number): Promise<T>;
+    abstract fetchOne(id: number): Promise<T> | Promise<null>;
 
-    abstract fetchAll(params: IBackendArgs): Promise<T[]>;
+    abstract fetchAll(params: IBackendArgs): Promise<T[]> | Promise<null>;
 }

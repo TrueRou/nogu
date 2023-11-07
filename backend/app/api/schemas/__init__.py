@@ -23,8 +23,8 @@ class APIException(HTTPException):
         self.stored_kwargs = kwargs
         super().__init__(status_code=400, detail=kwargs)
         
-    def extends(self, **kwargs) -> 'APIException':
-        self.stored_kwargs['details'] = kwargs
+    def extends(self, next_node: dict) -> 'APIException':
+        self.stored_kwargs['details'] = next_node
         return self
         
     def response(self, headers={'exception-source': 'internal'}):

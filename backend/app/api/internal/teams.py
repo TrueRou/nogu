@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app import database
 from app.api import require_team, require_user_optional
-from app.api.schemas import APIException, APIExceptions
+from app.api.schemas import APIExceptions
 from app.api.schemas.score import ScoreRead
 from app.api.schemas.stage import StageRead
 from app.api.schemas.team import TeamBase, TeamRead, TeamUpdate
@@ -25,7 +25,7 @@ async def get_teams(privacy_limit: int, active_only: bool, limit: int = 20, offs
             teams = (await Team.fetch_all(session, limit, offset, with_private=False, active_only=active_only)).all()
         if privacy_limit > Privacy.PUBLIC: # the user's own teams
             if user is None:
-                return APIExceptions.user_unauthorized
+                raise APIExceptions.user_unauthorized
             columns = (await Team.fetch_me(session, user, limit, offset, active_only)).all()
             teams = [relationship.teams for relationship in columns]
         return teams
