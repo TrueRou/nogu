@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { IExceptionNode } from '@/schema'
+import type { IExceptionNode } from '@/objects/object'
 
 export const useUIStore = defineStore('user_interface', () => {
     const dialog = ref({

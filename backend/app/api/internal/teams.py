@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app import database
 from app.api import require_team, require_user_optional
-from app.api.schemas import APIException
+from app.api.schemas import APIException, APIExceptions
 from app.api.schemas.score import ScoreRead
 from app.api.schemas.stage import StageRead
 from app.api.schemas.team import TeamBase, TeamRead, TeamUpdate
@@ -25,7 +25,7 @@ async def get_teams(privacy_limit: int, active_only: bool, limit: int = 20, offs
             teams = (await Team.fetch_all(session, limit, offset, with_private=False, active_only=active_only)).all()
         if privacy_limit > Privacy.PUBLIC: # the user's own teams
             if user is None:
-                return APIException('Unauthorized.', 'user.unauthorized')
+                return APIExceptions.user_unauthorized
             columns = (await Team.fetch_me(session, user, limit, offset, active_only)).all()
             teams = [relationship.teams for relationship in columns]
         return teams
@@ -47,7 +47,7 @@ async def patch_team(info: TeamUpdate, team: Team = Depends(require_team)):
 @router.get("/scores/", response_model=list[ScoreRead])
 async def get_recent_scores(limit: int = 20, offset: int = 0, team: Team = Depends(require_team)):
     if team.active_stage is None:
-        raise APIException(message="Team has no active stage.", i18n_node="team.active_stage.exists")
+        raise APIExceptions.team_active_stage_not_exist
     return team.active_stage.get_scores(limit, offset)
 
 

@@ -3,7 +3,7 @@ from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
 import config
-from app.api.schemas import ModelResponse, APIException
+from app.api.schemas import APIExceptions, ModelResponse, APIException
 from app.api.schemas.beatmap import BeatmapBase, BeatmapEvent
 from app.api import require_user
 from app.database import db_session as database_session
@@ -34,7 +34,7 @@ async def get_beatmap(ident: str):
     async with database_session() as session:
         beatmap = await Beatmap.from_ident(session, ident)
         if beatmap is None:
-            raise APIException(message="Beatmap not found.", i18n_node="beatmap.exists")
+            raise APIExceptions.beatmap_not_exist
         return beatmap
 
 

@@ -16,7 +16,7 @@ from app import database
 from app.api.internal import scores, beatmaps
 from app.database import db_session
 from app.logging import log, Ansi
-from app.api.schemas import APIException
+from app.api.schemas import APIException, APIExceptions
 from app.api.users import parse_exception
 
 
@@ -78,7 +78,7 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
                 'message': _display_error_loc(error),
                 'i18n_node': ''
             })
-        return APIException(f'Validation error ', 'validation', details=details_list).response()
+        return APIExceptions.glob_validation.extends(details_list).response()
     
     @asgi_app.exception_handler(HTTPException)
     async def exception_handler(request, error: HTTPException):
