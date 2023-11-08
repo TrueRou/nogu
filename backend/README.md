@@ -15,3 +15,5 @@ cp config.example.py config.py
 nano config.py
 
 python3.10 main.py
+
+redis-cli CONFIG set notify-keyspace-events xEe

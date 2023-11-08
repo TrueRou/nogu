@@ -127,3 +127,12 @@ class Operator(metaclass=ABCMeta):
                 self.skip_next_interval = False
                 continue
             await asyncio.sleep(self.interval)
+
+def ignore_errors(func):
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            pass
+    return wrapper
