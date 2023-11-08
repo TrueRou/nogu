@@ -26,12 +26,12 @@ def process_stage_entry(scores: ScalarResult[Score]) -> dict:
 
 
 # scores: scores from different user and the same map.
-def process_stage_map(scores: ScalarResult[Score]) -> dict:
+def process_stage_map(scores: ScalarResult[StageMapUser]) -> dict:
     return { 'play_count': len(scores) }
 
 
 # scores: scores from the same user and different maps.
-def process_stage_user(scores: ScalarResult[Score]) -> dict:
+def process_stage_user(scores: ScalarResult[StageMapUser]) -> dict:
     return { 'play_count': len(scores) }
 
 
@@ -63,8 +63,8 @@ async def analyze_stage_map(stage: Stage) -> list[dict]:
     stage_maps = (await session.execute(stage.maps)).scalars()
     for stage_map in stage_maps:
         condition = and_(StageMapUser.stage_id == stage.id, StageMapUser.beatmap_md5 == stage_map.map_md5)
-        scores = (await session.execute(select(StageMapUser).where(condition))).scalars()
-        sentences.append(with_primary_key(await process_stage_map(scores), stage_id=stage.id, map_md5=stage_map.beatmap_md5))
+        analysis = (await session.execute(select(StageMapUser).where(condition))).scalars()
+        sentences.append(with_primary_key(await process_stage_map(analysis), stage_id=stage.id, map_md5=stage_map.beatmap_md5))
     await session.execute(update(StageMap), sentences)
     return sentences
 
@@ -74,8 +74,8 @@ async def analyze_stage_user(stage: Stage) -> list[dict]:
     sentences = []
     for user in stage.team.member:
         condition = and_(StageMapUser.stage_id == stage.id, StageMapUser.user_id == user.id)
-        scores = (await session.execute(select(StageMapUser).where(condition))).scalars
-        sentences.append(with_primary_key(await process_stage_user(scores), stage_id=stage.id, user_id=user.id))
+        analysis = (await session.execute(select(StageMapUser).where(condition))).scalars()
+        sentences.append(with_primary_key(await process_stage_user(analysis), stage_id=stage.id, user_id=user.id))
     await session.execute(update(StageUser), sentences)
     return sentences
 
