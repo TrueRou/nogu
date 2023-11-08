@@ -27,6 +27,17 @@ class BeatmapBase(ModelBase):
     server_updated_at: datetime
     server_id: int
 
+class BeatmapAnalysis(ModelBase):
+    filename: str
+    total_length: int
+    max_combo: int
+    mode: int
+    bpm: float
+    cs: float
+    ar: float
+    od: float
+    hp: float
+    star_rating: float
 
 class BeatmapEvent(ModelBase):
     status: str

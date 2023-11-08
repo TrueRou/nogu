@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -10,14 +11,20 @@ from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 from pydantic.error_wrappers import _display_error_loc
+from redis.commands.search.field import NumericField, TextField
+from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 
 import app.api.internal
+from app.analysis import drop_stage_pipeline
+import config
 from app import database
 from app.api.internal import scores, beatmaps
-from app.database import db_session
+from app.database import db_session, redis
 from app.logging import log, Ansi
 from app.api.schemas import APIException, APIExceptions
 from app.api.users import parse_exception
+from app.definition import ignore_errors
+from redis import Redis
 
 
 def init_openapi(asgi_app: FastAPI) -> None:
@@ -49,6 +56,14 @@ def init_middlewares(asgi_app: FastAPI) -> None:
         allow_headers=["*"],
     )
 
+async def init_redis():
+    def create_index():
+        schema = NumericField("$.stage_id", as_name="stage_id"), NumericField("$.user_id", as_name="user_id"), TextField("$.beatmap_md5", as_name="beatmap_md5")
+        redis.ft('scores').create_index(schema, definition=IndexDefinition(prefix=["scores:"], index_type=IndexType.JSON))
+    
+    await redis.ping()
+    ignore_errors(create_index)
+    
 
 def init_events(asgi_app: FastAPI) -> None:
     @asgi_app.on_event("startup")
@@ -56,6 +71,7 @@ def init_events(asgi_app: FastAPI) -> None:
         try:
             async with db_session() as session:
                 await session.execute(text('SELECT 1'))
+                await init_redis()
                 # TODO: Sql migration
                 await database.create_db_and_tables()
                 asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())

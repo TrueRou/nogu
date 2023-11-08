@@ -7,11 +7,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 import config
+import redis as redis_lib
 
 Base = declarative_base()
 
 engine = create_async_engine(config.mysql_url, echo=False, future=True)
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+redis: redis_lib.Redis = redis_lib.from_url(config.redis_url, decode_responses=True)
 
 V = TypeVar("V")
 

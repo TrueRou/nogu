@@ -210,7 +210,6 @@ class Score(Base):
     mode = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_id = Column(Integer, nullable=False, default=int(Server.LOCAL))
-    analysis = Column(JSON, nullable=True)
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
 
     beatmap = relationship('Beatmap', lazy='selectin')

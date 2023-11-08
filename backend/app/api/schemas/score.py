@@ -4,7 +4,7 @@ from typing import Optional
 from ossapi import Score
 
 from app.api.schemas import ModelBase
-from app.api.schemas.beatmap import BeatmapBase
+from app.api.schemas.beatmap import BeatmapAnalysis, BeatmapBase
 from app.constants.servers import Server
 
 
@@ -58,10 +58,15 @@ class ScoreBase(ModelBase):
                          full_combo=full_combo, mods=mods, num_300s=n300, num_100s=n100, num_misses=miss, num_gekis=0,
                          num_katus=0, num_50s=0, mode=mode, server_id=Server.LOCAL, grade='R')
 
+class ScoreAnalysis(ScoreBase):
+    id: int
+    performance_points: float
+    stage_id: int
+    analysis: Optional[dict]
 
 class ScoreRead(ScoreBase):
     id: int
     performance_points: float
     created_at: datetime
     stage_id: int
-    beatmap: BeatmapBase
+    beatmap: BeatmapAnalysis

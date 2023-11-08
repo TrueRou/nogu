@@ -42,3 +42,5 @@ orjson
 aiohttp
 sse-starlette
 ossapi[async]
+uvicorn
+redis

@@ -1,133 +1,95 @@
-from typing import Sequence
+from redis.commands.json.path import Path
+from redis import Redis
+from redis.client import Pipeline
+from redis.commands.search.query import Query
 
-from sqlalchemy import select, update, and_
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_object_session as AsyncSession, async_sessionmaker
 
 from app import database
-from app.database import engine
-from app.interaction import Score, Stage, StageMap, StageMapUser, StageUser, Beatmap
+from app.database import engine, redis
+from app.interaction import Score, Stage
+from app.api.schemas.score import ScoreAnalysis
+from app.api.schemas.beatmap import BeatmapAnalysis
 
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+def _fetch_scores(condition: str) -> list[int]:
+    query = Query(condition).return_field('$.id', as_field='score_id').paging(0, 0)
+    documents = redis.ft('scores').search(query).docs
+    return [document.score_id for document in documents]
 
-def with_primary_key(analysis_dict: dict, **kwargs) -> dict:
-    new_dict = {'analysis': analysis_dict}
-    for key, item in kwargs.items():
-        new_dict[key] = item
-    return new_dict
+def _fetch_score(score_id: int) -> ScoreAnalysis:
+    return redis.json().get(f'score:{score_id}', Path.root_path())
+
+def _renew_stage(pipeline: Redis | Pipeline, stage_id: int):
+    pipeline.set(f'stage:{stage_id}', 'active')
+    pipeline.expire(f'stage:{stage_id}', 60 * 60 * 24)
+
+def _push_score(pipeline: Redis | Pipeline, score: Score):
+    beatmap_dict = BeatmapAnalysis.from_orm(score.beatmap).dict()
+    score_dict = ScoreAnalysis.from_orm(score).dict()
+    pipeline.json().set(f'score:{score.id}', Path.root_path(), score_dict)
+    pipeline.set(f'beatmap:{score.beatmap_md5}', beatmap_dict)
+
+# call this function on every score insert.
+async def insert_score(score: Score):
+    pipeline = redis.pipeline()
+    beatmap_dict = BeatmapAnalysis.from_orm(score.beatmap).dict()
+    score_dict = ScoreAnalysis.from_orm(score).dict()
+    if (not redis.exists(f'stage:{score.stage_id}')):
+        # the stage is recycled by redis (also the scores we need), we need to refresh it.
+        # when redis data is lost, we need to refresh the stage.
+        await refresh_stage(score.stage_id)
+    pipeline.json().set(f'score:{score.id}', Path.root_path(), score_dict) # cache the score (we always have the full scores of the stage)
+    pipeline.set(f'beatmap:{score.beatmap_md5}', beatmap_dict) # cache the beatmap (keep every beatmaps of the stage in redis)
+    _renew_stage(pipeline, score.stage_id) # renew the stage (keep the stage in redis for 24 hours)
+    pipeline.execute()
+    analyze_score(score.id) # analyze the score (from bottom to upper)
+    await analyze_stage(score.stage_id) # analyze the stage (from upper to bottom)
+    
+    
+async def refresh_stage(stage_id: int):
+    session = async_session_maker()
+    pipeline = redis.pipeline()
+    scores = await database.select_models(session, Score, Score.stage_id == stage_id)
+    for score in scores:
+        _push_score(pipeline, score)
+    pipeline.execute()
+    await session.commit()
 
 
-# process: score_detail
-
-async def compute_score(score: Score) -> dict:
-    # TODO: real formula
-    beatmap: Beatmap = score.beatmap
+def process_score(score: ScoreAnalysis, beatmap: BeatmapAnalysis) -> dict:
     return {
         'percentage': score.highest_combo / beatmap.max_combo
     }
+    
+    
+def process_stage(stage: Stage, stage_maps: list[dict], stage_users: list[dict]) -> dict:
+    pass
+    
+
+# score cache must be existed when we call this mannually.
+async def analyze_score(pipeline: Redis | Pipeline, score_id: int):
+    score: ScoreAnalysis = _fetch_score(score_id)
+    beatmap = BeatmapAnalysis.parse_obj(await redis.get(f'beatmaps:{score.beatmap_md5}'))
+    analysis = process_score(score, beatmap)
+    pipeline.json().set(f'analysis:score:{score_id}', Path.root_path(), analysis)
 
 
-async def compute_scores(session: AsyncSession, stage: Stage):
-    computed_results = []
-    scores = await session.scalars(select(Score).where(Score.stage_id == stage.id))  # type: ignore
-    for score in scores:
-        computed_result = with_primary_key(await compute_score(score), id=score.id)
-        computed_results.append(computed_result)
-    await session.execute(update(Score), computed_results)
+# usually, we do not call this method mannually.
+async def analyze_scores(stage_id: int):
+    pipeline = redis.pipeline()
+    for score_id in _fetch_scores(f'@stage_id:[{stage_id} {stage_id}]'):
+        analyze_score(pipeline, stage_id, score_id)
+    pipeline.execute()
 
-
-# process: stage_map_user_detail (smu: stage_map_user)
-
-async def compute_smu_scores(particular_scores: Sequence) -> dict:
-    # particular_scores: scores from the same user and beatmap.
-    # TODO: real formula
-    return {
-        'play_count': len(particular_scores)
-    }
-
-
-async def compute_smu_users(session: AsyncSession, stage: Stage, stage_map: StageMap) -> list[dict]:
-    computed_results = []
-    for user in stage.team.member:
-        condition = and_(Score.beatmap_md5 == stage_map.map_md5, Score.user_id == user.id,
-                         Score.stage_id == stage_map.stage_id)
-        current_scores = (await session.execute(select(Score).where(condition))).fetchall()
-        computed_result = with_primary_key(await compute_smu_scores(current_scores), stage_id=stage.id,
-                                           beatmap_md5=stage_map.map_md5, user_id=user.id)
-        computed_results.append(computed_result)
-    return computed_results
-
-
-async def compute_smu(session: AsyncSession, stage: Stage):
-    computed_results = []
-    stage_maps = (await session.execute(stage.maps)).scalars().fetchall()
-    for stage_map in stage_maps:
-        computed_result = await compute_smu_users(session, stage, stage_map)
-        computed_results.extend(computed_result)
-    await session.execute(update(StageMapUser), computed_results)
-
-
-# process: stage_map_detail
-
-async def compute_stage_map(particular_scores: Sequence) -> dict:
-    # particular_scores: scores from the same beatmap and different users.
-    # TODO: real formula
-    return {
-        'play_count': len(particular_scores)
-    }
-
-
-async def compute_stage_maps(session: AsyncSession, stage: Stage) -> list:
-    computed_results = []
-    stage_maps = (await session.execute(stage.maps)).scalars().fetchall()
-    for stage_map in stage_maps:
-        condition = and_(StageMapUser.stage_id == stage.id, StageMapUser.beatmap_md5 == stage_map.map_md5)
-        current_scores = (await session.execute(select(StageMapUser).where(condition))).fetchall()
-        computed_result = with_primary_key(await compute_stage_map(current_scores), stage_id=stage.id,
-                                           map_md5=stage_map.beatmap_md5)
-        computed_results.append(computed_result)
-    await session.execute(update(StageMap), computed_results)
-    return computed_results
-
-
-# process: stage_user_detail
-
-async def compute_stage_user(particular_scores: Sequence) -> dict:
-    # particular_scores: scores from the same user and different maps.
-    # TODO: real formula
-    return {
-        'play_count': len(particular_scores)
-    }
-
-
-async def compute_stage_users(session: AsyncSession, stage: Stage) -> list:
-    computed_results = []
-    for user in stage.team.member:
-        condition = and_(StageMapUser.stage_id == stage.id, StageMapUser.user_id == user.id)
-        current_scores = (await session.execute(select(StageMapUser).where(condition))).fetchall()
-        computed_result = with_primary_key(await compute_stage_user(current_scores), stage_id=stage.id, user_id=user.id)
-        computed_results.append(computed_result)
-    await session.execute(update(StageUser), computed_results)
-    return computed_results
-
-
-# process: stage_detail
-async def compute_stage(stage: Stage, stage_maps: list[dict], stage_users: list[dict]):
-    total_play_count = 0
-    for stage_map in stage_maps:
-        total_play_count += stage_map.get('play_count')
-    computed_result = {
-        'play_count': total_play_count
-    }  # TODO: real formula
-    stage.analysis = computed_result
-
-
-async def process_async(stage_id: int):
+async def analyze_stage(stage_id: int):
     session = async_session_maker()
     stage: Stage = await database.get_model(session, stage_id, Stage)
-    await compute_scores(session, stage)  # score_detail
-    await compute_smu(session, stage)  # stage_map_user_detail
-    cached_maps = await compute_stage_maps(session, stage)  # stage_map_detail
-    cached_users = await compute_stage_users(session, stage)  # stage_user_detail
-    await compute_stage(stage, cached_maps, cached_users)  # stage_detail
-    await session.commit()
+    stage_maps = []
+    stage_users = []
+    analysis = process_stage(stage, stage_maps, stage_users)
+    redis.json().set(f'analysis:stage:{stage_id}', analysis)
+    
+    
+    
