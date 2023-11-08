@@ -42,7 +42,7 @@ const features = ref(
                 <div v-for="feature in features" class="flex mt-10 w-80 md:w-60 md:mr-4">
                     <div class="flex flex-col">
                         <span class="flex font-bold text-xl mb-2">{{ feature.title }}</span>
-                        <span>{{ feature.description }}</span>
+                        <span class="jetbrains-mono text-sm">{{ feature.description }}</span>
                     </div>
                 </div>
             </div>

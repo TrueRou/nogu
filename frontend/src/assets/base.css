@@ -8,7 +8,7 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Montserrat', 'Roboto', sans-serif;
+    font-family: sans-serif;
     font-size: 16px;
     line-height: 1.5;
 }
@@ -22,7 +22,15 @@ body {
 
 .flex-panel {
     @apply w-full;
-    @media (min-width: 640px) {
+    @media (min-width: 800px) {
         width: 48rem;
     }
+}
+
+.jetbrains-mono {
+    font-family: 'JetBrains Mono', sans-serif;
+}
+
+.mont {
+    font-family: 'Montserrat', sans-serif;
 }
