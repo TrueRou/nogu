@@ -4,9 +4,8 @@ import axios, { type AxiosResponse } from 'axios'
 import qs from 'qs'
 import { useUIStore } from './user_interface'
 import type { IToken, IUserBase } from '@/objects/user'
-import type { IExceptionNode } from '@/objects/object'
-
-const API_URL = 'http://localhost:8000/'
+import type { ITranslateableList } from '@/translatable'
+import { API_URL } from '@/objects/backend'
 
 export const useUserStore = defineStore('user_information', () => {
     const ui = useUIStore()
@@ -34,7 +33,7 @@ export const useUserStore = defineStore('user_information', () => {
                 return data
             },
             (error) => {
-                const exception: IExceptionNode = error.response.data
+                const exception: ITranslateableList = error.response.data
                 ui.showException(exception)
                 return Promise.resolve(null)
             }

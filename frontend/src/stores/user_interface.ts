@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { IExceptionNode } from '@/objects/object'
+import { type ITranslateableList, ttl } from '@/translatable'
 
 export const useUIStore = defineStore('user_interface', () => {
     const dialog = ref({
@@ -26,19 +26,8 @@ export const useUIStore = defineStore('user_interface', () => {
         dialog.value.component = null
     }
 
-    function translate(i18n_node: string, fallback?: string) {
-        return fallback || ''
-    }
-
-    function showException(exception_node: IExceptionNode) {
-        let message = translate(exception_node.i18n_node, exception_node.message)
-        if (exception_node.details != null) {
-            message += ': \n'
-            for (const detail of exception_node.details) {
-                message += translate(detail.i18n_node, detail.message) + '\n'
-            }
-        }
-        showNotification('error', message)
+    function showException(exception_node: ITranslateableList) {
+        showNotification('error', ttl(exception_node))
     }
 
     function showNotification(type: string, message: string, i18n_node?: string) {

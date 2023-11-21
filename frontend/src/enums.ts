@@ -1,4 +1,4 @@
-export enum GameMode {
+export enum Gamemode {
     VN_OSU = 0,
     VN_TAIKO = 1,
     VN_CATCH = 2,

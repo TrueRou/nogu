@@ -1,7 +1,8 @@
-import { BackendObject, type IBackendArgs as IBackendParams } from "./object";
+import { BackendObject, type IBackendArgs as IBackendParams } from "./backend";
 import type { IStage } from "./stage";
 import type { IUserSimple } from "./user";
-import { MemberPosition } from "@/constants";
+import { MemberPosition } from "@/enums";
+import { type ITranslateable } from "@/translatable";
 
 export interface ITeamMember {
     member: IUserSimple;
@@ -20,13 +21,13 @@ export interface ITeam {
     member: ITeamMember[];
 }
 
-export interface ITeamArgs extends IBackendParams {
+export interface ITeamParams extends IBackendParams {
     privacy_limit: number;
     active_only: boolean;
 }
 
 export class Team extends BackendObject<ITeam> {
-    public async fetchAll(params: ITeamArgs): Promise<ITeam[]> {
+    public async fetchAll(params: ITeamParams): Promise<ITeam[]> {
         const teams: ITeam[] = await this.axios.get('/teams', { params: params })
         return teams
     }
@@ -36,11 +37,7 @@ export class Team extends BackendObject<ITeam> {
         return team
     }
 
-    public getLeader(team: ITeam): ITeamMember | undefined {
-        return team.member.find(member => member.member_position == MemberPosition.OWNER)
-    }
-
-    public getLeaderUsername(team: ITeam) {
-        return this.getLeader(team)?.member.username || ''
+    public getLeader(member: ITeamMember[]): ITeamMember | undefined {
+        return member.find(member => member.member_position == MemberPosition.OWNER)
     }
 }

@@ -1,11 +1,7 @@
 import { useUserStore } from "@/stores/user_information";
 import type { AxiosInstance } from "axios";
 
-export interface IExceptionNode {
-    message: string;
-    i18n_node: string;
-    details?: [IExceptionNode];
-}
+export const API_URL = 'http://localhost:8000/'
 
 export interface IBackendArgs {
     limit?: number;

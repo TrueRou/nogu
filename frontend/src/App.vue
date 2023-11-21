@@ -17,7 +17,7 @@ window.addEventListener('scroll', onScroll)
 <template>
   <div :class="ui.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col mb-2 flex-1">
-      <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0">
+      <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0 z-10">
         <div class="navbar bg-primary min-h-12">
           <div class="navbar-start">
             <RouterLink class="btn btn-ghost normal-case text-xl h-10 min-h-0 rounded-3xl" to="/">NOGU</RouterLink>
@@ -47,7 +47,9 @@ window.addEventListener('scroll', onScroll)
         </div>
       </div>
       <div class="flex flex-1 flex-wrap">
-        <RouterView />
+        <div class="flex justify-center ml-4 mr-4 md:mt-6 mt-4 w-full">
+          <RouterView />
+        </div>
       </div>
     </div>
   </div>
@@ -80,7 +82,7 @@ window.addEventListener('scroll', onScroll)
 <style scoped>
 .alert {
   grid-auto-flow: row;
-  grid-template-columns: auto minmax(auto,1fr);
+  grid-template-columns: auto minmax(auto, 1fr);
   justify-items: start;
   text-align: left;
 }
