@@ -21,14 +21,18 @@ export interface ITeam {
     member: ITeamMember[];
 }
 
-export interface ITeamParams extends IBackendParams {
-    privacy_limit: number;
-    active_only: boolean;
+export interface ITeamShowcaseParams extends IBackendParams {
+    status: number;
 }
 
 export class Team extends BackendObject<ITeam> {
-    public async fetchAll(params: ITeamParams): Promise<ITeam[]> {
-        const teams: ITeam[] = await this.axios.get('/teams', { params: params })
+    public async fetchShowcase(params: ITeamShowcaseParams): Promise<ITeam[]> {
+        const teams: ITeam[] = await this.axios.get('/teams/showcase', { params: params })
+        return teams
+    }
+
+    public async fetchAll(): Promise<ITeam[]> {
+        const teams: ITeam[] = await this.axios.get('/teams')
         return teams
     }
 

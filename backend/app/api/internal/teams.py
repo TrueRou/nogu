@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app import database
-from app.api import require_team, require_user_optional
+from app.api import require_team, require_user
 from app.api.schemas import APIExceptions
 from app.api.schemas.score import ScoreRead
 from app.api.schemas.stage import StageRead
@@ -12,6 +12,12 @@ from app.constants.privacy import Privacy
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 
+@router.get('/showcase', response_model=list[TeamRead])
+async def get_teams_showcase(status: int, limit: int = 20, offset: int = 0):
+    async with db_session() as session:
+        teams = (await Team.fetch_all(session, limit, offset, status)).all()
+        return teams
+
 
 @router.get('/{team_id}', response_model=TeamRead)
 async def get_team(team: Team = Depends(require_team)):
@@ -19,19 +25,10 @@ async def get_team(team: Team = Depends(require_team)):
 
 
 @router.get('/', response_model=list[TeamRead])
-async def get_teams(privacy_limit: int, active_only: bool, limit: int = 20, offset: int = 0, user: User = Depends(require_user_optional)):
+async def get_teams(limit: int = 20, offset: int = 0, user: User = Depends(require_user)):
     async with db_session() as session:
-        if privacy_limit == Privacy.PUBLIC: # the lowest scope
-            teams = (await Team.fetch_all(session, limit, offset, with_private=False, active_only=active_only)).all()
-        if privacy_limit > Privacy.PUBLIC: # the user's own teams
-            if user is None:
-                raise APIExceptions.user_unauthorized
-            scalars = await Team.fetch_me(session, user) # no limitation here.
-            teams = []
-            for scalar in scalars:
-                if active_only and scalar.teams.achieved:
-                    continue
-                teams.append(scalar.teams)
+        scalars = await Team.fetch_me(session, user) # no pagination here
+        teams = [scalar.teams for scalar in scalars]
         return teams
     
 

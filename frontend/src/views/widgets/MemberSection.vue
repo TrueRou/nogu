@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { type ITeamMember, Team } from '../../objects/team'
+import { type ITeamMember, Team } from '@/objects/team'
 import { t } from '@/translatable';
 const props = defineProps<{
     member: ITeamMember[]
@@ -27,4 +27,4 @@ const selectedMember = ref<ITeamMember | undefined>(statelessTeam.getLeader(prop
                 :aria-label="member.member.username" />
         </div>
     </div>
-</template>@/translatable
+</template>

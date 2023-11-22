@@ -252,14 +252,13 @@ class Team(Base):
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
     
     @staticmethod
-    async def fetch_all(session: AsyncSession, limit=20, offset=0, with_private = False, active_only = False) -> ScalarResult['Team']:
-        condition = None
-        if with_private and active_only:
-            condition = Team.achieved == False
-        if not with_private and active_only:
-            condition = and_(Team.achieved == False, Team.privacy <= int(Privacy.PROTECTED))
-        if with_private and not active_only:
+    async def fetch_all(session: AsyncSession, limit=20, offset=0, status=-1) -> ScalarResult['Team']:
+        if status == -1:
             condition = Team.privacy <= int(Privacy.PROTECTED)
+        if status == 0:
+            condition = and_(Team.achieved == False, Team.privacy <= int(Privacy.PROTECTED))
+        if status == 1:
+            condition = and_(Team.achieved == True, Team.privacy <= int(Privacy.PROTECTED))
         return await database.select_models(session=session, obj=Team, condition=condition, offset=offset, limit=limit)
     
     @staticmethod

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { Transition, ref } from 'vue';
-import { useUIStore } from './stores/user_interface';
+import { useUIStore } from '@/stores/user_interface';
 
 const ui = useUIStore();
 const scrollTop = ref(0);
@@ -23,11 +23,8 @@ window.addEventListener('scroll', onScroll)
             <RouterLink class="btn btn-ghost normal-case text-xl h-10 min-h-0 rounded-3xl" to="/">NOGU</RouterLink>
           </div>
           <div class="navbar-center">
-            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Team
-            </RouterLink>
-            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Stage
-            </RouterLink>
-            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/team">Pool
+            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/showcase">
+              Showcase
             </RouterLink>
           </div>
           <div class="navbar-end">
@@ -47,7 +44,7 @@ window.addEventListener('scroll', onScroll)
         </div>
       </div>
       <div class="flex flex-1 flex-wrap">
-        <div class="flex justify-center ml-4 mr-4 md:mt-6 mt-4 w-full">
+        <div class="flex justify-center ml-4 mr-4 md:mt-4 mt-2 w-full">
           <RouterView />
         </div>
       </div>

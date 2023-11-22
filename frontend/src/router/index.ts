@@ -1,8 +1,8 @@
 import { useUserStore } from '@/stores/user_information'
 import { useUIStore } from '@/stores/user_interface'
-import LeadinVue from '@/views/pages/Leadin.vue'
-import TeamVue from '@/views/pages/Teams.vue'
-import Login from '../views/dialogs/Login.vue';
+import Index from '@/views/pages/Index.vue'
+import Showcase from '@/views/pages/Showcase.vue'
+import Login from '@/views/dialogs/Login.vue';
 import { markRaw } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -11,16 +11,16 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'leadin',
-      component: LeadinVue,
+      name: 'index',
+      component: Index,
       meta: {
         requireAuth: false
       }
     },
     {
-      path: '/team',
-      name: 'team',
-      component: TeamVue,
+      path: '/showcase',
+      name: 'showcase',
+      component: Showcase,
       meta: {
         requireAuth: true
       }
@@ -28,10 +28,10 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   const ui = useUIStore()
-  userStore.refreshInstance(localStorage.getItem('token'))
+  await userStore.refreshInstance(localStorage.getItem('token'))
 
   if (!userStore.isLoggedIn && to.meta.requireAuth) {
     ui.cachedRoute = to.path

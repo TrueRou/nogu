@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useUIStore } from '@/stores/user_interface';
 import { markRaw, ref } from 'vue';
-import Login from '../dialogs/Login.vue';
-import Register from '../dialogs/Register.vue';
+import Login from '@/views/dialogs/Login.vue';
+import Register from '@/views/dialogs/Register.vue';
 
 const ui = useUIStore();
 const features = ref(
