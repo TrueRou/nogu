@@ -54,7 +54,7 @@ window.addEventListener('scroll', onScroll)
     </div>
   </div>
   <Transition name="fade">
-    <div v-if="ui.toast.isOpen">
+    <div v-if="ui.toast.isOpen" class="z-20">
       <div v-if="ui.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
         <i class="fa-solid fa-circle-info"></i>
         <p class="whitespace-pre-line">{{ ui.toast.message }}</p>
@@ -65,7 +65,6 @@ window.addEventListener('scroll', onScroll)
       </div>
     </div>
   </Transition>
-
   <Transition name="fade">
     <div v-if="ui.dialog.isOpen" class="dialog-mask absolute z-30" @click="ui.closeDialog()">
     </div>

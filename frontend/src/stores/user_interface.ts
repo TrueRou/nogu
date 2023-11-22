@@ -3,10 +3,10 @@ import { defineStore } from 'pinia'
 import { type ITranslateableList, ttl } from '@/translatable'
 
 export const useUIStore = defineStore('user_interface', () => {
+    const cachedRoute = ref('')
     const dialog = ref({
         'isOpen': false,
         'component': null,
-        'data': {}
     })
 
     const toast = ref({
@@ -18,7 +18,6 @@ export const useUIStore = defineStore('user_interface', () => {
     function openDialog(component: any) {
         dialog.value.isOpen = true
         dialog.value.component = component
-        dialog.value.data = {}
     }
 
     function closeDialog() {
@@ -39,5 +38,5 @@ export const useUIStore = defineStore('user_interface', () => {
         }, 3000)
     }
 
-    return { dialog, toast, openDialog, closeDialog, showNotification, showException }
+    return { dialog, toast, cachedRoute, openDialog, closeDialog, showNotification, showException }
 })

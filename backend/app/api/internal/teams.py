@@ -26,8 +26,12 @@ async def get_teams(privacy_limit: int, active_only: bool, limit: int = 20, offs
         if privacy_limit > Privacy.PUBLIC: # the user's own teams
             if user is None:
                 raise APIExceptions.user_unauthorized
-            columns = (await Team.fetch_me(session, user, limit, offset, active_only)).all()
-            teams = [relationship.teams for relationship in columns]
+            scalars = await Team.fetch_me(session, user) # no limitation here.
+            teams = []
+            for scalar in scalars:
+                if active_only and scalar.teams.achieved:
+                    continue
+                teams.append(scalar.teams)
         return teams
     
 

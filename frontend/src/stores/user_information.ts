@@ -6,6 +6,7 @@ import { useUIStore } from './user_interface'
 import type { IToken, IUserBase } from '@/objects/user'
 import type { ITranslateableList } from '@/translatable'
 import { API_URL } from '@/objects/backend'
+import router from '@/router'
 
 export const useUserStore = defineStore('user_information', () => {
     const ui = useUIStore()
@@ -54,13 +55,15 @@ export const useUserStore = defineStore('user_information', () => {
             isLoggedIn.value = false
             userInfo.value = {}
             localStorage.removeItem('token')
+            return
         }
         axiosInstance = axiosGenerator(true, token)
-        const response = await axiosInstance.get('/users/me')
-        if (response.status == 200) {
-            localStorage.setItem('token', response.data['access_token'])
+        const user = await axiosInstance.get('/users/me')
+        localStorage.removeItem('token') // expire old token
+        if (user != null) {
+            localStorage.setItem('token', token)
             isLoggedIn.value = true
-            userInfo.value = response.data
+            userInfo.value = user
         }
     }
 
@@ -76,6 +79,7 @@ export const useUserStore = defineStore('user_information', () => {
                 ui.closeDialog()
             }
             await refreshInstance(token.access_token)
+            if (!mute && ui.cachedRoute != '') router.push(ui.cachedRoute)
         }
     }
 
@@ -101,5 +105,5 @@ export const useUserStore = defineStore('user_information', () => {
         ui.showNotification('info', 'Successfully logged out.')
     }
 
-    return { isLoggedIn, userInfo, login, register, logout, requests }
+    return { isLoggedIn, userInfo, login, register, logout, requests, refreshInstance }
 })

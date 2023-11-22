@@ -5,7 +5,7 @@ import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, ScalarResult, String, text, Float, Boolean, and_, JSON
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 
 import config
 from app import database, definition, sessions
@@ -13,7 +13,7 @@ from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
-from app.database import Base, db_session
+from app.database import Base, _enlarge_sentence, db_session
 from app.definition import AstChecker
 from app.logging import log, Ansi
 
@@ -248,7 +248,7 @@ class Team(Base):
     active_stage_id = Column(Integer, ForeignKey('stages.id'), nullable=True)
 
     active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
-    member = relationship('TeamMember', lazy='selectin', back_populates="teams")
+    member = relationship('TeamMember', lazy='immediate', back_populates="teams")
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
     
     @staticmethod
@@ -263,9 +263,8 @@ class Team(Base):
         return await database.select_models(session=session, obj=Team, condition=condition, offset=offset, limit=limit)
     
     @staticmethod
-    async def fetch_me(session: AsyncSession, user: User, limit=20, offset=0, active_only = False) -> ScalarResult['TeamMember']:
-        condition = Team.achieved == False if active_only else None
-        return await database.query_models(session=session, condition=condition, sentence=user.teams, limit=limit, offset=offset)
+    async def fetch_me(session: AsyncSession, user: User) -> ScalarResult['TeamMember']:
+        return await database.query_models(session=session, sentence=user.teams)
 
     @staticmethod
     async def from_id(session: AsyncSession, team_id: int) -> Optional['Team']:
