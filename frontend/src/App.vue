@@ -18,18 +18,20 @@ window.addEventListener('scroll', onScroll)
   <div :class="ui.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col mb-2 flex-1">
       <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0 z-10">
-        <div class="navbar bg-primary min-h-12">
+        <div class="navbar min-h-fit h-12 md:h-14 bg-primary pt-0 pb-0">
           <div class="navbar-start">
-            <RouterLink class="btn btn-ghost normal-case text-xl h-10 min-h-0 rounded-3xl" to="/">NOGU</RouterLink>
+            <RouterLink class="btn btn-ghost normal-case text-lg rounded-3xl h-8 md:h-10 min-h-fit" to="/">NOGU
+            </RouterLink>
           </div>
           <div class="navbar-center">
-            <RouterLink class="btn btn-ghost normal-case text-lg h-10 min-h-0 font-normal rounded-3xl" to="/showcase">
+            <RouterLink class="btn btn-ghost normal-case text-lg font-normal rounded-3xl h-8 md:h-10 min-h-fit"
+              to="/showcase">
               Showcase
             </RouterLink>
           </div>
           <div class="navbar-end">
-            <div class="dropdown dropdown-end">
-              <label tabindex="0" class="btn btn-ghost btn-circle avatar h-10 min-h-0 p-0 w-10">
+            <div class="dropdown dropdown-end h-10">
+              <label tabindex="0" class="btn btn-ghost btn-circle avatar p-0 w-10 h-fit min-h-fit">
                 <div class="w-10 rounded-full">
                   <img src="https://a.ppy.sb/1094" />
                 </div>

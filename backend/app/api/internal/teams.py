@@ -8,7 +8,6 @@ from app.api.schemas.stage import StageRead
 from app.api.schemas.team import TeamBase, TeamRead, TeamUpdate
 from app.database import db_session
 from app.interaction import Team, User
-from app.constants.privacy import Privacy
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 
