@@ -46,7 +46,7 @@ window.addEventListener('scroll', onScroll)
         </div>
       </div>
       <div class="flex flex-1 flex-wrap">
-        <div class="flex justify-center ml-4 mr-4 md:mt-4 mt-2 w-full">
+        <div class="flex justify-center ml-2 mr-2 mt-2 w-full">
           <RouterView />
         </div>
       </div>

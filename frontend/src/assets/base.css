@@ -27,6 +27,13 @@ body {
     }
 }
 
+.flex-panel-2 {
+    @apply w-full;
+    @media (min-width: 950px) {
+        width: 48rem;
+    }
+}
+
 .jetbrains-mono {
     font-family: 'JetBrains Mono', sans-serif;
 }
@@ -34,3 +41,7 @@ body {
 .mont {
     font-family: 'Montserrat', sans-serif;
 }
+
+::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
+  }

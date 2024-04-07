@@ -3,6 +3,7 @@ import { useUIStore } from '@/stores/user_interface'
 import Index from '@/views/pages/Index.vue'
 import Showcase from '@/views/pages/Showcase.vue'
 import Login from '@/views/dialogs/Login.vue';
+import Team from '@/views/pages/Team.vue';
 import { markRaw } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -22,9 +23,17 @@ const router = createRouter({
       name: 'showcase',
       component: Showcase,
       meta: {
-        requireAuth: true
+        requireAuth: false
       }
     },
+    {
+      path: '/teams/:teamId',
+      name: 'team',
+      component: Team,
+      meta: {
+        requireAuth: false
+      }
+    }
   ]
 })
 
