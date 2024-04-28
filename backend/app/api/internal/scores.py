@@ -8,8 +8,8 @@ from app.api import require_score, require_user
 from app.api.schemas.score import ScoreBase, ScoreRead
 from app.constants.servers import Server
 from app.database import db_session as database_session
-from app.definition import Inspector
-from app.interaction import User, Score, Beatmap
+from backend.app.objects import Inspector
+from backend.app.services import User, Score, Beatmap
 from app.sessions import api_client
 
 router = APIRouter(prefix='/scores', tags=['scores'])

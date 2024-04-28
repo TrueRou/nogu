@@ -5,16 +5,17 @@ import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, ScalarResult, String, text, Float, Boolean, and_, JSON
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
-from sqlalchemy.orm import relationship, joinedload
+from sqlalchemy.orm import relationship
 
+from backend.app import analysis, objects
 import config
-from app import database, definition, sessions
+from app import database, sessions
 from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
-from app.database import Base, _enlarge_sentence, db_session
-from app.definition import AstChecker
+from app.database import Base, db_session
+from backend.app.objects import AstChecker
 from app.logging import log, Ansi
 
 
@@ -22,8 +23,12 @@ class UserAccount(Base):
     __tablename__ = "user_accounts"
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     server_id = Column(Integer, primary_key=True, nullable=False)
-    server_user_id = Column(Integer, nullable=False)
-    server_user_name = Column(String(64), nullable=False)
+    su_id = Column(Integer, nullable=False)
+    su_name = Column(String(64), nullable=False)
+    su_flags = Column(Integer, nullable=False)
+    su_country = Column(Integer, nullable=False)
+    su_playtime = Column(Integer, nullable=False)
+    su_major_ruleset = Column(Integer, nullable=False)
     checked_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
 
     @staticmethod
@@ -53,13 +58,13 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     active_team_id = Column(Integer, ForeignKey('teams.id'), nullable=True)
 
-    accounts = relationship('UserAccount', lazy='selectin', uselist=True)
-    active_team = relationship('Team', lazy='selectin', uselist=False)
+    accounts: 'UserAccount' = relationship('UserAccount', lazy='selectin', uselist=True)
+    active_team: 'Team' = relationship('Team', lazy='selectin', uselist=False)
     teams = relationship('TeamMember', lazy='dynamic', back_populates="member", uselist=True)
 
     @property
     def active_stage(self) -> Optional['Stage']:
-        team = self.active_team
+        team: Team = self.active_team
         return team.active_stage if team else None
 
     @staticmethod
@@ -100,8 +105,8 @@ class Beatmap(Base):
     od = Column(Float, nullable=False)
     hp = Column(Float, nullable=False)
     star_rating = Column(Float, nullable=False)
-    updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
-    server_updated_at = Column(DateTime(True), nullable=False)
+    updated_at = Column(DateTime(True), nullable=False)
+    checked_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_id = Column(Integer, nullable=False, default=int(Server.BANCHO))
 
     @staticmethod
@@ -110,7 +115,7 @@ class Beatmap(Base):
             filename = (
                 "{artist} - {title} ({creator}) [{version}].osu"
                 .format(**entry)
-                .translate(definition.IGNORED_BEATMAP_CHARS)
+                .translate(objects.IGNORED_BEATMAP_CHARS)
             )
 
             _last_update = entry["last_update"]
@@ -151,7 +156,7 @@ class Beatmap(Base):
     async def request_api(ident: str) -> Optional['Beatmap']:
         params = {}
 
-        if definition.MD5_PATTERN.match(ident):
+        if objects.MD5_PATTERN.match(ident):
             params['h'] = ident
         elif ident.isnumeric():
             params['b'] = int(ident)
@@ -184,7 +189,7 @@ class Beatmap(Base):
     async def from_ident(session: AsyncSession, ident: str) -> Optional['Beatmap']:
         if ident.isnumeric():
             return await Beatmap.from_id(session, int(ident))
-        if definition.MD5_PATTERN.match(ident):
+        if objects.MD5_PATTERN.match(ident):
             return await Beatmap.from_md5(session, ident)
 
 
@@ -210,11 +215,11 @@ class Score(Base):
     mode = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     server_id = Column(Integer, nullable=False, default=int(Server.LOCAL))
-    analysis = Column(JSON, nullable=True)
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
+    analysis = Column(JSON, nullable=True)
 
-    beatmap = relationship('Beatmap', lazy='selectin')
-    stage = relationship('Stage', lazy='selectin', back_populates='scores')
+    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
+    stage: 'Stage' = relationship('Stage', lazy='selectin', back_populates='scores')
 
     @staticmethod
     async def from_id(session: AsyncSession, score_id: int) -> Optional['Score']:
@@ -244,11 +249,11 @@ class Team(Base):
     privacy = Column(Integer, nullable=False, default=int(Privacy.PROTECTED))
     achieved = Column(Boolean, nullable=False, default=False)
     create_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
-    finish_at = Column(DateTime(True), nullable=True)
+    achieved_at = Column(DateTime(True), nullable=True)
     active_stage_id = Column(Integer, ForeignKey('stages.id'), nullable=True)
 
-    active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
-    member = relationship('TeamMember', lazy='immediate', back_populates="teams")
+    active_stage: 'Stage' = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
+    member: list['User'] = relationship('TeamMember', lazy='immediate', back_populates="teams", uselist=True)
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
     
     @staticmethod
@@ -299,16 +304,17 @@ class Stage(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False)
-    mode = Column(Integer, nullable=False, default=0)
-    formula = Column(Integer, nullable=False, default=bancho_formula.formula_id)
+    version = Column(Integer, nullable=False, default=0)
+    mode = Column(Integer, nullable=False)
+    formula_set = Column(Integer, nullable=False, default=bancho_formula.formula_id)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     analysis = Column(JSON, nullable=True)
-    pool_id = Column(Integer, ForeignKey('pools.id'), nullable=False)
+    playlist_id = Column(Integer, ForeignKey('playlists.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
 
-    pool = relationship('Pool', lazy='selectin')  # originated from which pool
-    team = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id',
+    playlist: 'Playlist' = relationship('Playlist', lazy='selectin')  # originated from which playlist
+    team: 'Team' = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id',
                         viewonly=True)  # which team owned the stage
     scores = relationship('Score', lazy='dynamic', uselist=True, back_populates='stage')
     maps = relationship('StageMap', lazy='dynamic', uselist=True)
@@ -334,45 +340,58 @@ class Stage(Base):
         return await database.query_models(session=session, sentence=self.scores, limit=limit, offset=offset)
 
 
-class Pool(Base):
-    __tablename__ = "pools"
+class Playlist(Base):
+    __tablename__ = "playlists"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False)
     description = Column(String(64), nullable=True)
+    version = Column(Integer, nullable=False, default=0)
     mode = Column(Integer, nullable=False)
-    privacy = Column(Integer, nullable=False, default=int(Privacy.PUBLIC))
+    formula_set = Column(Integer, nullable=False, default=bancho_formula.formula_id)
     created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
+    
+    privacy = Column(Integer, nullable=False, default=int(Privacy.PUBLIC))
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    creator = relationship('User', lazy='selectin')
-    maps = relationship('PoolMap', lazy='dynamic', uselist=True)
+    creator: 'User' = relationship('User', lazy='selectin')
+    maps = relationship('PlaylistMap', lazy='dynamic', uselist=True)
 
-
-class PoolMap(Base):
-    __tablename__ = "pool_maps"
-    pool_id = Column(Integer, ForeignKey('pools.id'), primary_key=True, nullable=False)
-    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
+class PlaylistUpdate(Base):
+    __tablename__ = "playlist_updates"
+    
+    playlist_id = Column(Integer, ForeignKey('playlists.id'), primary_key=True, nullable=False)
+    version = Column(Integer, nullable=False, primary_key=True)
     description = Column(String(64), nullable=False)
-    condition_ast = Column(String(64), nullable=False)
-    condition_name = Column(String(64), nullable=False)
-    condition_represent_mods = Column(Integer, nullable=False)
+    created_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
+    
 
-    beatmap = relationship('Beatmap', lazy='selectin')
+class PlaylistMap(Base):
+    __tablename__ = "playlist_maps"
+    playlist_id = Column(Integer, ForeignKey('playlists.id'), primary_key=True, nullable=False)
+    map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
+    label = Column(String(64), nullable=False) # NM1
+    description = Column(String(64), nullable=False) # NoMod Aims
+    represent_mods = Column(Integer, nullable=False) # 0(NoMod)
+    condition_ast = Column(String(64), nullable=False) # mods == 0
+    condition_name = Column(String(64), nullable=False) # NoMod
+
+    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
 
 
 class StageMap(Base):
     __tablename__ = "stage_maps"
     stage_id = Column(Integer, ForeignKey('stages.id'), primary_key=True, nullable=False)
     map_md5 = Column(String(64), ForeignKey('beatmaps.md5'), primary_key=True, nullable=False)
-    description = Column(String(64), nullable=False)
-    condition_ast = Column(String(64), nullable=False)
-    condition_name = Column(String(64), nullable=False)
-    condition_represent_mods = Column(Integer, nullable=False)
+    label = Column(String(64), nullable=False) # NM1
+    description = Column(String(64), nullable=False) # NoMod Aims
+    represent_mods = Column(Integer, nullable=False) # NM(0)
+    condition_ast = Column(String(64), nullable=False) # mods == 0
+    condition_name = Column(String(64), nullable=False) # NoMod
     analysis = Column(JSON, nullable=True)
 
-    beatmap = relationship('Beatmap', lazy='selectin')
+    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
 
 
 class StageUser(Base):

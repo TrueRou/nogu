@@ -4,7 +4,7 @@ from app.api import users
 from app.api.schemas import APIException, APIExceptions
 from app.api.schemas.user import UserUpdate, UserBase, UserWrite, UserRead
 from app.database import db_session
-from app.interaction import User, Team, Stage, Score
+from backend.app.services import User, Team, Stage, Score
 
 router = APIRouter()
 

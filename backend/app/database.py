@@ -22,7 +22,7 @@ async def create_db_and_tables():
 
 
 @contextlib.asynccontextmanager
-async def db_session() -> AsyncContextManager[AsyncSession]:
+async def db_session() -> AsyncContextManager[AsyncSession]: # type: ignore
     async with async_session_maker() as session:
         yield session
         await session.commit()

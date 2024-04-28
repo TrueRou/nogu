@@ -23,8 +23,8 @@ class BeatmapBase(ModelBase):
     od: float
     hp: float
     star_rating: float
+    checked_at: datetime
     updated_at: datetime
-    server_updated_at: datetime
     server_id: int
 
 

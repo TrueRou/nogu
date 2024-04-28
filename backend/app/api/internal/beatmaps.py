@@ -7,8 +7,8 @@ from app.api.schemas import APIExceptions, ModelResponse
 from app.api.schemas.beatmap import BeatmapBase
 from app.api import require_user
 from app.database import db_session as database_session
-from app.definition import Operator
-from app.interaction import Beatmap, User
+from backend.app.objects import Operator
+from backend.app.services import Beatmap, User
 from app.logging import log, Ansi
 
 

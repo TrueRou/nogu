@@ -13,7 +13,7 @@ class TeamBase(ModelBase):
     name: str
     privacy: int
     achieved: bool
-    finish_at: Optional[datetime]
+    achieved_at: Optional[datetime]
     active_stage_id: Optional[int]
 
 

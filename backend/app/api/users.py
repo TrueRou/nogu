@@ -15,7 +15,7 @@ from starlette.requests import Request
 
 from app import database
 from app.database import db_session
-from app.interaction import User
+from backend.app.services import User
 from app.api.schemas import APIException, APIExceptions
 from config import jwt_secret
 

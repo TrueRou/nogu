@@ -10,8 +10,12 @@ from . import ModelBase
 class UserAccount(ModelBase):
     user_id: int
     server_id: int
-    server_user_id: int
-    server_user_name: str
+    su_id: int
+    su_name: str
+    su_flags: int
+    su_country: int
+    su_playtime: int
+    su_major_ruleset: int
     checked_at: datetime
 
 
