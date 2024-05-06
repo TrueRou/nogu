@@ -13,7 +13,7 @@ def convert_to_optional(schema):
 
 class ModelBase(BaseModel):
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class APIException(HTTPException):
     stored_kwargs = None

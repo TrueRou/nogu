@@ -9,10 +9,10 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
-from pydantic.error_wrappers import _display_error_loc
+
 
 import app.api.internal
-from app import database
+from app import database, sessions
 from app.api.internal import scores, beatmaps
 from app.database import db_session
 from app.logging import log, Ansi
@@ -56,17 +56,17 @@ def init_events(asgi_app: FastAPI) -> None:
     async def on_startup() -> None:
         try:
             async with db_session() as session:
-                await session.execute(text('SELECT 1'))
-                # TODO: Sql migration
-                await database.create_db_and_tables()
                 asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())
                 asyncio.create_task(scores.bancho_match_inspector.inspect_async())
-            log("Startup process complete.", Ansi.LGREEN)
+                asyncio.create_task(sessions.init_sessions())
+                await session.execute(text('SELECT 1'))
+                await database.create_db_and_tables() # TODO: Sql migration
+                log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)
+        
             
 def init_exception_handlers(asgi_app: FastAPI) -> None:
-    
     @asgi_app.exception_handler(APIException)
     async def api_exception_handler(request, exception: APIException):
         return exception.response() # normalize response (with header)
@@ -76,7 +76,7 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
         details_list = []
         for error in error.errors():
             details_list.append({
-                'message': _display_error_loc(error),
+                'message': str(error),
                 'i18n_node': ''
             })
         return APIExceptions.glob_validation.extends(details_list).response()

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, async_objec
 
 from app import database
 from app.database import engine
-from backend.app.services import Score, Stage, StageMap, StageMapUser, StageUser, Beatmap
+from app.services import Score, Stage, StageMap, StageMapUser, StageUser, Beatmap
 
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

@@ -9,7 +9,7 @@ from app import sessions, database
 from app.api import require_user_optional
 from app.constants.servers import Server
 from app.database import db_session
-from backend.app.services import User, UserAccount
+from app.services import User, UserAccount
 
 router = APIRouter(prefix='/oauth', tags=['oauth'])
 

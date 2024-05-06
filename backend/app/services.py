@@ -7,16 +7,14 @@ from sqlalchemy import Column, Integer, ForeignKey, DateTime, ScalarResult, Stri
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
 
-from backend.app import analysis, objects
-import config
-from app import database, sessions
+from app import objects, database, sessions
 from app.constants.formulas import bancho_formula, dict_id2obj
 from app.constants.privacy import Privacy
 from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
 from app.database import Base, db_session
-from backend.app.objects import AstChecker
 from app.logging import log, Ansi
+import config
 
 
 class UserAccount(Base):
@@ -58,8 +56,8 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     updated_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
     active_team_id = Column(Integer, ForeignKey('teams.id'), nullable=True)
 
-    accounts: 'UserAccount' = relationship('UserAccount', lazy='selectin', uselist=True)
-    active_team: 'Team' = relationship('Team', lazy='selectin', uselist=False)
+    accounts = relationship('UserAccount', lazy='selectin', uselist=True)
+    active_team = relationship('Team', lazy='selectin', uselist=False)
     teams = relationship('TeamMember', lazy='dynamic', back_populates="member", uselist=True)
 
     @property
@@ -218,8 +216,8 @@ class Score(Base):
     stage_id = Column(Integer, ForeignKey('stages.id'), index=True, nullable=False)
     analysis = Column(JSON, nullable=True)
 
-    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
-    stage: 'Stage' = relationship('Stage', lazy='selectin', back_populates='scores')
+    beatmap = relationship('Beatmap', lazy='selectin')
+    stage = relationship('Stage', lazy='selectin', back_populates='scores')
 
     @staticmethod
     async def from_id(session: AsyncSession, score_id: int) -> Optional['Score']:
@@ -235,9 +233,9 @@ class Score(Base):
             "mods": score.mods,
             "score": score.score
         }
-        if AstChecker(condition).check(variables):
+        if objects.AstChecker(condition).check(variables):
             score = await database.add_model(session, score)
-            await analysis.analyze_score(score)
+            await analyze_score(score)
             return score
 
 
@@ -252,8 +250,8 @@ class Team(Base):
     achieved_at = Column(DateTime(True), nullable=True)
     active_stage_id = Column(Integer, ForeignKey('stages.id'), nullable=True)
 
-    active_stage: 'Stage' = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
-    member: list['User'] = relationship('TeamMember', lazy='immediate', back_populates="teams", uselist=True)
+    active_stage = relationship('Stage', lazy='selectin', foreign_keys='Team.active_stage_id')
+    member = relationship('TeamMember', lazy='immediate', back_populates="teams", uselist=True)
     stages = relationship('Stage', lazy='dynamic', foreign_keys='Stage.team_id')
     
     @staticmethod
@@ -313,8 +311,8 @@ class Stage(Base):
     playlist_id = Column(Integer, ForeignKey('playlists.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
 
-    playlist: 'Playlist' = relationship('Playlist', lazy='selectin')  # originated from which playlist
-    team: 'Team' = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id',
+    playlist = relationship('Playlist', lazy='selectin')  # originated from which playlist
+    team = relationship('Team', lazy='selectin', foreign_keys='Stage.team_id',
                         viewonly=True)  # which team owned the stage
     scores = relationship('Score', lazy='dynamic', uselist=True, back_populates='stage')
     maps = relationship('StageMap', lazy='dynamic', uselist=True)
@@ -355,7 +353,7 @@ class Playlist(Base):
     privacy = Column(Integer, nullable=False, default=int(Privacy.PUBLIC))
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    creator: 'User' = relationship('User', lazy='selectin')
+    creator = relationship('User', lazy='selectin')
     maps = relationship('PlaylistMap', lazy='dynamic', uselist=True)
 
 class PlaylistUpdate(Base):
@@ -377,7 +375,7 @@ class PlaylistMap(Base):
     condition_ast = Column(String(64), nullable=False) # mods == 0
     condition_name = Column(String(64), nullable=False) # NoMod
 
-    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
+    beatmap = relationship('Beatmap', lazy='selectin')
 
 
 class StageMap(Base):
@@ -391,7 +389,7 @@ class StageMap(Base):
     condition_name = Column(String(64), nullable=False) # NoMod
     analysis = Column(JSON, nullable=True)
 
-    beatmap: 'Beatmap' = relationship('Beatmap', lazy='selectin')
+    beatmap = relationship('Beatmap', lazy='selectin')
 
 
 class StageUser(Base):

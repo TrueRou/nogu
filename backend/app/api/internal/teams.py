@@ -7,7 +7,7 @@ from app.api.schemas.score import ScoreRead
 from app.api.schemas.stage import StageRead
 from app.api.schemas.team import TeamBase, TeamRead, TeamUpdate
 from app.database import db_session
-from backend.app.services import Team, User
+from app.services import Team, User
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 

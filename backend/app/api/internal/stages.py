@@ -7,7 +7,7 @@ from app.api import require_stage
 from app.api.schemas.beatmap import BeatmapBase
 from app.api.schemas.stage import StageRead, StageBase, StageUpdate, StageMapBase
 from app.database import db_session
-from backend.app.services import Stage
+from app.services import Stage
 
 router = APIRouter(prefix='/stages', tags=['stages'])
 
