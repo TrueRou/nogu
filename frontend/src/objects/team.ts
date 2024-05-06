@@ -2,7 +2,6 @@ import { BackendObject, type IBackendArgs as IBackendParams } from "./backend";
 import type { IStage } from "./stage";
 import type { IUserSimple } from "./user";
 import { MemberPosition } from "@/enums";
-import { type ITranslateable } from "@/translatable";
 
 export interface ITeamMember {
     member: IUserSimple;
@@ -13,7 +12,7 @@ export interface ITeam {
     name: string;
     privacy: number;
     achieved: boolean;
-    finish_at: Date;
+    achieved_at: Date;
     active_stage_id: number;
     id: number;
     create_at: Date;

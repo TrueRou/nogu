@@ -6,8 +6,12 @@ export interface IToken {
 export interface IAccount {
     user_id: number;
     server_id: number;
-    server_user_id: number;
-    server_user_name: string;
+    su_id: number;
+    su_name: string;
+    su_flags: number;
+    su_country: number;
+    su_playtime: number;
+    su_major_ruleset: number;
     checked_at: Date;
 }
 

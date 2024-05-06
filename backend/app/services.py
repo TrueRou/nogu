@@ -234,6 +234,7 @@ class Score(Base):
             "score": score.score
         }
         if objects.AstChecker(condition).check(variables):
+            from analysis import analyze_score
             score = await database.add_model(session, score)
             await analyze_score(score)
             return score
