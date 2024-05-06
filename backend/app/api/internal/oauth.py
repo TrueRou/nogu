@@ -1,7 +1,7 @@
 import asyncio
 
-import aiohttp
 from fastapi import Depends, APIRouter
+from ossapi import Ossapi
 from starlette.responses import RedirectResponse
 
 import config
@@ -18,18 +18,11 @@ router = APIRouter(prefix='/oauth', tags=['oauth'])
 # https://osu.ppy.sh/oauth/authorize?client_id=14308&redirect_uri=http://localhost:8000/users/oauth/token&response_type=code&scope=identify
 
 async def request_identity(code: str):
-    async with aiohttp.ClientSession() as session:
-        result = await (await session.post("https://osu.ppy.sh/oauth/token", data={
-            "client_id": config.osu_api_v2_id,
-            "client_secret": config.osu_api_v2_secret,
-            "redirect_uri": config.osu_api_v2_callback,
-            "code": code,
-            "grant_type": "authorization_code"
-        })).json()
-        if result["access_token"] is not None:
-            return await (await session.get("https://osu.ppy.sh/api/v2/me", headers={
-                "Authorization": "Bearer " + result["access_token"]
-            })).json()
+    try:
+        user_context = Ossapi(config.osu_api_v2_id, config.osu_api_v2_secret, config.osu_api_v2_callback, access_token=code)
+        return user_context.get_me()
+    except Exception:
+        return None
 
 
 def generate_redirect(success: bool, **kwargs):
@@ -45,7 +38,7 @@ async def process_oauth(code: str, user: User = Depends(require_user_optional)):
     async with db_session() as session:
         if user is None:
             return generate_redirect(success=False, target="login", reason="not_logged")
-        user_account = await UserAccount.from_user_server(session, Server.BANCHO, user)
+        user_account: UserAccount = await UserAccount.from_source(session, Server.BANCHO, user)
         api_user = await request_identity(code)
 
         if api_user is None:
@@ -53,10 +46,9 @@ async def process_oauth(code: str, user: User = Depends(require_user_optional)):
 
         if user_account is not None:
             # we have user account, check whether it is the original player
-            if user_account.server_user_id == api_user['id']:
-                # update for the newest username of the player
-                user_account.server_user_name = api_user['username']
-                await session.commit()
+            if user_account.su_id == api_user.id:
+                # update to the newest status of the player
+                await user_account.refresh_user(api_user=api_user)
             else:
                 return generate_redirect(success=False, target="oauth", reason="not_the_same_account")
         else:
@@ -64,10 +56,9 @@ async def process_oauth(code: str, user: User = Depends(require_user_optional)):
             original_account = await UserAccount.from_source(session, Server.BANCHO, api_user['id'])
             if original_account is not None:
                 return generate_redirect(success=False, target="oauth", reason="user_occupied")
-            # do the insert operation
-            user_account = UserAccount(user_id=user.id, server_id=Server.BANCHO.value,
-                                       server_user_id=api_user['id'],
-                                       server_user_name=api_user['username'])
+            # do the insertion and refresh operation
+            user_account = UserAccount(user_id=user.id, server_id=Server.BANCHO.value, server_user_id=api_user['id'])
             await database.add_model(session, user_account)
+            await user_account.refresh_user(api_user=api_user) # fill other fields of the server user
         asyncio.ensure_future(UserAccount.prepare_avatar(user=user, avatar_url=api_user['avatar_url']))
         return generate_redirect(success=True, target="home")

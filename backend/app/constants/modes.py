@@ -16,20 +16,33 @@ class GameMode(IntFlag):
     # AP_MANIA = 11  # doesn't exist
 
 
-def for_client(server_game_mode: int) -> int:
-    game_mode = server_game_mode
-    if game_mode == GameMode.AP_OSU:
-        return GameMode.VN_OSU
-    elif game_mode >= GameMode.RX_OSU:
-        return game_mode - GameMode.RX_OSU
-    else:
+    @staticmethod
+    def from_client(vanilla: int, mods: int) -> 'GameMode':
+        game_mode = GameMode(vanilla)
+        if mods & 128:  # relax
+            game_mode += 4
+        if mods & 8192:  # autopilot
+            game_mode += 8
         return game_mode
 
 
-def for_server(client_game_mode: int, mods: int) -> int:
-    game_mode = client_game_mode
-    if mods & 128:  # relax
-        game_mode += 4
-    if mods & 8192:  # autopilot
-        game_mode += 8
-    return game_mode
+    @staticmethod
+    def from_v2(ruleset: str) -> 'GameMode':
+        if ruleset == "osu":
+            return GameMode.VN_OSU
+        if ruleset == "taiko":
+            return GameMode.VN_TAIKO
+        if ruleset == "fruits":
+            return GameMode.VN_CATCH
+        if ruleset == "mania":
+            return GameMode.VN_MANIA
+        
+
+    def as_vanilla(self):
+        if self == GameMode.AP_OSU:
+            return GameMode.VN_OSU
+        elif self >= GameMode.RX_OSU:
+            return self - GameMode.RX_OSU
+        else:
+            return self
+

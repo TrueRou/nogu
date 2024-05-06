@@ -3,6 +3,7 @@ from typing import Optional, Any
 
 import aiohttp
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
+import ossapi
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, ScalarResult, String, text, Float, Boolean, and_, JSON
 from sqlalchemy.ext.asyncio import async_object_session as object_session, AsyncSession
 from sqlalchemy.orm import relationship
@@ -14,6 +15,7 @@ from app.constants.privileges import MemberPosition
 from app.constants.servers import Server
 from app.database import Base, db_session
 from app.logging import log, Ansi
+from app.constants.modes import GameMode
 import config
 
 
@@ -22,11 +24,11 @@ class UserAccount(Base):
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     server_id = Column(Integer, primary_key=True, nullable=False)
     su_id = Column(Integer, nullable=False)
-    su_name = Column(String(64), nullable=False)
-    su_flags = Column(Integer, nullable=False)
-    su_country = Column(Integer, nullable=False)
-    su_playtime = Column(Integer, nullable=False)
-    su_major_ruleset = Column(Integer, nullable=False)
+    su_name = Column(String(64), nullable=True)
+    su_flags = Column(Integer, nullable=True)
+    su_country = Column(Integer, nullable=True)
+    su_playtime = Column(Integer, nullable=True)
+    su_major_ruleset = Column(Integer, nullable=True)
     checked_at = Column(DateTime(True), nullable=False, server_default=text("now()"))
 
     @staticmethod
@@ -43,6 +45,17 @@ class UserAccount(Base):
     async def from_source(session: AsyncSession, server_id: Server, server_user_id: int) -> Optional['UserAccount']:
         return await database.select_model(session, UserAccount, and_(UserAccount.server_id == server_id.value,
                                                                       UserAccount.server_user_id == server_user_id))
+    
+    async def refresh_user(self, *args):
+        session = object_session(self)
+        if self.server_id == Server.BANCHO:
+            api_user: ossapi.User = args['api_user'] if 'api_user' in args else sessions.api_client.user(self.su_id)
+            self.su_name = api_user.username
+            self.su_flags = 0 # TODO... apply flags to the database (active, supporter, bot, restricted, deleted)
+            self.su_country = api_user.country_code
+            self.su_playtime = api_user.statistics.play_time
+            self.su_major_ruleset = int(GameMode.from_v2(api_user.playmode))
+        await session.commit()
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
