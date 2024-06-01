@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "nogu-nekko"
+version = "0.1.0"
+description = "tournament practicing platform. In order to reduce the work in the progress of collecting data, sorting data and analyzing data."
+authors = ["Usagi no Niku <chenbohan911@163.com>"]
+license = "GPL-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+apscheduler = "^3.10.4"
+pymysql = "^1.1.1"
+sqlalchemy = "^2.0.30"
+email-validator = "^2.1.1"
+fastapi-users = {extras = ["sqlalchemy"], version = "^13.0.0"}
+fastapi-users-db-sqlalchemy = "^6.0.1"
+pyjwt = "^2.8.0"
+python-multipart = "^0.0.9"
+uvicorn = "^0.30.0"
+websockets = "^12.0"
+aiohttp = "^3.9.5"
+orjson = "^3.10.3"
+sse-starlette = "^2.1.0"
+ossapi = {extras = ["async"], version = "^4.0.0"}
+sqlmodel = "^0.0.18"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
