@@ -22,14 +22,14 @@ from fastapi_users.router.common import ErrorCode
 from sqlalchemy import or_
 from starlette.requests import Request
 
-from app.database import auto_session
+from app.database import async_session, auto_session
 from app.models import User
 from app.constants.exceptions import (
     APIException,
     glob_internal,
     glob_not_exist,
 )
-from app.models.user import UserBase, UserUpdate, UserWrite
+from app.models.user import UserRead, UserUpdate, UserWrite
 from config import jwt_secret
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
@@ -94,7 +94,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
 
 async def get_user_manager():
-    with auto_session() as session:
+    async with async_session() as session:
         yield UserManager(SQLAlchemyUserDatabase(session, User))
 
 
@@ -139,7 +139,7 @@ fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
 
 user_router = fastapi_users.get_users_router(User, UserUpdate)
 auth_router = fastapi_users.get_auth_router(auth_backend)
-register_router = fastapi_users.get_register_router(UserBase, UserWrite)
+register_router = fastapi_users.get_register_router(UserRead, UserWrite)
 
 router.include_router(user_router, prefix="/users", tags=["users"])
 router.include_router(auth_router, prefix="/auth/jwt", tags=["auth"])

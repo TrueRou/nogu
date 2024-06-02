@@ -86,7 +86,7 @@ class BeatmapSrv:
     def from_ident(session: Session, ident: str):
         if ident.isnumeric():
             sentence = select(Beatmap).where(Beatmap.id == int(ident))
-            return session.exec(sentence)
+            return session.exec(sentence).first()
         if MD5_PATTERN.match(ident):
             return session.get(Beatmap, ident)
 

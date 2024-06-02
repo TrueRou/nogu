@@ -31,7 +31,7 @@ beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_reques
 
 @router.get("/{ident}", response_model=Beatmap)
 async def get_beatmap(ident: str):
-    async with auto_session() as session:
+    with auto_session() as session:
         beatmap = BeatmapSrv.from_ident(session, ident)
         if beatmap is None:
             raise glob_not_exist

@@ -1,9 +1,11 @@
 import contextlib
 from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 import config
 
 engine = create_engine(config.mysql_url, echo=False, future=True)
+async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"), echo=False, future=True)
 
 
 def create_db_and_tables():
@@ -23,6 +25,12 @@ def auto_session():
     with Session(engine) as session:
         yield session
         session.commit()
+
+
+@contextlib.asynccontextmanager
+async def async_session():
+    async with AsyncSession(async_engine) as session:
+        yield session
 
 
 def add_model(session: Session, *models):

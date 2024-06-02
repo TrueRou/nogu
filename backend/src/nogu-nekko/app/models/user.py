@@ -33,14 +33,22 @@ class UserUpdate(SQLModel):
     country: str | None
 
 
+# for fastapi-users to read a user
+class UserRead(UserBase):
+    id: int
+    privileges: UserPriv
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+
 class User(UserBase, table=True):
     __tablename__ = "users"
 
     id: int | None = Field(default=None, primary_key=True)
-    password: str
+    hashed_password: str
     privileges: UserPriv = Field(default=UserPriv.UNRESTRICTED)
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    updated_at: datetime.datetime | None = Field(sa_column=Column(DateTime(), onupdate=func.now()))
+    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
     active_team_id: int | None = Field(foreign_key="teams.id")
     team_links: list["TeamUserLink"] = Relationship(back_populates="user")

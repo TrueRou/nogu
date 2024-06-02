@@ -39,7 +39,9 @@ def submit_score(score: ScoreBase, user: User = Depends(require_user)):
 
 
 class BanchoMatchInspector(Inspector):
-    api_client = OssapiAsync(config.osu_api_v2_id, config.osu_api_v2_secret)
+    def __init__(self, interval: float, each_interval: float):
+        super().__init__(interval, each_interval)
+        self.api_client = OssapiAsync(config.osu_api_v2_id, config.osu_api_v2_secret)
 
     async def consume(self, target: Any) -> int:
         match: MatchResponse = await self.api_client.match(target)
