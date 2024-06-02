@@ -2,8 +2,8 @@ import datetime
 from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 
-from app.constants.osu import Server, Mods, Ruleset
-from app.constants.exceptions import glob_not_belongings
+from nogu.app.constants.osu import Server, Mods, Ruleset
+from nogu.app.constants.exceptions import glob_not_belongings
 from .performance import Performance
 from ..user import User
 

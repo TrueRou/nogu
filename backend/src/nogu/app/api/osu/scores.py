@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends
 from ossapi import MatchResponse, MatchEvent, OssapiAsync
 from sqlmodel import select
 
-import config
-from app.api.users import require_user
-from app.models.osu import *
-from app.models.user import User
-from app.constants.osu import Server
-from app.database import auto_session, manual_session
-from app.objects import AstChecker, Inspector
+from nogu import config
+from nogu.app.api.users import require_user
+from nogu.app.models.osu import *
+from nogu.app.models.user import User
+from nogu.app.constants.osu import Server
+from nogu.app.database import auto_session, manual_session
+from nogu.app.objects import AstChecker, Inspector
 
 router = APIRouter(prefix="/scores", tags=["scores"])
 

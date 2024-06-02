@@ -6,7 +6,7 @@ from typing import TypeVar, Any
 
 from starlette.requests import Request
 
-from app.logging import log
+from nogu.app.logging import log
 
 T = TypeVar("T")
 

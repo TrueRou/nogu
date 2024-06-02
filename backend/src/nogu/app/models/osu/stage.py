@@ -1,9 +1,9 @@
 import datetime
 from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel, Session, select
-from app.constants.exceptions import glob_not_belongings, glob_no_permission
+from nogu.app.constants.exceptions import glob_not_belongings, glob_no_permission
 
-from app.constants.osu import Mods, Ruleset, WinCondition
+from nogu.app.constants.osu import Mods, Ruleset, WinCondition
 from ..ast_condition import AstCondition
 from ..user import User
 from ..team import TeamUserLink, TeamRole

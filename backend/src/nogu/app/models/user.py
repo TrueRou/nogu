@@ -1,7 +1,6 @@
 import datetime
 from enum import IntFlag, auto
 from typing import TYPE_CHECKING
-from sqlalchemy import Column, DateTime, func
 from fastapi_users.schemas import CreateUpdateDictModel
 from sqlmodel import Field, Relationship, SQLModel
 

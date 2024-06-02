@@ -2,8 +2,8 @@ import logging
 
 import uvicorn
 
-import config
-from app.logging import Ansi, log
+from nogu import config
+from nogu.app.logging import Ansi, log
 
 if __name__ == "__main__":
     log(f"Uvicorn running on http://{config.bind_address}:{str(config.bind_port)} (Press CTRL+C to quit)", Ansi.YELLOW)

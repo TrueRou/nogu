@@ -1,8 +1,7 @@
 import datetime
 from enum import IntEnum, auto
-from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel, Session, select
-from app.constants.exceptions import glob_not_belongings
+from nogu.app.constants.exceptions import glob_not_belongings
 
 from .user import User
 

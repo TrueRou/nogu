@@ -2,16 +2,22 @@ import contextlib
 from sqlmodel import SQLModel, create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-import config
+from nogu import config
 
 engine = create_engine(config.mysql_url, echo=False, future=True)
 async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"), echo=False, future=True)
 
 
-def create_db_and_tables():
-    import app.models  # make sure all models are imported (keep its record in metadata)
+def create_db_and_tables(engine):
+    import nogu.app.models  # make sure all models are imported (keep its record in metadata)
 
-    app.models.SQLModel.metadata.create_all(engine)
+    nogu.app.models.SQLModel.metadata.create_all(engine)
+
+
+def drop_db_and_tables(engine):
+    import nogu.app.models  # make sure all models are imported (keep its record in metadata)
+
+    nogu.app.models.SQLModel.metadata.drop_all(engine)
 
 
 @contextlib.contextmanager

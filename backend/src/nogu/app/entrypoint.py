@@ -9,12 +9,12 @@ from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 
-from app import database, api
-from app.database import manual_session
-from app.logging import log, Ansi
-from app.api.users import parse_exception
-from app.constants.exceptions import APIException, glob_validation
-from app.api.osu import beatmaps, scores
+from nogu.app import database, api
+from nogu.app.database import manual_session
+from nogu.app.logging import log, Ansi
+from nogu.app.api.users import parse_exception
+from nogu.app.constants.exceptions import APIException, glob_validation
+from nogu.app.api.osu import beatmaps, scores
 
 
 def init_openapi(asgi_app: FastAPI) -> None:
@@ -56,7 +56,7 @@ def init_events(asgi_app: FastAPI) -> None:
                 asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())
                 asyncio.create_task(scores.bancho_match_inspector.inspect_async())
                 session.exec(text("SELECT 1"))
-                database.create_db_and_tables()  # TODO: Sql migration
+                database.create_db_and_tables(database.engine)  # TODO: Sql migration
                 log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)

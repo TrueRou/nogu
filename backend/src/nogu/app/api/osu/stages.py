@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import select
 
-from app.api.users import require_user
-from app.models.osu import *
-from app.models import User, TeamRole
-from app.database import auto_session, manual_session, add_model, partial_update_model
+from nogu.app.api.users import require_user
+from nogu.app.models.osu import *
+from nogu.app.models import User, TeamRole
+from nogu.app.database import auto_session, manual_session, add_model, partial_update_model
 
 router = APIRouter(prefix="/stages", tags=["stages"])
 

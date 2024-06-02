@@ -1,9 +1,8 @@
 import datetime
 from enum import IntFlag, auto
-from sqlalchemy import Column, DateTime, func
 from sqlmodel import Field, SQLModel
 
-from app.constants.osu import Server
+from nogu.app.constants.osu import Server
 
 
 class ServerPriv(IntFlag):

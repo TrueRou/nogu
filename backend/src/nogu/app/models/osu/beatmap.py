@@ -3,11 +3,11 @@ import aiohttp
 from typing import Any
 from sqlmodel import Field, SQLModel, Session, select
 
-import config
-from app.database import auto_session
-from app.logging import log, Ansi
-from app.constants.osu import Server, Ruleset
-from app.objects import IGNORED_BEATMAP_CHARS, MD5_PATTERN
+from nogu import config
+from nogu.app.database import auto_session
+from nogu.app.logging import log, Ansi
+from nogu.app.constants.osu import Server, Ruleset
+from nogu.app.objects import IGNORED_BEATMAP_CHARS, MD5_PATTERN
 
 
 class Beatmap(SQLModel, table=True):

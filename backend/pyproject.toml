@@ -3,7 +3,6 @@ name = "nogu-nekko"
 version = "0.1.0"
 description = "tournament practicing platform. In order to reduce the work in the progress of collecting data, sorting data and analyzing data."
 authors = ["Usagi no Niku <chenbohan911@163.com>"]
-packages = [{include = "nogu-nekko", from="src"}]
 license = "GPL-3.0"
 readme = "README.md"
 
@@ -26,6 +25,8 @@ sse-starlette = "^2.1.0"
 ossapi = {extras = ["async"], version = "^4.0.0"}
 sqlmodel = "^0.0.18"
 aiomysql = "^0.2.0"
+pytest = "^8.2.1"
+polyfactory = "^2.16.0"
 
 
 [build-system]

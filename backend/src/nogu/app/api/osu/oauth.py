@@ -4,12 +4,12 @@ from ossapi import Ossapi, OssapiAsync
 from sqlmodel import select
 from starlette.responses import RedirectResponse
 
-import config
-from app.api.users import require_user_optional
-from app.constants.osu import Server
-from app.database import auto_session
-from app.models import User
-from app.models.osu import *
+from nogu import config
+from nogu.app.api.users import require_user_optional
+from nogu.app.constants.osu import Server
+from nogu.app.database import auto_session
+from nogu.app.models import User
+from nogu.app.models.osu import *
 from typing import Callable, Any
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])

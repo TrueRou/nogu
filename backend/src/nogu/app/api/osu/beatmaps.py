@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends
 from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
-import config
-from app.models.osu import *
-from app.models.user import User
-from app.api.users import require_user
-from app.database import auto_session
-from app.objects import Operator
-from app.logging import log, Ansi
+from nogu import config
+from nogu.app.models.osu import *
+from nogu.app.models.user import User
+from nogu.app.api.users import require_user
+from nogu.app.database import auto_session
+from nogu.app.objects import Operator
+from nogu.app.logging import log, Ansi
 
 
 class BeatmapRequestOperator(Operator):

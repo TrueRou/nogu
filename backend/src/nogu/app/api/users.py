@@ -22,10 +22,10 @@ from fastapi_users.router.common import ErrorCode
 from sqlalchemy import or_
 from starlette.requests import Request
 
-from app.database import async_session, auto_session
-from app.models import User
-from app.constants.exceptions import APIException
-from app.models.user import UserRead, UserUpdate, UserWrite
+from nogu.app.database import async_session, auto_session
+from nogu.app.models import User
+from nogu.app.constants.exceptions import APIException
+from nogu.app.models.user import UserRead, UserUpdate, UserWrite
 from config import jwt_secret
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")

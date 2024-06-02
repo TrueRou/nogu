@@ -1,9 +1,8 @@
 import datetime
 from enum import IntEnum, auto
-from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.constants.osu import Ruleset, WinCondition, Mods
+from nogu.app.constants.osu import Ruleset, WinCondition, Mods
 from ..ast_condition import AstCondition
 
 
