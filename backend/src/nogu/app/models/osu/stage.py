@@ -31,7 +31,7 @@ class Stage(StageBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     version: int = Field(default=0)
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    updated_at: datetime.datetime  # we have to mannually update this column
+    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
 
 
 class StageMapBase(SQLModel):

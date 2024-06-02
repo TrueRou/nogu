@@ -1,7 +1,25 @@
 from tests.mock import UserFactory, TeamFactory
+from nogu.app.models import TeamUserLink, TeamSrv
+from nogu.app import database
 
 
 def test_team_belongings(db_session):
-    db_session.add_all(UserFactory.batch(10))
-    db_session.add(TeamFactory.build())
-    db_session.commit()
+    # create 10 users and a team
+    users = UserFactory.batch(10)
+    team = TeamFactory.build()
+    database.add_model(db_session, *users)
+    database.add_model(db_session, team)
+
+    # add 5 users to the team
+    database.add_model(db_session, *[TeamUserLink(team_id=team.id, user_id=user.id) for user in users[:5]])
+
+    # check how many users belong to the team
+    member_num = 0
+    for user in users:
+        try:
+            TeamSrv.check_belongings(db_session, team, user)
+            member_num += 1
+        except:
+            pass
+
+    assert member_num == 5
