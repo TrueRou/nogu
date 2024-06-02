@@ -24,11 +24,7 @@ from starlette.requests import Request
 
 from app.database import async_session, auto_session
 from app.models import User
-from app.constants.exceptions import (
-    APIException,
-    glob_internal,
-    glob_not_exist,
-)
+from app.constants.exceptions import APIException
 from app.models.user import UserRead, UserUpdate, UserWrite
 from config import jwt_secret
 
@@ -42,6 +38,8 @@ user_password_illegal = APIException("Password illegal.", "user.password.illegal
 user_country_illegal = APIException("Country illegal.", "user.country.illegal")
 user_credentials_incorrect = APIException("Incorrect username or password.", "user.credentials.incorrect")
 user_email_duplicated = APIException("Email already exists.", "user.email.duplicated")
+user_internal = APIException("Backend server error.", "user.internal")
+user_not_exist = APIException("Resources not found.", "user.not-exist")
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -104,11 +102,11 @@ def get_jwt_strategy() -> JWTStrategy:
 
 def parse_exception(exception: HTTPException) -> APIException:
     if exception.status_code == 500:
-        return glob_internal
+        return user_internal
     if exception.status_code == 401:
         return user_unauthorized
     if exception.status_code == 404:
-        return glob_not_exist
+        return user_not_exist
     if exception.status_code == 400:
         if type(exception.detail) == dict:
             if exception.detail["code"] in [

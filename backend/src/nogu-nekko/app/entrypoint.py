@@ -82,6 +82,10 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
 
 
 def init_routes(asgi_app: FastAPI) -> None:
+    @asgi_app.get("/")
+    async def root():
+        return {"message": "Welcome to nogu-nekko!"}
+
     response = {
         400: {
             "content": {

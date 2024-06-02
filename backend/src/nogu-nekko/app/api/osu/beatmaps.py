@@ -7,7 +7,6 @@ from app.models.osu import *
 from app.models.user import User
 from app.api.users import require_user
 from app.database import auto_session
-from app.constants.exceptions import glob_not_exist
 from app.objects import Operator
 from app.logging import log, Ansi
 
@@ -33,9 +32,7 @@ beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_reques
 async def get_beatmap(ident: str):
     with auto_session() as session:
         beatmap = BeatmapSrv.from_ident(session, ident)
-        if beatmap is None:
-            raise glob_not_exist
-        return beatmap
+    return beatmap
 
 
 @router.post("/stream/")

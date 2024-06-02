@@ -20,7 +20,5 @@ class APIException(HTTPException):
 
 
 glob_validation = APIException(f"Validation error ", "glob.validation")
-glob_internal = APIException("Backend server error.", "glob.internal")
-glob_not_exist = APIException("Resources not found.", "glob.not-exist")
 glob_no_permission = APIException("No permission.", "glob.no-permission")
-glob_not_belongings = APIException("Resources not belongs to you.", "glob.not-belongings")
+glob_not_belongings = APIException("Not belongings.", "glob.not-belongings")
