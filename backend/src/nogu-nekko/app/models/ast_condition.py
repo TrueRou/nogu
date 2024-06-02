@@ -9,6 +9,6 @@ class AstCondition(SQLModel, table=True):
     name: str = Field()
     description: str | None
     ast_expression: str
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
     user_id: int = Field(foreign_key="users.id")

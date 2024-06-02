@@ -39,7 +39,7 @@ class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     password: str
     privileges: UserPriv = Field(default=UserPriv.UNRESTRICTED)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime | None = Field(sa_column=Column(DateTime(), onupdate=func.now()))
 
     active_team_id: int | None = Field(foreign_key="teams.id")

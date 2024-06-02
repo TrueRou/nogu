@@ -4,9 +4,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.constants.osu import Ruleset, WinCondition, Mods
-
-if TYPE_CHECKING:
-    from ..ast_condition import AstCondition
+from ..ast_condition import AstCondition
 
 
 class PlaylistVisibility(IntEnum):
@@ -34,7 +32,7 @@ class Playlist(PlaylistBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     version: int = Field(default=0)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime  # we have to mannually update this column
 
     user_id: int = Field(foreign_key="users.id")
@@ -53,7 +51,7 @@ class PlaylistHistoryUpdate(SQLModel):
 class PlaylistHistory(PlaylistHistoryBase, table=True):
     __tablename__ = "osu_playlist_history"
 
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
 class PlaylistMapBase(SQLModel):

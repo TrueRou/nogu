@@ -22,5 +22,5 @@ class UserAccount(SQLModel, table=True):
     su_priv: ServerPriv = Field(default=ServerPriv.UNRESTRICTED)
     su_country: str = Field(default="XX")
     su_playtime: int = Field(default=0)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime | None = Field(sa_column=Column(DateTime(), onupdate=func.now()))

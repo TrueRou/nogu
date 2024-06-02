@@ -1,7 +1,7 @@
-from account import UserAccount
-from beatmap import Beatmap, BeatmapEvent, BeatmapSrv
-from performance import Performance, PPFormula
-from playlist import (
+from .account import UserAccount
+from .beatmap import Beatmap, BeatmapEvent, BeatmapSrv
+from .performance import Performance, PPFormula
+from .playlist import (
     Playlist,
     PlaylistBase,
     PlaylistHistory,
@@ -13,8 +13,8 @@ from playlist import (
     PlaylistUpdate,
     PlaylistVisibility,
 )
-from score import Score, ScoreBase, ScoreSrv
-from stage import (
+from .score import Score, ScoreBase, ScoreSrv
+from .stage import (
     Stage,
     StageBase,
     StageMap,

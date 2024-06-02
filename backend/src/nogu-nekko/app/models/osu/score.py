@@ -1,17 +1,14 @@
 import datetime
 from typing import TYPE_CHECKING
-from fastapi import Depends
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 
-from api.users import require_user
 from app.constants.osu import Server, Mods, Ruleset
-from app.constants.exceptions import glob_not_exist, glob_not_belongings
-from app.database import auto_session
+from app.constants.exceptions import glob_not_belongings
+from .performance import Performance
+from ..user import User
 
 if TYPE_CHECKING:
-    from .performance import Performance
     from .stage import Stage, StageMap
-    from ..user import User
     from ..team import TeamUserLink, Team
 
 
@@ -40,7 +37,7 @@ class Score(ScoreBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     full_combo: bool
     grade: str
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
     performances: list[Performance] = Relationship()
 

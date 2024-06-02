@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from users import router as users_router
-from osu import router as osu_router
+from .users import router as users_router
+from .osu import router as osu_router
 
 router = APIRouter()
 

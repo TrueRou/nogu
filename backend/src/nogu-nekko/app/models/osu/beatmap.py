@@ -32,7 +32,7 @@ class Beatmap(SQLModel, table=True):
     hp: float
     star_rating: float
     osu_server: int = Field(default=Server.BANCHO)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     checked_at: datetime.datetime  # the time we last checked for updates
 
     uploaded_by: int | None = Field(default=None, foreign_key="users.id")  # null if beatmap is from remote server
@@ -47,9 +47,7 @@ class BeatmapSrv:
     @staticmethod
     async def _save_response(session: Session, response_data: list[dict[str, Any]]):
         for entry in response_data:
-            filename = "{artist} - {title} ({creator}) [{version}].osu".format(
-                **entry
-            ).translate(IGNORED_BEATMAP_CHARS)
+            filename = "{artist} - {title} ({creator}) [{version}].osu".format(**entry).translate(IGNORED_BEATMAP_CHARS)
 
             _last_update = entry["last_update"]
             last_update = datetime(

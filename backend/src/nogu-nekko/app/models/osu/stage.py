@@ -4,11 +4,9 @@ from sqlmodel import Field, Relationship, SQLModel, Session, select
 from app.constants.exceptions import glob_not_belongings, glob_no_permission
 
 from app.constants.osu import Mods, Ruleset, WinCondition
-
-if TYPE_CHECKING:
-    from ..ast_condition import AstCondition
-    from ..user import User
-    from ..team import TeamUserLink, TeamRole
+from ..ast_condition import AstCondition
+from ..user import User
+from ..team import TeamUserLink, TeamRole
 
 
 class StageBase(SQLModel):
@@ -32,7 +30,7 @@ class Stage(StageBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     version: int = Field(default=0)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime  # we have to mannually update this column
 
 
