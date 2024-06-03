@@ -49,5 +49,4 @@ class User(UserBase, table=True):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
-    active_team_id: int | None = Field(foreign_key="teams.id")
     team_links: list["TeamUserLink"] = Relationship(back_populates="user")

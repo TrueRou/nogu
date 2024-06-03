@@ -1,6 +1,8 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from nogu.app import database
+from nogu.app.models.team import Team
 from ossapi import MatchResponse, MatchEvent, OssapiAsync
 from sqlmodel import select
 
@@ -17,26 +19,10 @@ router = APIRouter(prefix="/scores", tags=["scores"])
 
 
 @router.post("/", response_model=Score)
-def submit_score(score: ScoreBase, user: User = Depends(require_user)):
-    with manual_session() as session:
-        # try to get the stage map of the user active team.
-        sentence = select(StageMap).join(Stage).where(Stage.team_id == user.active_team_id).where(StageMap.map_md5 == score.beatmap_md5)
-        stage_map = session.exec(sentence).first()
-        if stage_map is not None:
-            # check if the score is valid for the stage map condition.
-            ast_expression = stage_map.condition.ast_expression
-            variables = {
-                "acc": score.accuracy,
-                "max_combo": score.highest_combo,
-                "mods": score.mods,
-                "score": score.score,
-            }
-            if AstChecker(ast_expression).check(variables):
-                db_score = Score(**score.model_dump(), full_combo=True, grade="S")  # TODO: full combo and grade calculation
-                session.add(db_score)  # TODO: calculate for performance points
-                session.commit()
-                session.refresh(db_score)
-                return db_score
+async def submit_score(score: ScoreBase, user: User = Depends(require_user)):
+    with auto_session() as session:
+        score = ScoreSrv.submit_score(session, score, user)
+    return score
 
 
 class BanchoMatchInspector(Inspector):
@@ -95,7 +81,7 @@ async def submit_score_partial(keywords: str, beatmap_md5: str, user: User = Dep
 
         if tuple:
             (stage_map, beatmap, stage) = tuple
-            
+
             data = keywords.split()  # 5miss 96.5acc 600c 100w
             miss = 0
             acc = 100.0

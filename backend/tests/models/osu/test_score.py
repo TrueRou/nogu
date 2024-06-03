@@ -1,7 +1,7 @@
-from nogu.app.api.osu import scores
 from nogu.app.models.osu.score import Score, ScoreSrv
 from nogu.app.models.team import TeamVisibility
-from tests.mock import AstConditionFactory, BeatmapFactory, ScoreFactory, StageFactory, StageMapFactory, UserFactory, TeamFactory
+import pytest
+from tests.mock import AstConditionFactory, BeatmapFactory, ScoreBaseFactory, ScoreFactory, StageFactory, StageMapFactory, UserFactory, TeamFactory
 from nogu.app.models import TeamUserLink
 from nogu.app import database
 
@@ -63,24 +63,36 @@ def test_score_visibility(db_session):
         assert ScoreSrv.check_score_visibility(db_session, score, user) == True
         assert ScoreSrv.check_score_visibility(db_session, score1, user) == True
 
-def test_score_submit(db_session):
-    user = UserFactory.build()
-    beatmap = BeatmapFactory.build()
-    team = TeamFactory.build()
-    database.add_model(db_session, beatmap, team, user)
 
+@pytest.mark.asyncio
+async def test_score_submit(db_session):
+    user = UserFactory.build()
+    user2 = UserFactory.build()
+    beatmap = BeatmapFactory.build()
+    beatmap2 = BeatmapFactory.build()
+    team = TeamFactory.build(active=True)
+    database.add_model(db_session, beatmap, beatmap2, team, user, user2)
+
+    ast = AstConditionFactory().build(ast_expression="acc > 90", user_id=user.id)
+    database.add_model(db_session, ast)
     stage = StageFactory.build(team_id=team.id)
     database.add_model(db_session, stage)
-    stage_map = StageMapFactory.build(stage_id=stage.id, map_md5=beatmap.md5)
+    stage_map = StageMapFactory.build(stage_id=stage.id, map_md5=beatmap.md5, condition_id=ast.id)
     database.add_model(db_session, stage_map)
     user_team = TeamUserLink(team_id=team.id, user_id=user.id)
     database.add_model(db_session, user_team)
-    ast = AstConditionFactory().build(ast_expression="acc > 90", user_id=user.id)
-    database.add_model(db_session, ast)
 
-    score1 = ScoreFactory.build(user_id=user.id, stage_id=stage.id, beatmap_md5=beatmap.md5, accuracy=80)
-    score2 = ScoreFactory.build(user_id=user.id, stage_id=stage.id, beatmap_md5=beatmap.md5, accuracy=95)
-    scores.submit_score(score1, user)
-    scores.submit_score(score2, user)
-    
-    assert db_session.exec(database.count(Score)).one() == 1
+    score1 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap.md5, accuracy=80.0)
+    score2 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap.md5, accuracy=95.0)
+    score3 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap2.md5, accuracy=100.0)
+    score4 = ScoreBaseFactory.build(user_id=user2.id, beatmap_md5=beatmap.md5, accuracy=95.0)
+
+    score1: Score = ScoreSrv.submit_score(db_session, score1, user)
+    score2: Score = ScoreSrv.submit_score(db_session, score2, user)
+    score3: Score = ScoreSrv.submit_score(db_session, score3, user)
+    score4: Score = ScoreSrv.submit_score(db_session, score4, user2)
+
+    assert score3.stage_id == None  # stage map ×
+    assert score1.stage_id == None  # stage map √ condition ×
+    assert score4.stage_id == None  # stage map √ condition √ user ×
+    assert score2.stage_id == stage.id  # stage map √ condition √ user √

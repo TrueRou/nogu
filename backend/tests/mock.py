@@ -1,9 +1,10 @@
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
+from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory import Ignore
 
 from nogu.app.models.ast_condition import AstCondition
 from nogu.app.models.osu.beatmap import Beatmap
-from nogu.app.models.osu.score import Score
+from nogu.app.models.osu.score import Score, ScoreBase
 from nogu.app.models.osu.stage import Stage, StageMap
 from nogu.app.models.team import Team
 from nogu.app.models.user import User
@@ -22,6 +23,12 @@ class UserFactory(SQLAlchemyFactory[User]):
 
 
 class ScoreFactory(SQLAlchemyFactory[Score]):
+    user_id = Ignore()
+    stage_id = Ignore()
+    beatmap_md5 = Ignore()
+
+
+class ScoreBaseFactory(ModelFactory[ScoreBase]):
     user_id = Ignore()
     stage_id = Ignore()
     beatmap_md5 = Ignore()
