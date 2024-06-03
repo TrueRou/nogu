@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nogu-nekko"
+name = "nogu"
 version = "0.1.0"
 description = "tournament practicing platform. In order to reduce the work in the progress of collecting data, sorting data and analyzing data."
 authors = ["Usagi no Niku <chenbohan911@163.com>"]
