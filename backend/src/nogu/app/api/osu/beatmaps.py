@@ -18,7 +18,7 @@ class BeatmapRequestOperator(Operator):
             if beatmap is not None:
                 self.skip_next_interval = True
             if beatmap is None:
-                beatmap = await BeatmapSrv.request_api(args)
+                beatmap = await BeatmapSrv.request_api(db_session, args)
             if beatmap is None:
                 return BeatmapEvent(message="Beatmap not found.")
             return BeatmapEvent(beatmap=beatmap)

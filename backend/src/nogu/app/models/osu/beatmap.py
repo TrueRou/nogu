@@ -32,8 +32,9 @@ class Beatmap(SQLModel, table=True):
     hp: float
     star_rating: float
     osu_server: int = Field(default=Server.BANCHO)
+    server_updated_at: datetime.datetime
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    checked_at: datetime.datetime  # the time we last checked for updates
+    checked_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # the time we last checked for updates
 
     uploaded_by: int | None = Field(default=None, foreign_key="users.id")  # null if beatmap is from remote server
 
@@ -45,12 +46,12 @@ class BeatmapEvent(SQLModel):
 
 class BeatmapSrv:
     @staticmethod
-    async def _save_response(session: Session, response_data: list[dict[str, Any]]):
+    def _save_response(session: Session, response_data: list[dict[str, Any]]):
         for entry in response_data:
             filename = "{artist} - {title} ({creator}) [{version}].osu".format(**entry).translate(IGNORED_BEATMAP_CHARS)
 
             _last_update = entry["last_update"]
-            last_update = datetime(
+            last_update = datetime.datetime(
                 year=int(_last_update[0:4]),
                 month=int(_last_update[5:7]),
                 day=int(_last_update[8:10]),
@@ -71,7 +72,7 @@ class BeatmapSrv:
                 filename=filename,
                 total_length=int(entry["total_length"]),
                 max_combo=int(entry["max_combo"]),
-                mode=int(entry["mode"]),
+                ruleset=int(entry["mode"]),
                 bpm=float(entry["bpm"] if entry["bpm"] is not None else 0),
                 cs=float(entry["diff_size"]),
                 od=float(entry["diff_overall"]),
@@ -82,6 +83,7 @@ class BeatmapSrv:
             )
 
             session.merge(beatmap)
+        session.commit()
 
     def from_ident(session: Session, ident: str):
         if ident.isnumeric():
@@ -91,7 +93,7 @@ class BeatmapSrv:
             return session.get(Beatmap, ident)
 
     @staticmethod
-    async def request_api(ident: str):
+    async def request_api(session: Session, ident: str) -> Beatmap | None:
         params = {}
 
         if MD5_PATTERN.match(ident):
@@ -111,7 +113,5 @@ class BeatmapSrv:
             response = await request_session.get(url, params=params)
             response_data = await response.json()
             if response.status == 200 and response_data:
-                with auto_session() as session:
-                    BeatmapSrv._save_response(session, response_data)
-                    a = BeatmapSrv.from_ident(session, ident)
-                    return BeatmapSrv.from_ident(session, ident)
+                BeatmapSrv._save_response(session, response_data)
+                return BeatmapSrv.from_ident(session, ident)
