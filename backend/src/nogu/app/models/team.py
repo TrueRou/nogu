@@ -1,7 +1,6 @@
 import datetime
 from enum import IntEnum, auto
 from sqlmodel import Field, Relationship, SQLModel, Session, select
-from nogu.app.constants.exceptions import glob_not_belongings
 
 from .user import User
 
@@ -58,8 +57,7 @@ class TeamUserLink(SQLModel, table=True):
 
 
 class TeamSrv:
-    def check_belongings(session: Session, team: Team, user: User):
+    def check_belongings(session: Session, team: Team, user: User) -> bool:
         if team and user:
             sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
-            if session.exec(sentence).first() is None:
-                raise glob_not_belongings
+            return session.exec(sentence).first() is not None

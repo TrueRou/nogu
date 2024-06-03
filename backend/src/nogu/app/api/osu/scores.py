@@ -10,6 +10,7 @@ from nogu.app.models.osu import *
 from nogu.app.models.user import User
 from nogu.app.constants.osu import Server
 from nogu.app.database import auto_session, manual_session
+from nogu.app.constants.exceptions import glob_not_belongings
 from nogu.app.objects import AstChecker, Inspector
 
 router = APIRouter(prefix="/scores", tags=["scores"])
@@ -75,7 +76,8 @@ bancho_match_inspector = BanchoMatchInspector(
 async def get_score(score_id: int, user: User = Depends(require_user)):
     with auto_session() as session:
         score = session.get(Score, score_id)
-        ScoreSrv.check_score_belongings(session, score, user)
+        if ScoreSrv.check_score_visibility(session, score, user):
+            raise glob_not_belongings
     return score
 
 

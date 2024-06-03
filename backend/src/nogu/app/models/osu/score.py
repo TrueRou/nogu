@@ -3,13 +3,10 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 
 from nogu.app.constants.osu import Server, Mods, Ruleset
-from nogu.app.constants.exceptions import glob_not_belongings
 from .performance import Performance
 from ..user import User
-
-if TYPE_CHECKING:
-    from .stage import Stage, StageMap
-    from ..team import TeamUserLink, Team
+from ..team import TeamUserLink, Team, TeamVisibility
+from .stage import Stage
 
 
 class ScoreBase(SQLModel):
@@ -43,17 +40,24 @@ class Score(ScoreBase, table=True):
 
 
 class ScoreSrv:
-    # you have permission to fetch the beatmap scores in your team stages.
-    def check_score_belongings(session: Session, score: Score, user: User):
+    # you have limited permission to fetch the scores.
+    def check_score_visibility(session: Session, score: Score, user: User) -> bool:
+        # You can fetch your own scores.
         if score is None or score.user_id == user.id:
-            return  # You can fetch your own scores.
-        # find if the score is made by a teammate in your teams.
-        sentence = select(User, Team).join(Team).join(TeamUserLink).where(TeamUserLink.user_id == user.id, User.id == score.user_id)
-        (mate, team) = session.exec(sentence).first()
-        if mate and team:
-            # it is a score made by a teammate in your team, let's check if the beatmap is in that team stages.
-            sentence = select(StageMap).join(Stage).where(Stage.team_id == team.id, StageMap.map_md5 == score.beatmap_md5)
-            if session.exec(sentence).first():
-                # the beatmap is in the team stages, you can fetch the score.
-                return
-        raise glob_not_belongings
+            return True
+
+        sentence = select(Team).join(Stage).where(Stage.id == score.stage_id)
+        team = session.exec(sentence).first()
+
+        assert team is not None  # the stage must belong to a team
+
+        # You can fetch scores that from public teams.
+        if team.visibility == TeamVisibility.PUBLIC:
+            return True
+
+        # You can fetch scores if you are in the team that the score belongs to.
+        sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
+        if session.exec(sentence).first():
+            return True
+
+        return False

@@ -7,8 +7,7 @@ def test_team_belongings(db_session):
     # create 10 users and a team
     users = UserFactory.batch(10)
     team = TeamFactory.build()
-    database.add_model(db_session, *users)
-    database.add_model(db_session, team)
+    database.add_model(db_session, *users, team)
 
     # add 5 users to the team
     database.add_model(db_session, *[TeamUserLink(team_id=team.id, user_id=user.id) for user in users[:5]])
@@ -16,10 +15,7 @@ def test_team_belongings(db_session):
     # check how many users belong to the team
     member_num = 0
     for user in users:
-        try:
-            TeamSrv.check_belongings(db_session, team, user)
+        if TeamSrv.check_belongings(db_session, team, user):
             member_num += 1
-        except:
-            pass
 
     assert member_num == 5
