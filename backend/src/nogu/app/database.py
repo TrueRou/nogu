@@ -1,12 +1,13 @@
 import contextlib
-from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy import func
+from sqlmodel import SQLModel, create_engine, Session, select
+from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from nogu import config
 
 engine = create_engine(config.mysql_url, echo=False, future=True)
 async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"), echo=False, future=True)
-
 
 def create_db_and_tables(engine):
     import nogu.app.models  # make sure all models are imported (keep its record in metadata)
@@ -38,6 +39,8 @@ async def async_session():
     async with AsyncSession(async_engine) as session:
         yield session
 
+def count(model: _TCCA[_T0]) -> SelectOfScalar[int]:
+    return select(func.count()).select_from(model)
 
 def add_model(session: Session, *models):
     [session.add(model) for model in models if model]

@@ -26,7 +26,7 @@ from nogu.app.database import async_session, auto_session
 from nogu.app.models import User
 from nogu.app.constants.exceptions import APIException
 from nogu.app.models.user import UserRead, UserUpdate, UserWrite
-from config import jwt_secret
+from nogu.config import jwt_secret
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 router = APIRouter()

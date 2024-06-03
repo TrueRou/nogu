@@ -81,8 +81,8 @@ async def get_score(score_id: int, user: User = Depends(require_user)):
     return score
 
 
-@router.post("/make/", response_model=Score)
-async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(require_user)):
+@router.post("/partial/", response_model=Score)
+async def submit_score_partial(keywords: str, beatmap_md5: str, user: User = Depends(require_user)):
     with auto_session() as session:
         sentence = (
             select(StageMap, Beatmap, Stage)
@@ -91,9 +91,11 @@ async def make_score(keywords: str, beatmap_md5: str, user: User = Depends(requi
             .where(Stage.team_id == user.active_team_id)
             .where(StageMap.map_md5 == beatmap_md5)
         )
-        (stage_map, beatmap, stage) = session.exec(sentence).first()
+        tuple = session.exec(sentence).first()
 
-        if stage_map and beatmap and stage:
+        if tuple:
+            (stage_map, beatmap, stage) = tuple
+            
             data = keywords.split()  # 5miss 96.5acc 600c 100w
             miss = 0
             acc = 100.0
