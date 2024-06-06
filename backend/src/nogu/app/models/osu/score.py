@@ -71,7 +71,7 @@ class ScoreSrv:
             "mods": score.mods,
             "score": score.score,
         }
-        AstChecker(stage_map.condition.ast_expression).check(variables)
+        return AstChecker(stage_map.condition.ast_expression).check(variables)
 
     def _ensure_grade(score: Score, beatmap: Beatmap):
         score.grade = "S"
@@ -91,6 +91,7 @@ class ScoreSrv:
             .join(Stage, onclause=StageMap.stage_id == Stage.id)
             .join(Team, onclause=Stage.team_id == Team.id)
             .join(TeamUserLink, onclause=TeamUserLink.team_id == Team.id)
+            .join(Beatmap, onclause=StageMap.map_md5 == Beatmap.md5)
             .where(StageMap.map_md5 == score.beatmap_md5)
             .where(Team.active == True)
             .where(TeamUserLink.user_id == user.id, TeamUserLink.team_id == Team.id)
@@ -105,7 +106,7 @@ class ScoreSrv:
 
     def submit_partial(session: Session, keywords: str, beatmap_md5: str, user: User):
         sentence = (
-            select(StageMap, Beatmap, Stage, Team)
+            select(StageMap, Beatmap, Stage)
             .join(Stage, onclause=StageMap.stage_id == Stage.id)
             .join(Beatmap, onclause=StageMap.map_md5 == Beatmap.md5)
             .join(Team, onclause=Stage.team_id == Team.id)
@@ -118,7 +119,7 @@ class ScoreSrv:
 
         matched = session.exec(sentence).first()
         if matched:
-            (stage_map, beatmap, stage, team) = matched
+            (stage_map, beatmap, stage) = matched
             data = keywords.split()  # 5miss 96.5acc 600c 100w
             miss = 0
             acc = 100.0
@@ -139,8 +140,6 @@ class ScoreSrv:
             n100 = numerator / denominator
 
             fake_score = Score(
-                user_id=user.id,
-                beatmap_md5=beatmap_md5,
                 score=score,
                 accuracy=acc,
                 highest_combo=combo,
@@ -153,12 +152,11 @@ class ScoreSrv:
                 num_50s=0,
                 ruleset=stage.ruleset,
                 osu_server=Server.LOCAL,
-                full_combo=True,
-                grade="S",
+                beatmap_md5=beatmap_md5,
                 user_id=user.id,
                 stage_id=stage.id,
             )
-
+            ScoreSrv._ensure_grade(fake_score, beatmap)
             if ScoreSrv._check_ast(fake_score, stage_map):
                 database.add_model(session, fake_score)
         return fake_score
