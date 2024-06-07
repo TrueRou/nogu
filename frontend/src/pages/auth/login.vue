@@ -1,13 +1,25 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user_information';
 import { ref } from 'vue';
+import { client } from '@/requests'
+import router from '@/routes';
+import { useGlobal } from '@/store/global';
 
 const username = ref('')
 const password = ref('')
-const user = useUserStore()
+const global = useGlobal()
 
 const handleLogin = async () => {
-    await user.login(username.value, password.value)
+    const { data, error } = await client.POST('/auth/jwt/login', {
+        body: {
+            username: username.value,
+            password: password.value
+        }
+    })
+    if (!error && data) {
+        localStorage.setItem('accessToken', data.access_token)
+        global.closeDialog() // close the dialog
+        router.go(0) // refresh the page
+    }
 }
 
 </script>

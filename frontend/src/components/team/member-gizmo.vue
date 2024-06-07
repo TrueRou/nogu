@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { type ITeamMember, Team } from '@/objects/team'
-import { t } from '@/translatable';
 const props = defineProps<{
     member: ITeamMember[]
 }>()

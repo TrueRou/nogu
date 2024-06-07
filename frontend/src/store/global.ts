@@ -1,8 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { type ITranslateableList, ttl } from '@/translatable'
 
-export const useUIStore = defineStore('user_interface', () => {
+export const useGlobal = defineStore('global', () => {
     const cachedRoute = ref('')
     const dialog = ref({
         'isOpen': false,
@@ -16,8 +15,16 @@ export const useUIStore = defineStore('user_interface', () => {
     })
 
     function openDialog(component: any) {
-        dialog.value.isOpen = true
-        dialog.value.component = component
+        if (dialog.value.isOpen) {
+            dialog.value.isOpen = false
+            setTimeout(() => {
+                dialog.value.isOpen = true
+                dialog.value.component = component
+            }, 200)
+        } else {
+            dialog.value.isOpen = true
+            dialog.value.component = component
+        }
     }
 
     function closeDialog() {
@@ -25,11 +32,7 @@ export const useUIStore = defineStore('user_interface', () => {
         dialog.value.component = null
     }
 
-    function showException(exception_node: ITranslateableList) {
-        showNotification('error', ttl(exception_node))
-    }
-
-    function showNotification(type: string, message: string, i18n_node?: string) {
+    function showNotification(type: string, message: string) {
         toast.value.isOpen = true
         toast.value.type = type
         toast.value.message = message
@@ -38,5 +41,5 @@ export const useUIStore = defineStore('user_interface', () => {
         }, 3000)
     }
 
-    return { dialog, toast, cachedRoute, openDialog, closeDialog, showNotification, showException }
+    return { dialog, toast, cachedRoute, openDialog, closeDialog, showNotification }
 })

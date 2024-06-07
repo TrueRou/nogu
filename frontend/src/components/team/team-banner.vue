@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { type ITeam } from '@/objects/team'
-import MemberSection from '@/views/widgets/MemberSection.vue';
+import type { Team } from '@/schemas/types';
+import MemberGizmo from './member-gizmo.vue';
+
 const props = defineProps<{
-    team: ITeam
+    team: Team
 }>()
 </script>
 
@@ -15,6 +16,6 @@ const props = defineProps<{
                 <span class="text-sm mont">Stage on {{ props.team.active_stage.name }}</span>
             </div>
         </div>
-        <MemberSection :member="team.member" />
+        <MemberGizmo :member="team.member" />
     </div>
 </template>

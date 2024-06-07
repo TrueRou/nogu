@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "update": "npx openapi-typescript http://127.0.0.1:8000/openapi.json -o src/schemas/schema.d.ts",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "axios": "^1.6.0",
+    "openapi-fetch": "^0.9.7",
     "pinia": "^2.1.6",
     "qs": "^6.11.2",
     "timeago.js": "^4.0.2",
@@ -19,12 +21,13 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
-    "@types/node": "^18.17.17",
+    "@types/node": "^18.19.34",
     "@vitejs/plugin-vue": "^4.3.4",
     "@vue/tsconfig": "^0.4.0",
     "autoprefixer": "^10.4.16",
     "daisyui": "^3.9.4",
     "npm-run-all2": "^6.0.6",
+    "openapi-typescript": "^6.7.6",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "typescript": "~5.2.0",

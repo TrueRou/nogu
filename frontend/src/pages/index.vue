@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useUIStore } from '@/stores/user_interface';
+import { useGlobal } from '@/store/global';
 import { markRaw, ref } from 'vue';
-import Login from '@/views/dialogs/Login.vue';
-import Register from '@/views/dialogs/Register.vue';
+import Register from './auth/register.vue';
+import Login from './auth/login.vue';
 
-const ui = useUIStore();
+const global = useGlobal();
 const features = ref(
     [
         {
@@ -30,8 +30,8 @@ const features = ref(
                     style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                 <h2 class="text-xl font-bold ">Focusing on collecting, sorting, analyzing scores</h2>
                 <div class="flex mt-2">
-                    <button class="btn btn-primary mr-2 font-bold" @click="ui.openDialog(markRaw(Register));">Try</button>
-                    <button class="btn btn-accent mr-2 font-bold" @click="ui.openDialog(markRaw(Login));">Login</button>
+                    <button class="btn btn-primary mr-2 font-bold" @click="global.openDialog(markRaw(Register));">Try</button>
+                    <button class="btn btn-accent mr-2 font-bold" @click="global.openDialog(markRaw(Login));">Login</button>
                 </div>
             </div>
             <img class="hidden h-64 sm:flex md:ml-24" src="https://s2.loli.net/2023/11/01/mrZisGMnxqtC8Tv.png">

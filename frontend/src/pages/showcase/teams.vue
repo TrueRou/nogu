@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
-import { Team, type ITeam, type ITeamShowcaseParams } from '@/objects/team'
-import TeamCard from '@/views/widgets/TeamCard.vue';
+import teamBanner from '@/components/team/team-banner.vue';
+import type { Team } from '@/schemas/types';
+import { client } from '@/requests';
 
-const statelessTeam = new Team()
-
-const teams = ref<ITeam[]>([])
+const teams = ref<Team[]>([])
 const teamParams = reactive({
     status: -1
-} as ITeamShowcaseParams)
+})
 
-watch([teamParams], async () => teams.value = await statelessTeam.fetchShowcase(teamParams), { immediate: true })
+const fetchTeams = async () => {
+    const { data } = await client.GET('/teams/')
+    if (data) teams.value = data
+}
+
+watch([teamParams], async () => await fetchTeams(), { immediate: true })
 </script>
 
 <template>
@@ -24,9 +28,9 @@ watch([teamParams], async () => teams.value = await statelessTeam.fetchShowcase(
             aria-label="Achieved" />
     </div>
     <div class="flex flex-col mt-2">
-        <div v-for="team in teams" :key="team['id']" class="flex mb-4 h-44 rounded-2xl"
+        <div v-for="team in teams" :key="Number(team.id)" class="flex mb-4 h-44 rounded-2xl"
             style="background: url('https://assets.ppy.sh/beatmaps/1990406/covers/cover@2x.jpg?1699284105') center center no-repeat; background-size: cover;">
-            <TeamCard :team="team" />
+            <teamBanner :team="team" />
         </div>
     </div>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { markRaw, ref } from 'vue';
-import TeamProfile from './team/TeamProfile.vue'
-const selectedComponent = ref(markRaw(TeamProfile))
+import profile from './profile.vue';
+
+const selectedComponent = ref(markRaw(profile))
 </script>
 <template>
     <div class="flex flex-col-reverse w-full justify-start md:flex-row md:mt-1 md:mb-1 h-full">
@@ -12,7 +13,7 @@ const selectedComponent = ref(markRaw(TeamProfile))
         <div
             class="flex md:float-left md:h-90p h-16 w-full md:w-40 bottom-2 left-2 rounded-2xl fixed bg-primary md:bg-neutral w-90p">
             <div class="flex md:flex-col w-full md:mt-6 md:justify-start content-center flex-wrap justify-center">
-                <input v-model="selectedComponent" :value="markRaw(TeamProfile)"
+                <input v-model="selectedComponent" :value="markRaw(profile)"
                     class="flex btn h-full w-32 md:h-6 md:w-full btn-ghost rounded-none normal-case" type="radio"
                     aria-label="Profile">
                 <input v-model="selectedComponent" :value="null"

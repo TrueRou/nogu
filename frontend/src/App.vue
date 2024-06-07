@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { Transition, ref } from 'vue';
-import { useUIStore } from '@/stores/user_interface';
+import { useGlobal } from './store/global';
 
-const ui = useUIStore();
+const global = useGlobal();
 const scrollTop = ref(0);
 
 const onScroll = () => {
@@ -15,7 +15,7 @@ window.addEventListener('scroll', onScroll)
 </script>
 
 <template>
-  <div :class="ui.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
+  <div :class="global.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col mb-2 flex-1">
       <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0 z-10">
         <div class="navbar min-h-fit h-12 md:h-14 bg-primary pt-0 pb-0">
@@ -53,25 +53,25 @@ window.addEventListener('scroll', onScroll)
     </div>
   </div>
   <Transition name="fade">
-    <div v-if="ui.toast.isOpen" class="z-20">
-      <div v-if="ui.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
+    <div v-if="global.toast.isOpen" class="z-20">
+      <div v-if="global.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
         <i class="fa-solid fa-circle-info"></i>
-        <p class="whitespace-pre-line">{{ ui.toast.message }}</p>
+        <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>
-      <div v-if="ui.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
+      <div v-if="global.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <p class="whitespace-pre-line">{{ ui.toast.message }}</p>
+        <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>
     </div>
   </Transition>
   <Transition name="fade">
-    <div v-if="ui.dialog.isOpen" class="dialog-mask absolute z-30" @click="ui.closeDialog()">
+    <div v-if="global.dialog.isOpen" class="dialog-mask absolute z-30" @click="global.closeDialog()">
     </div>
   </Transition>
   <div class="dialog-container z-40">
     <Transition name="bounce">
-      <div v-if="ui.dialog.isOpen" class="bg-neutral rounded-xl">
-        <component :is="ui.dialog.component"></component>
+      <div v-if="global.dialog.isOpen" class="bg-neutral rounded-xl">
+        <component :is="global.dialog.component"></component>
       </div>
     </Transition>
   </div>
