@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import teamBanner from '@/components/team/team-banner.vue';
-import type { Team } from '@/schemas/types';
-import { client } from '@/requests';
+import type { Team } from '@/def/types';
+import { client } from '@/def/requests';
 
 const teams = ref<Team[]>([])
 const teamParams = reactive({

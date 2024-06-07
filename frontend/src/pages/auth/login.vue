@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { client } from '@/requests'
-import router from '@/routes';
+import { client } from '@/def/requests';
+import router from '@/router';
 import { useGlobal } from '@/store/global';
+import { ref } from 'vue';
 
 const username = ref('')
 const password = ref('')

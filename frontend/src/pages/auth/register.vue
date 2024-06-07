@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { client } from '@/requests';
-import router from '@/routes';
+import { client } from '@/def/requests';
+import router from '@/router';
 import { useGlobal } from '@/store/global';
 import { markRaw, ref } from 'vue';
 import Login from './login.vue';

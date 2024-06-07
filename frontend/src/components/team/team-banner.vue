@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Team } from '@/schemas/types';
+import type { Team } from '@/def/types';
 import MemberGizmo from './member-gizmo.vue';
 
 const props = defineProps<{

@@ -1,5 +1,5 @@
-import { client } from '@/requests';
-import type { User } from '@/schemas/types';
+import { client } from '@/def/requests';
+import type { User } from '@/def/types';
 import { defineStore } from 'pinia';
 
 export const useSessionStore = defineStore('session', {

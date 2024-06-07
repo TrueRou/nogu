@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { Transition, ref } from 'vue';
-import { useGlobal } from './store/global';
+import { useGlobal } from '@/store/global';
 
 const global = useGlobal();
 const scrollTop = ref(0);

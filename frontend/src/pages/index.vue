@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import Login from '@/pages/auth/login.vue';
+import Register from '@/pages/auth/register.vue';
 import { useGlobal } from '@/store/global';
 import { markRaw, ref } from 'vue';
-import Register from './auth/register.vue';
-import Login from './auth/login.vue';
 
 const global = useGlobal();
 const features = ref(

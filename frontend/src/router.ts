@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeIndex from './pages/index.vue'
-import TeamIndex from './pages/team/index.vue'
-import ShowcaseIndex from './pages/showcase/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,17 +6,17 @@ const router = createRouter({
     {
       path: '/',
       name: 'index',
-      component: HomeIndex,
+      component: () => import('@/pages/index.vue'),
     },
     {
       path: '/showcase',
       name: 'showcase',
-      component: ShowcaseIndex,
+      component: () => import('@/pages/showcase/index.vue'),
     },
     {
       path: '/teams/:teamId',
       name: 'team',
-      component: TeamIndex,
+      component: () => import('@/pages/team/index.vue'),
     }
   ]
 })
