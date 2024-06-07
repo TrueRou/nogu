@@ -95,7 +95,7 @@ class ScoreSrv:
             .where(StageMap.map_md5 == score.beatmap_md5)
             .where(Team.active == True)
             .where(TeamUserLink.user_id == user.id, TeamUserLink.team_id == Team.id)
-            .order_by(Team.updated_at)
+            .order_by(Team.updated_at.desc())
         )
         matched = session.exec(sentence).first()
         if matched and ScoreSrv._check_ast(prebuild_score, matched[0]):
@@ -114,7 +114,7 @@ class ScoreSrv:
             .where(StageMap.map_md5 == beatmap_md5)
             .where(Team.active == True)
             .where(TeamUserLink.user_id == user.id, TeamUserLink.team_id == Team.id)
-            .order_by(Team.updated_at)
+            .order_by(Team.updated_at.desc())
         )
 
         matched = session.exec(sentence).first()

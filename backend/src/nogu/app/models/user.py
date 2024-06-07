@@ -1,11 +1,7 @@
 import datetime
 from enum import IntFlag, auto
-from typing import TYPE_CHECKING
 from fastapi_users.schemas import CreateUpdateDictModel
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from .team import TeamUserLink
+from sqlmodel import Field, SQLModel
 
 
 class UserPriv(IntFlag):
@@ -17,6 +13,12 @@ class UserBase(SQLModel):
     username: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
     country: str = Field(default="XX")
+
+
+# for fastapi-users to read a user
+class UserRead(UserBase):
+    id: int
+    privileges: UserPriv
 
 
 # for fastapi-users to create a user
@@ -32,14 +34,6 @@ class UserUpdate(SQLModel):
     country: str | None
 
 
-# for fastapi-users to read a user
-class UserRead(UserBase):
-    id: int
-    privileges: UserPriv
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
-
-
 class User(UserBase, table=True):
     __tablename__ = "users"
 
@@ -49,4 +43,10 @@ class User(UserBase, table=True):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
-    team_links: list["TeamUserLink"] = Relationship(back_populates="user")
+    @property
+    def is_active(self) -> bool:
+        return self.privileges & UserPriv.UNRESTRICTED
+
+    @property
+    def is_verified(self) -> bool:
+        return True

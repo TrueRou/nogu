@@ -2,7 +2,7 @@ import datetime
 from enum import IntEnum, auto
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 
-from .user import User
+from .user import User, UserRead
 
 
 class TeamVisibility(IntEnum):
@@ -24,6 +24,14 @@ class TeamBase(SQLModel):
     active_until: datetime.datetime | None  # null if team is active indefinitely
 
 
+# for sqlmodel to serialize the full team
+class TeamRead(TeamBase):
+    id: int
+    active: bool
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+
 class TeamUpdate(SQLModel):
     name: str | None
     slogan: str | None
@@ -40,7 +48,7 @@ class Team(TeamBase, table=True):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
 
-    user_links: list["TeamUserLink"] = Relationship(back_populates="team")
+    user_links: list["TeamUserLink"] = Relationship(sa_relationship_kwargs={"lazy": "subquery"})
 
 
 class TeamUserLink(SQLModel, table=True):
@@ -52,8 +60,15 @@ class TeamUserLink(SQLModel, table=True):
     joined_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
 
-    team: Team = Relationship(back_populates="user_links")
-    user: User = Relationship(back_populates="team_links")
+    user: User = Relationship(sa_relationship_kwargs={"lazy": "subquery"})
+
+
+class TeamWithMembers(TeamRead):
+    class TeamUserLinkPublic(SQLModel):
+        role: TeamRole
+        user: UserRead
+
+    user_links: list[TeamUserLinkPublic]
 
 
 class TeamSrv:

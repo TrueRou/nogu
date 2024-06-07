@@ -16,6 +16,8 @@ from nogu.app.api.users import parse_exception
 from nogu.app.constants.exceptions import APIException, glob_validation
 from nogu.app.api.osu import beatmaps, scores
 
+keeping_tasks: list[asyncio.Task] = []
+
 
 def init_openapi(asgi_app: FastAPI) -> None:
     asgi_app.openapi_schema = get_openapi(
@@ -53,13 +55,19 @@ def init_events(asgi_app: FastAPI) -> None:
     async def on_startup() -> None:
         try:
             with manual_session() as session:
-                asyncio.create_task(beatmaps.beatmap_request_operator.operate_async())
-                asyncio.create_task(scores.bancho_match_inspector.inspect_async())
+                keeping_tasks.append(asyncio.create_task(beatmaps.beatmap_request_operator.operate_async()))
+                keeping_tasks.append(asyncio.create_task(scores.bancho_match_inspector.inspect_async()))
                 session.exec(text("SELECT 1"))
                 database.create_db_and_tables(database.engine)  # TODO: Sql migration
                 log("Startup process complete.", Ansi.LGREEN)
         except OperationalError:
             log("Failed to connect to the database.", Ansi.RED)
+
+    @asgi_app.on_event("shutdown")
+    async def on_shutdown() -> None:
+        [task.cancel() for task in keeping_tasks]
+        await database.async_engine.dispose()
+        database.engine.dispose()
 
 
 def init_exception_handlers(asgi_app: FastAPI) -> None:

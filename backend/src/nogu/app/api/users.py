@@ -22,7 +22,7 @@ from fastapi_users.router.common import ErrorCode
 from sqlalchemy import or_
 from starlette.requests import Request
 
-from nogu.app.database import async_session, auto_session
+from nogu.app.database import async_session, manual_session
 from nogu.app.models import User
 from nogu.app.constants.exceptions import APIException
 from nogu.app.models.user import UserRead, UserUpdate, UserWrite
@@ -44,7 +44,7 @@ user_not_exist = APIException("Resources not found.", "user.not-exist")
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def get_by_ident(self, ident: str) -> Optional[models.UP]:
-        with auto_session() as session:
+        with manual_session() as session:
             sentence = select(User).where(or_(User.email == ident, User.username == ident))
             user = session.exec(sentence).first()
             if user is None:
@@ -66,7 +66,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         if len(user_create.country) != 2 or user_create.country.isalpha() == False:
             raise user_country_illegal
 
-        with auto_session() as session:
+        with manual_session() as session:
             existing_user = session.exec(select(User).where(User.username == user_create.username)).first()
             if existing_user is not None:
                 raise exceptions.UserAlreadyExists()
