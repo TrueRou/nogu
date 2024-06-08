@@ -80,7 +80,8 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
         details_list = []
         for error in error.errors():
             details_list.append({"message": str(error), "i18n_node": ""})
-        return glob_validation.extends(details_list).response()
+        validation_err = APIException(f"Validation error", "validation", 40100)
+        return validation_err.extends(details_list).response()
 
     @asgi_app.exception_handler(HTTPException)
     async def exception_handler(request, error: HTTPException):

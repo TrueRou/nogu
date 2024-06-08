@@ -5,9 +5,10 @@ from fastapi.responses import JSONResponse
 class APIException(HTTPException):
     stored_kwargs = None
 
-    def __init__(self, message: str, i18n_node: str, **kwargs):
+    def __init__(self, message: str, i18n_node: str, error_code: int, **kwargs):
         kwargs["message"] = message
         kwargs["i18n_node"] = "exception." + i18n_node
+        kwargs["error_code"] = error_code
         self.stored_kwargs = kwargs
         super().__init__(status_code=400, detail=kwargs)
 

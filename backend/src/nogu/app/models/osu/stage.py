@@ -1,12 +1,15 @@
 import datetime
-from typing import TYPE_CHECKING
+from fastapi import Depends
+from fastapi.security import SecurityScopes
+from nogu.app.database import manual_session
 from sqlmodel import Field, Relationship, SQLModel, Session, select
-from nogu.app.constants.exceptions import glob_not_belongings, glob_no_permission
+from nogu.app.constants.exceptions import APIException, glob_not_belongings, glob_no_permission
+from nogu.app.api.users import require_user_optional
 
 from nogu.app.constants.osu import Mods, Ruleset, WinCondition
 from ..ast_condition import AstCondition
 from ..user import User
-from ..team import TeamUserLink, TeamRole
+from ..team import TeamSrv, TeamUserLink, TeamRole
 
 
 class StageBase(SQLModel):
@@ -15,7 +18,6 @@ class StageBase(SQLModel):
     ruleset: Ruleset
     win_condition: WinCondition
 
-    team_id: int = Field(foreign_key="teams.id")
     playlist_id: int | None = Field(foreign_key="osu_playlists.id")
 
 
@@ -33,9 +35,10 @@ class Stage(StageBase, table=True):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
 
+    team_id: int = Field(foreign_key="teams.id")
+
 
 class StageMapBase(SQLModel):
-    stage_id: int = Field(foreign_key="osu_stages.id", primary_key=True)
     map_md5: str = Field(foreign_key="osu_beatmaps.md5", primary_key=True)
     label: str  # NM1
     description: str | None  # Consistency jumps
@@ -54,20 +57,16 @@ class StageMapUpdate(SQLModel):
 class StageMap(StageMapBase, table=True):
     __tablename__ = "osu_stage_maps"
 
+    stage_id: int = Field(foreign_key="osu_stages.id", primary_key=True)
     condition: AstCondition = Relationship()
 
 
 class StageSrv:
-    def check_belongings(session: Session, stage: Stage, user: User):
-        if stage and user:
-            sentence = select(TeamUserLink).where(TeamUserLink.team_id == stage.team_id, TeamUserLink.user_id == user.id)
-            if session.exec(sentence).first() is None:
-                raise glob_not_belongings
-
-    def check_permission(session: Session, stage: Stage, user: User, permission: TeamRole):
-        if stage and user:
-            sentence = select(TeamUserLink).where(
-                TeamUserLink.team_id == stage.team_id, TeamUserLink.user_id == user.id, TeamUserLink.role <= permission
-            )
-            if session.exec(sentence).first() is None:
-                raise glob_no_permission
+    # scope: access, access-sensitive, member, admin, owner
+    def get_stage(security: SecurityScopes, stage_id: int, user: User = Depends(require_user_optional)):
+        with manual_session() as session:
+            stage = session.get(Stage, stage_id)
+            if stage is None:
+                raise APIException("Stage not found", "stage.not-found", 40420)
+            TeamSrv.get_team(security, stage.team_id, user)  # check if user have proper grant to the team
+            return stage
