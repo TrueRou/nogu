@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
@@ -13,7 +13,7 @@ from nogu.app import database, api
 from nogu.app.database import manual_session
 from nogu.app.logging import log, Ansi
 from nogu.app.api.users import parse_exception
-from nogu.app.constants.exceptions import APIException, glob_validation
+from nogu.app.constants.exceptions import APIException
 from nogu.app.api.osu import beatmaps, scores
 
 keeping_tasks: list[asyncio.Task] = []
@@ -27,12 +27,10 @@ def init_openapi(asgi_app: FastAPI) -> None:
     )
     for _, method_item in asgi_app.openapi_schema.get("paths").items():
         for _, param in method_item.items():
-            responses = param.get("responses")
-            # remove 422 response, also can remove other status code
-            if "422" in responses:
-                del responses["422"]
-            if "401" in responses:
-                del responses["401"]
+            for key in list(param["responses"].keys()):
+                # Remove 4xx and 5xx responses from the OpenAPI schema
+                if key.startswith("4") or key.startswith("5"):
+                    del param["responses"][key]
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
@@ -80,7 +78,7 @@ def init_exception_handlers(asgi_app: FastAPI) -> None:
         details_list = []
         for error in error.errors():
             details_list.append({"message": str(error), "i18n_node": ""})
-        validation_err = APIException(f"Validation error", "validation", 40100)
+        validation_err = APIException(f"Validation error", "validation", status.HTTP_422_UNPROCESSABLE_ENTITY)
         return validation_err.extends(details_list).response()
 
     @asgi_app.exception_handler(HTTPException)
@@ -95,20 +93,7 @@ def init_routes(asgi_app: FastAPI) -> None:
     async def root():
         return {"message": "Welcome to nogu-nekko!"}
 
-    response = {
-        400: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Request body is invalid.",
-                        "i18n_node": "glob.request.invalid",
-                    }
-                }
-            }
-        }
-    }
-
-    asgi_app.include_router(api.router, responses=response)
+    asgi_app.include_router(api.router)
 
 
 def init_api() -> FastAPI:

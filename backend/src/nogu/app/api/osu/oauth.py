@@ -1,3 +1,4 @@
+from nogu.app.models.user import UserSrv
 import ossapi
 from fastapi import Depends, APIRouter
 from ossapi import Ossapi, OssapiAsync
@@ -5,7 +6,6 @@ from sqlmodel import select
 from starlette.responses import RedirectResponse
 
 from nogu import config
-from nogu.app.api.users import require_user_optional
 from nogu.app.constants.osu import Server
 from nogu.app.database import auto_session
 from nogu.app.models import User
@@ -46,7 +46,7 @@ async def request_identity(code: str):
 
 
 @router.get("/bancho/token")
-async def process_bancho_oauth(code: str, user: User = Depends(require_user_optional)):
+async def process_bancho_oauth(code: str, user: User = Depends(UserSrv.require_user_optional)):
     with auto_session() as session:
         if user is None:
             return generate_redirect("login", "You need to login first for this operation.")

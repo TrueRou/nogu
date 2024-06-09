@@ -5,35 +5,29 @@ from ossapi import MatchResponse, MatchEvent, OssapiAsync
 from sqlmodel import select
 
 from nogu import config
-from nogu.app.api.users import require_user
 from nogu.app.models.osu import *
-from nogu.app.models.user import User
+from nogu.app.models.user import User, UserSrv
 from nogu.app.constants.osu import Server
 from nogu.app.database import auto_session
-from nogu.app.constants.exceptions import glob_not_belongings
 from nogu.app.objects import Inspector
 
 router = APIRouter(prefix="/scores", tags=["scores"])
 
 
 @router.get("/{score_id}", response_model=Score)
-async def get_score(score_id: int, user: User = Depends(require_user)):
-    with auto_session() as session:
-        score = session.get(Score, score_id)
-        if ScoreSrv.check_score_visibility(session, score, user):
-            raise glob_not_belongings
+async def get_score(score: Score = Depends(ScoreSrv.require_score)):
     return score
 
 
 @router.post("/", response_model=Score)
-async def submit_score(score: ScoreBase, user: User = Depends(require_user)):
+async def submit_score(score: ScoreBase, user: User = Depends(UserSrv.require_user)):
     with auto_session() as session:
         score = ScoreSrv.submit_score(session, score, user)
     return score
 
 
 @router.post("/partial/", response_model=Score)
-async def submit_score_partial(keywords: str, beatmap_md5: str, user: User = Depends(require_user)):
+async def submit_score_partial(keywords: str, beatmap_md5: str, user: User = Depends(UserSrv.require_user)):
     with auto_session() as session:
         score = ScoreSrv.submit_partial(session, keywords, beatmap_md5, user)
     return score

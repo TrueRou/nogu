@@ -1,13 +1,13 @@
 import datetime
 from enum import IntEnum, auto
-from fastapi import Depends
+from fastapi import Depends, status
 from fastapi.security import SecurityScopes
 from nogu.app.constants.exceptions import APIException
 from nogu.app.database import manual_session
+from nogu.app.utils import ensure_throw
 from sqlmodel import Field, Relationship, SQLModel, Session, select
-from nogu.app.api.users import require_user_optional
 
-from .user import User, UserRead
+from .user import User, UserRead, UserSrv
 
 
 class TeamVisibility(IntEnum):
@@ -79,41 +79,36 @@ class TeamWithMembers(TeamRead):
 class TeamSrv:
     def _ensure_privilege(session: Session, team: Team, user: User | None, role: TeamRole = None) -> tuple[bool, APIException]:
         if user is None:
-            return False, APIException("Login is required to access that team.", "team.login-required", 40310)
+            return False, APIException("Login is required to access that team.", "team.login-required", status.HTTP_401_UNAUTHORIZED)
         sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
         if role is not None:
             sentence = sentence.where(TeamUserLink.role <= role)
         if session.exec(sentence).first() is None:
-            return False, APIException("You have no privilege to do that.", "team.not-priv", 40311)
+            return False, APIException("You have no privilege to do that.", "team.not-priv", status.HTTP_403_FORBIDDEN)
         return True, None
 
-    def _ensure_privilege_throw(session: Session, team: Team, user: User | None, role: TeamRole = None):
-        result, exception = TeamSrv._ensure_privilege(session, team, user, role)
-        if not result:
-            raise exception
-
     # scope: access, access-sensitive, member, admin, owner
-    def get_team(security: SecurityScopes, team_id: int, user: User = Depends(require_user_optional)):
+    def require_team(security: SecurityScopes, team_id: int, user: User = Depends(UserSrv.require_user_optional)):
         with manual_session() as session:
             team = session.get(Team, team_id)
             if team is None:
-                raise APIException("Team not found", "team.not-found", 40410)
+                raise APIException("Team not found", "team.not-found", status.HTTP_404_NOT_FOUND)
 
             if "access" in security.scopes or security.scopes == []:
                 if team.visibility == TeamVisibility.PRIVATE:
-                    TeamSrv._ensure_privilege_throw(session, team, user)
+                    ensure_throw(TeamSrv._ensure_privilege(session, team, user))
 
             if "access-sensitive" in security.scopes:
                 if team.visibility >= TeamVisibility.PROTECTED:
-                    TeamSrv._ensure_privilege_throw(session, team, user)
+                    ensure_throw(TeamSrv._ensure_privilege(session, team, user))
 
             if "member" in security.scopes:
-                TeamSrv._ensure_privilege_throw(session, team, user)
+                ensure_throw(TeamSrv._ensure_privilege(session, team, user))
 
             if "admin" in security.scopes:
-                TeamSrv._ensure_privilege_throw(session, team, user, TeamRole.ADMIN)
+                ensure_throw(TeamSrv._ensure_privilege(session, team, user, TeamRole.ADMIN))
 
             if "owner" in security.scopes:
-                TeamSrv._ensure_privilege_throw(session, team, user, TeamRole.OWNER)
+                ensure_throw(TeamSrv._ensure_privilege(session, team, user, TeamRole.OWNER))
 
             return team

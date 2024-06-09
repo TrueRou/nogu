@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from nogu.app.constants.exceptions import APIException
 from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 
 from nogu import config
 from nogu.app.models.osu import *
-from nogu.app.models.user import User
-from nogu.app.api.users import require_user
+from nogu.app.models.user import User, UserSrv
 from nogu.app.database import auto_session
 from nogu.app.objects import Operator
 from nogu.app.logging import log, Ansi
@@ -32,11 +32,13 @@ beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_reques
 async def get_beatmap(ident: str):
     with auto_session() as session:
         beatmap = BeatmapSrv.from_ident(session, ident)
+        if beatmap is None:
+            raise APIException("Beatmap not found.", "beatmap.not-found", status.HTTP_404_NOT_FOUND)
     return beatmap
 
 
 @router.post("/stream/")
-async def stream_beatmap(request: Request, idents: list[str], user: User = Depends(require_user)):
+async def stream_beatmap(request: Request, idents: list[str], user: User = Depends(UserSrv.require_user)):
     log(
         f"Doing beatmap streaming: {user.username} ({str(len(idents))} maps)",
         Ansi.LYELLOW,

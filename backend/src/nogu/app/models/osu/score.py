@@ -1,14 +1,18 @@
 import datetime
-from nogu.app import database
-from nogu.app.models.osu.beatmap import Beatmap, BeatmapSrv
-from nogu.app.objects import AstChecker
+from fastapi import Depends, status
+from nogu.app.constants.exceptions import APIException
+from nogu.app.utils import ensure_throw
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 from ossapi.models import Score as BanchoScore
-
+from nogu.app import database
+from nogu.app.database import manual_session
+from nogu.app.models.osu.beatmap import Beatmap, BeatmapSrv
+from nogu.app.objects import AstChecker
 from nogu.app.constants.osu import Server, Mods, Ruleset
+
 from .performance import Performance
-from ..user import User
-from ..team import TeamUserLink, Team, TeamVisibility
+from ..user import User, UserSrv
+from ..team import TeamSrv, TeamUserLink, Team, TeamVisibility
 from .stage import Stage, StageMap
 
 
@@ -42,28 +46,6 @@ class Score(ScoreBase, table=True):
 
 
 class ScoreSrv:
-    # you have limited permission to fetch the scores.
-    def check_score_visibility(session: Session, score: Score, user: User) -> bool:
-        # You can fetch your own scores.
-        if score is None or score.user_id == user.id:
-            return True
-
-        sentence = select(Team).join(Stage).where(Stage.id == score.stage_id)
-        team = session.exec(sentence).first()
-
-        assert team is not None  # the stage must belong to a team
-
-        # You can fetch scores that from public teams.
-        if team.visibility == TeamVisibility.PUBLIC:
-            return True
-
-        # You can fetch scores if you are in the team that the score belongs to.
-        sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
-        if session.exec(sentence).first():
-            return True
-
-        return False
-
     def _check_ast(score: Score, stage_map: StageMap) -> bool:
         variables = {
             "acc": score.accuracy,
@@ -76,6 +58,27 @@ class ScoreSrv:
     def _ensure_grade(score: Score, beatmap: Beatmap):
         score.grade = "S"
         score.full_combo = True
+
+    # you have limited permission to fetch the scores.
+    def _ensure_visibility(session: Session, score: Score, user: User | None) -> tuple[bool, APIException]:
+        # You can fetch your own scores.
+        if user is not None and score.user_id == user.id:
+            return True, None
+        # Everyone can fetch scores from the public teams.
+        sentence = select(Team).join(Stage).where(Stage.id == score.stage_id)
+        team = session.exec(sentence).first()
+        assert team is not None  # the stage must belong to a team
+        if team.visibility == TeamVisibility.PUBLIC:
+            return True, None
+        # You can fetch scores if you are in the team (not public) that the score belongs to.
+        return TeamSrv._ensure_privilege(session, team, user)
+
+    def require_score(score_id: int, user: User = Depends(UserSrv.require_user_optional)):
+        with manual_session() as session:
+            score = session.get(Score, score_id)
+            if score is None:
+                raise APIException("Score not found", "score.not-found", status.HTTP_404_NOT_FOUND)
+            ensure_throw(ScoreSrv._ensure_visibility, session, score, user)
 
     def submit_score(session: Session, score: ScoreBase, user: User):
         beatmap = session.get(Beatmap, score.beatmap_md5)
