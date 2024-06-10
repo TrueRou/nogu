@@ -30,7 +30,7 @@ const features = ref(
                     style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                 <h2 class="text-xl font-bold ">Focusing on collecting, sorting, analyzing scores</h2>
                 <div class="flex mt-2">
-                    <button class="btn btn-primary mr-2 font-bold" @click="global.openDialog(markRaw(Register));">Try</button>
+                    <button class="btn btn-primary mr-2 font-bold" @click="global.openDialog(markRaw(Register));">Register</button>
                     <button class="btn btn-accent mr-2 font-bold" @click="global.openDialog(markRaw(Login));">Login</button>
                 </div>
             </div>

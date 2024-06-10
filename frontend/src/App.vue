@@ -2,8 +2,10 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { Transition, computed, ref } from 'vue';
 import { useGlobal } from '@/store/global';
+import { useSession } from './store/session';
 
 const global = useGlobal();
+const session = useSession();
 const scrollTop = ref(0);
 
 const onScroll = () => {
@@ -13,7 +15,7 @@ const onScroll = () => {
 window.addEventListener('scroll', onScroll)
 
 const alertStyle = computed(() => {
-  return {top: global.dialog.isOpen ? '0.5rem' : '4rem'}
+  return { top: global.dialog.isOpen ? '0.5rem' : '4rem' }
 })
 
 </script>
@@ -29,21 +31,33 @@ const alertStyle = computed(() => {
           </div>
           <div class="navbar-center">
             <RouterLink class="btn btn-ghost normal-case text-lg font-normal rounded-3xl h-8 md:h-10 min-h-fit"
-              to="/showcase">
-              Showcase
+              to="/discover/osu">
+              <i class="fa-solid fa-globe"></i>
+              <b>Discover</b>
             </RouterLink>
           </div>
           <div class="navbar-end">
+            <RouterLink
+              class="btn btn-ghost btn-circle normal-case text-lg font-normal rounded-full h-10 w-10 min-h-fit"
+              to="/showcase">
+              <i class="fa-solid fa-search"></i>
+            </RouterLink>
             <div class="dropdown dropdown-end h-10">
               <label tabindex="0" class="btn btn-ghost btn-circle avatar p-0 w-10 h-fit min-h-fit">
                 <div class="w-10 rounded-full">
-                  <img src="https://a.ppy.sb/1094" />
+                  <img v-if="session.isLoggedIn" src="https://a.ppy.sb/1094" />
                 </div>
               </label>
               <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
-                <li><a>Profile</a></li>
-                <li><a>Settings</a></li>
-                <li><a>Logout</a></li>
+                <div class="flex">
+                  <button class="btn btn-ghost">OSU</button>
+                  <button class="btn btn-ghost">MAIMAI</button>
+                </div>
+                <li v-if="!session.isLoggedIn"><a>Login</a></li>
+                <li v-if="!session.isLoggedIn"><a>Register</a></li>
+                <li v-if="session.isLoggedIn"><a>Profile</a></li>
+                <li v-if="session.isLoggedIn"><a>Settings</a></li>
+                <li v-if="session.isLoggedIn"><a>Logout</a></li>
               </ul>
             </div>
           </div>
@@ -58,11 +72,13 @@ const alertStyle = computed(() => {
   </div>
   <Transition name="fade">
     <div v-if="global.toast.isOpen" class="z-40">
-      <div v-if="global.toast.type == 'info'" class="alert fixed w-96 right-0 left-0 m-auto z-50 p-3" :style="alertStyle">
+      <div v-if="global.toast.type == 'info'" class="alert fixed w-96 right-0 left-0 m-auto z-50 p-3 gap-2"
+        :style="alertStyle">
         <i class="fa-solid fa-circle-info"></i>
         <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>
-      <div v-if="global.toast.type == 'error'" class="alert alert-error fixed w-96 right-0 left-0 m-auto z-50 p-3" :style="alertStyle">
+      <div v-if="global.toast.type == 'error'" class="alert alert-error fixed w-96 right-0 left-0 m-auto z-50 p-3 gap-2"
+        :style="alertStyle">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>

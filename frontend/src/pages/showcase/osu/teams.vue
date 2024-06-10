@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import teamBanner from '@/components/team/team-banner.vue';
-import type { Team } from '@/def/types';
+import type { TeamWithMembers } from '@/def/types';
 import { client } from '@/def/requests';
 
-const teams = ref<Team[]>([])
+const teams = ref<TeamWithMembers[]>([])
 const teamParams = reactive({
     status: -1
 })
@@ -28,9 +28,6 @@ watch([teamParams], async () => await fetchTeams(), { immediate: true })
             aria-label="Achieved" />
     </div>
     <div class="flex flex-col mt-2">
-        <div v-for="team in teams" :key="Number(team.id)" class="flex mb-4 h-44 rounded-2xl"
-            style="background: url('https://assets.ppy.sh/beatmaps/1990406/covers/cover@2x.jpg?1699284105') center center no-repeat; background-size: cover;">
-            <teamBanner :team="team" />
-        </div>
+        <teamBanner v-for="team in teams" :team="team" />
     </div>
 </template>

@@ -71,9 +71,9 @@ export interface paths {
     /** Patch Team */
     patch: operations["patch_team_teams__team_id__patch"];
   };
-  "/teams/me": {
+  "/teams/me/": {
     /** Get Teams Me */
-    get: operations["get_teams_me_teams_me_get"];
+    get: operations["get_teams_me_teams_me__get"];
   };
   "/teams/scores/": {
     /** Get Scores */
@@ -299,8 +299,6 @@ export interface components {
       description: string | null;
       ruleset: components["schemas"]["Ruleset"];
       win_condition: components["schemas"]["WinCondition"];
-      /** Team Id */
-      team_id: number;
       /** Playlist Id */
       playlist_id: number | null;
       /** Id */
@@ -320,6 +318,8 @@ export interface components {
        * Format: date-time
        */
       updated_at?: string;
+      /** Team Id */
+      team_id: number;
     };
     /** StageBase */
     StageBase: {
@@ -329,15 +329,11 @@ export interface components {
       description: string | null;
       ruleset: components["schemas"]["Ruleset"];
       win_condition: components["schemas"]["WinCondition"];
-      /** Team Id */
-      team_id: number;
       /** Playlist Id */
       playlist_id: number | null;
     };
     /** StageMapBase */
     StageMapBase: {
-      /** Stage Id */
-      stage_id: number;
       /** Map Md5 */
       map_md5: string;
       /** Label */
@@ -396,10 +392,47 @@ export interface components {
       active_until: string | null;
     };
     /**
+     * TeamRole
+     * @enum {integer}
+     */
+    TeamRole: 1 | 2 | 3;
+    /** TeamUserLinkPublic */
+    TeamUserLinkPublic: {
+      role: components["schemas"]["TeamRole"];
+      user: components["schemas"]["UserRead"];
+    };
+    /**
      * TeamVisibility
      * @enum {integer}
      */
     TeamVisibility: 1 | 2 | 3;
+    /** TeamWithMembers */
+    TeamWithMembers: {
+      /** Name */
+      name: string;
+      /** Slogan */
+      slogan: string | null;
+      /** @default 2 */
+      visibility?: components["schemas"]["TeamVisibility"];
+      /** Active Until */
+      active_until: string | null;
+      /** Id */
+      id: number;
+      /** Active */
+      active: boolean;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /** User Links */
+      user_links: components["schemas"]["TeamUserLinkPublic"][];
+    };
     /** User */
     User: {
       /** Username */
@@ -447,16 +480,6 @@ export interface components {
       /** Id */
       id: number;
       privileges: components["schemas"]["UserPriv"];
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
     };
     /** UserUpdate */
     UserUpdate: {
@@ -531,12 +554,6 @@ export interface operations {
           "application/json": components["schemas"]["User"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Users:Patch Current User */
@@ -551,12 +568,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["User"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ErrorModel"];
         };
       };
     };
@@ -575,20 +586,6 @@ export interface operations {
           "application/json": components["schemas"]["User"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Not a superuser. */
-      403: {
-        content: never;
-      };
-      /** @description The user does not exist. */
-      404: {
-        content: never;
-      };
     };
   };
   /** Users:Delete User */
@@ -601,20 +598,6 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       204: {
-        content: never;
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Not a superuser. */
-      403: {
-        content: never;
-      };
-      /** @description The user does not exist. */
-      404: {
         content: never;
       };
     };
@@ -638,20 +621,6 @@ export interface operations {
           "application/json": components["schemas"]["User"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ErrorModel"];
-        };
-      };
-      /** @description Not a superuser. */
-      403: {
-        content: never;
-      };
-      /** @description The user does not exist. */
-      404: {
-        content: never;
-      };
     };
   };
   /** Auth:Jwt.Login */
@@ -668,12 +637,6 @@ export interface operations {
           "application/json": components["schemas"]["BearerResponse"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ErrorModel"];
-        };
-      };
     };
   };
   /** Auth:Jwt.Logout */
@@ -681,12 +644,6 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Bad Request */
-      400: {
         content: {
           "application/json": unknown;
         };
@@ -707,12 +664,6 @@ export interface operations {
           "application/json": components["schemas"]["UserRead"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ErrorModel"];
-        };
-      };
     };
   };
   /** Get Score */
@@ -729,12 +680,6 @@ export interface operations {
           "application/json": components["schemas"]["Score"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Submit Score */
@@ -749,12 +694,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Score"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
         };
       };
     };
@@ -774,12 +713,6 @@ export interface operations {
           "application/json": components["schemas"]["Score"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Inspect Bancho Match */
@@ -792,12 +725,6 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Bad Request */
-      400: {
         content: {
           "application/json": unknown;
         };
@@ -818,12 +745,6 @@ export interface operations {
           "application/json": components["schemas"]["Beatmap"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Stream Beatmap */
@@ -836,12 +757,6 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Bad Request */
-      400: {
         content: {
           "application/json": unknown;
         };
@@ -861,13 +776,7 @@ export interface operations {
       /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["Team"][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["TeamWithMembers"][];
         };
       };
     };
@@ -883,13 +792,7 @@ export interface operations {
       /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["Team"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["Team"] | null;
         };
       };
     };
@@ -905,13 +808,7 @@ export interface operations {
       /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["Team"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["Team"] | null;
         };
       };
     };
@@ -932,19 +829,13 @@ export interface operations {
       /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["Team"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["Team"] | null;
         };
       };
     };
   };
   /** Get Teams Me */
-  get_teams_me_teams_me_get: {
+  get_teams_me_teams_me__get: {
     parameters: {
       query?: {
         limit?: number;
@@ -956,13 +847,7 @@ export interface operations {
       /** @description Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["Team"][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["TeamWithMembers"][];
         };
       };
     };
@@ -971,9 +856,9 @@ export interface operations {
   get_scores_teams_scores__get: {
     parameters: {
       query: {
-        team_id: number;
         limit?: number;
         offset?: number;
+        team_id: number;
       };
     };
     responses: {
@@ -983,21 +868,15 @@ export interface operations {
           "application/json": components["schemas"]["Score"][];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Get Stages */
   get_stages_teams_stages__get: {
     parameters: {
       query: {
-        team_id: number;
         limit?: number;
         offset?: number;
+        team_id: number;
       };
     };
     responses: {
@@ -1005,12 +884,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Stage"][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
         };
       };
     };
@@ -1027,12 +900,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Stage"];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
         };
       };
     };
@@ -1056,16 +923,15 @@ export interface operations {
           "application/json": components["schemas"]["Stage"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Create Stage */
   create_stage_stages__post: {
+    parameters: {
+      query: {
+        team_id: number;
+      };
+    };
     requestBody: {
       content: {
         "application/json": components["schemas"]["StageBase"];
@@ -1078,21 +944,15 @@ export interface operations {
           "application/json": components["schemas"]["Stage"];
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Get Stage Beatmaps */
   get_stage_beatmaps_stages_beatmaps__get: {
     parameters: {
       query: {
-        stage_id: number;
         limit?: unknown;
         offset?: unknown;
+        stage_id: number;
       };
     };
     responses: {
@@ -1100,12 +960,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Beatmap"][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
         };
       };
     };
@@ -1129,12 +983,6 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": unknown;
-        };
-      };
     };
   };
   /** Process Bancho Oauth */
@@ -1147,12 +995,6 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Bad Request */
-      400: {
         content: {
           "application/json": unknown;
         };

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "update": "npx openapi-typescript http://127.0.0.1:8000/openapi.json -o src/schemas/schemas.d.ts",
+    "update": "npx openapi-typescript http://127.0.0.1:8000/openapi.json -o src/def/schemas.d.ts",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",

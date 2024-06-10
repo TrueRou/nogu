@@ -13,9 +13,9 @@ const router = createRouter({
       component: () => import('@/pages/index.vue'),
     },
     {
-      path: '/showcase',
-      name: 'showcase',
-      component: () => import('@/pages/showcase/index.vue'),
+      path: '/discover/osu',
+      name: 'discoverOsu',
+      component: () => import('@/pages/showcase/osu/index.vue'),
     },
     {
       path: '/teams/:teamId',

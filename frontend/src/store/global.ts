@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { t } from '@/def/translations'
 
 export const useGlobal = defineStore('global', () => {
     const cachedRoute = ref('')
@@ -35,7 +36,7 @@ export const useGlobal = defineStore('global', () => {
     function showNotification(type: string, message: string, i18n_node: string = '') {
         toast.value.isOpen = true
         toast.value.type = type
-        toast.value.message = message
+        toast.value.message = t(i18n_node, message)
         setTimeout(() => {
             toast.value.isOpen = false
         }, 3000)
