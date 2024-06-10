@@ -20,7 +20,7 @@ export const useGlobal = defineStore('global', () => {
             setTimeout(() => {
                 dialog.value.isOpen = true
                 dialog.value.component = component
-            }, 200)
+            }, 500)
         } else {
             dialog.value.isOpen = true
             dialog.value.component = component
@@ -32,7 +32,7 @@ export const useGlobal = defineStore('global', () => {
         dialog.value.component = null
     }
 
-    function showNotification(type: string, message: string) {
+    function showNotification(type: string, message: string, i18n_node: string = '') {
         toast.value.isOpen = true
         toast.value.type = type
         toast.value.message = message

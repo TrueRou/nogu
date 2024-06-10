@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
-import { Transition, ref } from 'vue';
+import { Transition, computed, ref } from 'vue';
 import { useGlobal } from '@/store/global';
 
 const global = useGlobal();
@@ -11,6 +11,10 @@ const onScroll = () => {
 };
 
 window.addEventListener('scroll', onScroll)
+
+const alertStyle = computed(() => {
+  return {top: global.dialog.isOpen ? '0.5rem' : '4rem'}
+})
 
 </script>
 
@@ -53,22 +57,22 @@ window.addEventListener('scroll', onScroll)
     </div>
   </div>
   <Transition name="fade">
-    <div v-if="global.toast.isOpen" class="z-20">
-      <div v-if="global.toast.type == 'info'" class="alert fixed w-72 right-2 top-2 z-50">
+    <div v-if="global.toast.isOpen" class="z-40">
+      <div v-if="global.toast.type == 'info'" class="alert fixed w-96 right-0 left-0 m-auto z-50 p-3" :style="alertStyle">
         <i class="fa-solid fa-circle-info"></i>
         <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>
-      <div v-if="global.toast.type == 'error'" class="alert alert-error fixed w-72 right-2 top-2 z-50">
+      <div v-if="global.toast.type == 'error'" class="alert alert-error fixed w-96 right-0 left-0 m-auto z-50 p-3" :style="alertStyle">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <p class="whitespace-pre-line">{{ global.toast.message }}</p>
       </div>
     </div>
   </Transition>
   <Transition name="fade">
-    <div v-if="global.dialog.isOpen" class="dialog-mask absolute z-30" @click="global.closeDialog()">
+    <div v-if="global.dialog.isOpen" class="dialog-mask absolute z-20" @click="global.closeDialog()">
     </div>
   </Transition>
-  <div class="dialog-container z-40">
+  <div class="dialog-container z-30">
     <Transition name="bounce">
       <div v-if="global.dialog.isOpen" class="bg-neutral rounded-xl">
         <component :is="global.dialog.component"></component>

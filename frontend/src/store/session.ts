@@ -1,45 +1,24 @@
 import { client } from '@/def/requests';
 import type { User } from '@/def/types';
+import router from '@/router';
 import { defineStore } from 'pinia';
 
-export const useSessionStore = defineStore('session', {
+export const useSession = defineStore('session', {
     state: () => ({
         user: null as User | null,
         isLoggedIn: false as boolean,
     }),
 
     actions: {
-        async login(username: string, password: string) {
-            const { data } = await client.POST('/auth/jwt/login', {
-                body: {
-                    username: username,
-                    password: password
-                }
-            })
-            if (data) localStorage.setItem('accessToken', data.access_token)
-            return data != undefined
-        },
-
-        async register(username: string, email: string, country: string, password: string) {
-            const { data } = await client.POST('/auth/register', {
-                body: {
-                    username: username,
-                    email: email,
-                    country: country,
-                    password: password
-                }
-            })
-            if (data) return await this.login(username, password)
-            return false
-        },
-
         logout() {
-            localStorage.removeItem('accessToken');
-            this.user = null;
-            this.isLoggedIn = false;
+            localStorage.removeItem('accessToken')
+            this.user = null
+            this.isLoggedIn = false
+            router.go(0) // reload the page and reset the guards
         },
 
         async authorize() {
+            if (localStorage.getItem('accessToken') === null) return
             const { data, error } = await client.GET('/users/me')
             this.user = data ? data : null
             this.isLoggedIn = error ? false : true

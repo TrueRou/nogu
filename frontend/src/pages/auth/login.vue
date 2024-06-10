@@ -13,7 +13,13 @@ const handleLogin = async () => {
         body: {
             username: username.value,
             password: password.value
-        }
+        },
+        bodySerializer(body) {
+            const form = new FormData();
+            form.set('username', body.username);
+            form.set('password', body.password);
+            return form;
+        },
     })
     if (!error && data) {
         localStorage.setItem('accessToken', data.access_token)

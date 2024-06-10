@@ -11,20 +11,6 @@ const country = ref('')
 const password = ref('')
 const global = useGlobal()
 
-const handleLogin = async () => {
-    const { data, error } = await client.POST('/auth/jwt/login', {
-        body: {
-            username: username.value,
-            password: password.value
-        }
-    })
-    if (!error && data) {
-        localStorage.setItem('accessToken', data.access_token)
-        global.closeDialog() // close the dialog
-        router.go(0) // refresh the page
-    }
-}
-
 const handleRegister = async () => {
     let { data, error } = await client.POST('/auth/register', {
         body: {
@@ -34,7 +20,10 @@ const handleRegister = async () => {
             password: password.value
         }
     })
-    if (error || !data) await handleLogin()
+    if (!error && data) {
+        global.closeDialog() // close the dialog
+        router.go(0) // refresh the page
+    }
 }
 
 </script>
@@ -49,7 +38,7 @@ const handleRegister = async () => {
                 <input v-model="password" type="password" class="input bg-neutral-content input-bordered mt-2 mb-2 w-full" placeholder="Password" />
             </form>
             <button class="btn btn-primary mt-3 w-full" @click="handleRegister">Register</button>
-            <span class="flex mt-3 text-sm text-secondary"><a href="/" @click="global.openDialog(markRaw(Login))">Already have an account</a></span>
+            <span class="flex mt-3 text-sm text-secondary"><a href="#" @click="global.openDialog(markRaw(Login))">Already have an account</a></span>
         </div>
     </div>
 </template>

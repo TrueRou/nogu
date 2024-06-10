@@ -6,12 +6,12 @@ from nogu.app.constants.exceptions import APIException
 router = APIRouter()
 
 user_password_illegal = APIException("Password illegal.", "user.password.illegal", status_code=status.HTTP_400_BAD_REQUEST)
-user_unauthorized = APIException("Unauthorized.", "user.unauthorized", status_code=status.HTTP_401_UNAUTHORIZED)
+user_unauthorized = APIException("Unauthorized.", "user.unauthorized", status_code=status.HTTP_401_UNAUTHORIZED, settled=False)
 user_duplicated = APIException("User already exists.", "user.duplicated", status_code=status.HTTP_400_BAD_REQUEST)
 user_credentials_incorrect = APIException("Incorrect username or password.", "user.credentials.incorrect", status_code=status.HTTP_400_BAD_REQUEST)
 user_email_duplicated = APIException("Email already exists.", "user.email.duplicated", status_code=status.HTTP_400_BAD_REQUEST)
-user_internal = APIException("Backend server error.", "user.internal", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-user_not_exist = APIException("Resources not found.", "user.not-exist", status_code=status.HTTP_404_NOT_FOUND)
+user_internal = APIException("Backend server error.", "user.internal", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, settled=False)
+user_not_exist = APIException("User not found.", "user.not-exist", status_code=status.HTTP_404_NOT_FOUND)
 
 
 def parse_exception(exception: HTTPException) -> APIException:
