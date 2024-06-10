@@ -1,8 +1,8 @@
 import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
-from nogu.app.database import manual_session
-from sqlmodel import Field, Relationship, SQLModel
+from nogu.app.database import require_session
+from sqlmodel import Field, Relationship, SQLModel, Session
 from nogu.app.constants.exceptions import APIException
 
 from nogu.app.constants.osu import Mods, Ruleset, WinCondition
@@ -62,10 +62,11 @@ class StageMap(StageMapBase, table=True):
 
 class StageSrv:
     # scope: access, access-sensitive, member, admin, owner
-    def require_stage(security: SecurityScopes, stage_id: int, user: User = Depends(UserSrv.require_user_optional)):
-        with manual_session() as session:
-            stage = session.get(Stage, stage_id)
-            if stage is None:
-                raise APIException("Stage not found", "stage.not-found", status.HTTP_404_NOT_FOUND)
-            TeamSrv.require_team(security, stage.team_id, user)  # check if user have proper grant to the team
-            return stage
+    def require_stage(
+        security: SecurityScopes, stage_id: int, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user_optional)
+    ):
+        stage = session.get(Stage, stage_id)
+        if stage is None:
+            raise APIException("Stage not found", "stage.not-found", status.HTTP_404_NOT_FOUND)
+        TeamSrv.require_team(security, stage.team_id, user)  # check if user have proper grant to the team
+        return stage

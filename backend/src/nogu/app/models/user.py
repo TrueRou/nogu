@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import status
 from fastapi_users.schemas import CreateUpdateDictModel
 from nogu.app.constants.exceptions import APIException
-from nogu.app.database import async_session, manual_session
+from nogu.app.database import async_session_ctx, require_session, session_ctx
 from sqlmodel import Field, SQLModel, select
 from fastapi.security import OAuth2PasswordRequestForm
 from nogu.config import jwt_secret
@@ -81,7 +81,7 @@ class UserSrv(IntegerIDMixin, BaseUserManager[User, int]):
     user_country_illegal = APIException("Country illegal.", "user.country.illegal", status_code=status.HTTP_400_BAD_REQUEST)
 
     async def get_by_ident(self, ident: str) -> Optional[models.UP]:
-        with manual_session() as session:
+        with session_ctx() as session:
             sentence = select(User).where(or_(User.email == ident, User.username == ident))
             user = session.exec(sentence).first()
             if user is None:
@@ -98,7 +98,7 @@ class UserSrv(IntegerIDMixin, BaseUserManager[User, int]):
         if len(user_create.country) != 2 or user_create.country.isalpha() == False:
             raise UserSrv.user_country_illegal
 
-        with manual_session() as session:
+        with session_ctx() as session:
             existing_user = session.exec(select(User).where(User.username == user_create.username)).first()
             if existing_user is not None:
                 raise exceptions.UserAlreadyExists()
@@ -118,7 +118,7 @@ class UserSrv(IntegerIDMixin, BaseUserManager[User, int]):
         return user
 
     async def get_user_manager():
-        async with async_session() as session:
+        async with async_session_ctx() as session:
             yield UserSrv(SQLAlchemyUserDatabase(session, User))
 
     def get_jwt_strategy() -> JWTStrategy:

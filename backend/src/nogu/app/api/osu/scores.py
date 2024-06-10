@@ -2,13 +2,13 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from ossapi import MatchResponse, MatchEvent, OssapiAsync
-from sqlmodel import select
+from sqlmodel import Session, select
 
 from nogu import config
 from nogu.app.models.osu import *
 from nogu.app.models.user import User, UserSrv
 from nogu.app.constants.osu import Server
-from nogu.app.database import auto_session
+from nogu.app.database import require_session, session_ctx
 from nogu.app.objects import Inspector
 
 router = APIRouter(prefix="/scores", tags=["scores"])
@@ -20,16 +20,16 @@ async def get_score(score: Score = Depends(ScoreSrv.require_score)):
 
 
 @router.post("/", response_model=Score)
-async def submit_score(score: ScoreBase, user: User = Depends(UserSrv.require_user)):
-    with auto_session() as session:
-        score = ScoreSrv.submit_score(session, score, user)
+async def submit_score(score: ScoreBase, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user)):
+    score = ScoreSrv.submit_score(session, score, user)
     return score
 
 
 @router.post("/partial/", response_model=Score)
-async def submit_score_partial(keywords: str, beatmap_md5: str, user: User = Depends(UserSrv.require_user)):
-    with auto_session() as session:
-        score = ScoreSrv.submit_partial(session, keywords, beatmap_md5, user)
+async def submit_score_partial(
+    keywords: str, beatmap_md5: str, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user)
+):
+    score = ScoreSrv.submit_partial(session, keywords, beatmap_md5, user)
     return score
 
 
@@ -47,7 +47,7 @@ class BanchoMatchInspector(Inspector):
         return match.latest_event_id
 
     async def process_result(self, target: Any, event: MatchEvent):
-        with auto_session() as session:
+        with session_ctx() as session:
             if event.game is None or event.game.scores is None:
                 return
             for score in event.game.scores:

@@ -10,7 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 
 from nogu.app import database, api
-from nogu.app.database import manual_session
+from nogu.app.database import require_session, session_ctx
 from nogu.app.logging import log, Ansi
 from nogu.app.api.users import parse_exception
 from nogu.app.constants.exceptions import APIException
@@ -47,12 +47,14 @@ def init_middlewares(asgi_app: FastAPI) -> None:
         allow_headers=["*"],
     )
 
+    database.register_middleware(asgi_app)
+
 
 def init_events(asgi_app: FastAPI) -> None:
     @asgi_app.on_event("startup")
     async def on_startup() -> None:
         try:
-            with manual_session() as session:
+            with session_ctx() as session:
                 keeping_tasks.append(asyncio.create_task(beatmaps.beatmap_request_operator.operate_async()))
                 keeping_tasks.append(asyncio.create_task(scores.bancho_match_inspector.inspect_async()))
                 session.exec(text("SELECT 1"))

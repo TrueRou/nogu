@@ -1,4 +1,5 @@
 import contextlib
+from fastapi import Request, Response
 from sqlalchemy import func
 from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from nogu import config
 
-engine = create_engine(config.mysql_url, echo=True)
+engine = create_engine(config.mysql_url)
 async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"))
 
 
@@ -22,21 +23,31 @@ def drop_db_and_tables(engine):
     nogu.app.models.SQLModel.metadata.drop_all(engine)
 
 
-@contextlib.contextmanager
-def manual_session():
-    with Session(engine, expire_on_commit=False) as session:
-        yield session
+# https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec
+def register_middleware(asgi_app):
+    @asgi_app.middleware("http")
+    async def session_middleware(request: Request, call_next):
+        response = Response("Internal server error", status_code=500)
+        try:
+            with Session(engine, expire_on_commit=False) as session:
+                request.state.session = session
+                response = await call_next(request)
+        finally:
+            return response
+
+
+def require_session(request: Request):
+    return request.state.session
 
 
 @contextlib.contextmanager
-def auto_session():
+def session_ctx():
     with Session(engine, expire_on_commit=False) as session:
         yield session
-        session.commit()
 
 
 @contextlib.asynccontextmanager
-async def async_session():
+async def async_session_ctx():
     async with AsyncSession(async_engine) as session:
         yield session
 

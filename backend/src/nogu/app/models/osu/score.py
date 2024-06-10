@@ -5,7 +5,7 @@ from nogu.app.utils import ensure_throw
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 from ossapi.models import Score as BanchoScore
 from nogu.app import database
-from nogu.app.database import manual_session
+from nogu.app.database import require_session
 from nogu.app.models.osu.beatmap import Beatmap, BeatmapSrv
 from nogu.app.objects import AstChecker
 from nogu.app.constants.osu import Server, Mods, Ruleset
@@ -73,12 +73,11 @@ class ScoreSrv:
         # You can fetch scores if you are in the team (not public) that the score belongs to.
         return TeamSrv._ensure_privilege(session, team, user)
 
-    def require_score(score_id: int, user: User = Depends(UserSrv.require_user_optional)):
-        with manual_session() as session:
-            score = session.get(Score, score_id)
-            if score is None:
-                raise APIException("Score not found", "score.not-found", status.HTTP_404_NOT_FOUND)
-            ensure_throw(ScoreSrv._ensure_visibility, session, score, user)
+    def require_score(score_id: int, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user_optional)):
+        score = session.get(Score, score_id)
+        if score is None:
+            raise APIException("Score not found", "score.not-found", status.HTTP_404_NOT_FOUND)
+        ensure_throw(ScoreSrv._ensure_visibility, session, score, user)
 
     def submit_score(session: Session, score: ScoreBase, user: User):
         beatmap = session.get(Beatmap, score.beatmap_md5)

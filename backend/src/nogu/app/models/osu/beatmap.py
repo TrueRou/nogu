@@ -4,7 +4,6 @@ from typing import Any
 from sqlmodel import Field, SQLModel, Session, select
 
 from nogu import config
-from nogu.app.database import auto_session
 from nogu.app.logging import log, Ansi
 from nogu.app.constants.osu import Server, Ruleset
 from nogu.app.objects import IGNORED_BEATMAP_CHARS, MD5_PATTERN

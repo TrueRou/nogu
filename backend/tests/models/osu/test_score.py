@@ -30,14 +30,14 @@ def test_score_visibility(db_session):
     database.add_model(db_session, score)
 
     # can the user (user 0) see the score now? yes!
-    assert ScoreSrv.check_score_visibility(db_session, score, users[0]) == True
+    assert ScoreSrv._ensure_visibility(db_session, score, users[0])[0] == True
 
     # can the other user (user 1) see the score now? no!
-    assert ScoreSrv.check_score_visibility(db_session, score, users[1]) == False
+    assert ScoreSrv._ensure_visibility(db_session, score, users[1])[0] == False
 
     # add user 1 to the team, can he see the score now? yes!
     database.add_model(db_session, TeamUserLink(team_id=team.id, user_id=users[1].id))
-    assert ScoreSrv.check_score_visibility(db_session, score, users[1]) == True
+    assert ScoreSrv._ensure_visibility(db_session, score, users[1])[0] == True
 
     # add user 0 to another team, and set a score there
     team1 = TeamFactory.build(visibility=TeamVisibility.PRIVATE.value)
@@ -49,7 +49,7 @@ def test_score_visibility(db_session):
     database.add_model(db_session, stage_map1, score1)
 
     # what if user 0 set a score in another team, can user 1 access it? no!
-    assert ScoreSrv.check_score_visibility(db_session, score1, users[1]) == False
+    assert ScoreSrv._ensure_visibility(db_session, score1, users[1])[0] == False
 
     # make the team public, can all the users see all the scores now? yes!
     team.visibility = TeamVisibility.PUBLIC
@@ -60,8 +60,8 @@ def test_score_visibility(db_session):
     database.add_model(db_session, *users)
 
     for user in users:
-        assert ScoreSrv.check_score_visibility(db_session, score, user) == True
-        assert ScoreSrv.check_score_visibility(db_session, score1, user) == True
+        assert ScoreSrv._ensure_visibility(db_session, score, user)[0] == True
+        assert ScoreSrv._ensure_visibility(db_session, score1, user)[0] == True
 
 
 @pytest.mark.asyncio
