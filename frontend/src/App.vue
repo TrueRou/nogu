@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterView } from 'vue-router';
 import { Transition, computed, ref } from 'vue';
 import { useGlobal } from '@/store/global';
-import { useSession } from './store/session';
+import NavBar from './components/navbar.vue'
 
 const global = useGlobal();
-const session = useSession();
 const scrollTop = ref(0);
 
 const onScroll = () => {
@@ -24,50 +23,17 @@ const alertStyle = computed(() => {
   <div :class="global.dialog.isOpen ? 'saturate-50' : ''" class="w-full flex flex-1 transition-all ease-in-out">
     <div class="flex flex-col mb-2 flex-1">
       <div v-bind:class="scrollTop == 0 ? '' : 'detached'" class="navbar-container sticky top-0 z-10">
-        <div class="navbar min-h-fit h-12 md:h-14 bg-primary pt-0 pb-0">
-          <div class="navbar-start">
-            <RouterLink class="btn btn-ghost normal-case text-lg rounded-3xl h-8 md:h-10 min-h-fit" to="/">NOGU
-            </RouterLink>
-          </div>
-          <div class="navbar-center">
-            <RouterLink class="btn btn-ghost normal-case text-lg font-normal rounded-3xl h-8 md:h-10 min-h-fit"
-              to="/discover/osu">
-              <i class="fa-solid fa-globe"></i>
-              <b>Discover</b>
-            </RouterLink>
-          </div>
-          <div class="navbar-end">
-            <RouterLink
-              class="btn btn-ghost btn-circle normal-case text-lg font-normal rounded-full h-10 w-10 min-h-fit"
-              to="/showcase">
-              <i class="fa-solid fa-search"></i>
-            </RouterLink>
-            <div class="dropdown dropdown-end h-10">
-              <label tabindex="0" class="btn btn-ghost btn-circle avatar p-0 w-10 h-fit min-h-fit">
-                <div class="w-10 rounded-full">
-                  <img v-if="session.isLoggedIn" src="https://a.ppy.sb/1094" />
-                </div>
-              </label>
-              <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
-                <div class="flex">
-                  <button class="btn btn-ghost">OSU</button>
-                  <button class="btn btn-ghost">MAIMAI</button>
-                </div>
-                <li v-if="!session.isLoggedIn"><a>Login</a></li>
-                <li v-if="!session.isLoggedIn"><a>Register</a></li>
-                <li v-if="session.isLoggedIn"><a>Profile</a></li>
-                <li v-if="session.isLoggedIn"><a>Settings</a></li>
-                <li v-if="session.isLoggedIn"><a>Logout</a></li>
-              </ul>
-            </div>
+        <NavBar></NavBar>
+      </div>
+      <RouterView v-slot="{ Component }">
+        <div class="flex flex-1 flex-wrap">
+          <div class="flex justify-center ml-2 mr-2 mt-2 w-full">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
           </div>
         </div>
-      </div>
-      <div class="flex flex-1 flex-wrap">
-        <div class="flex justify-center ml-2 mr-2 mt-2 w-full">
-          <RouterView />
-        </div>
-      </div>
+      </RouterView>
     </div>
   </div>
   <Transition name="fade">

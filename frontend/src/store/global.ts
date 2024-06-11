@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { t } from '@/def/translations'
 
 export const useGlobal = defineStore('global', () => {
-    const cachedRoute = ref('')
     const dialog = ref({
         'isOpen': false,
         'component': null,
@@ -13,6 +12,10 @@ export const useGlobal = defineStore('global', () => {
         'isOpen': false,
         'type': '',
         'message': ''
+    })
+
+    const navMenu = ref({
+        'featured_game': '',
     })
 
     function openDialog(component: any) {
@@ -42,5 +45,5 @@ export const useGlobal = defineStore('global', () => {
         }, 3000)
     }
 
-    return { dialog, toast, cachedRoute, openDialog, closeDialog, showNotification }
+    return { dialog, toast, navMenu, openDialog, closeDialog, showNotification }
 })

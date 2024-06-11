@@ -19,9 +19,13 @@ export const useSession = defineStore('session', {
 
         async authorize() {
             if (localStorage.getItem('accessToken') === null) return
-            const { data, error } = await client.GET('/users/me')
-            this.user = data ? data : null
-            this.isLoggedIn = error ? false : true
+            try {
+                const { data, error } = await client.GET('/users/me')
+                this.user = data ? data : null
+                this.isLoggedIn = error ? false : true
+            } catch (error) {
+                console.error("Failed to authorize user: " + error)
+            }
         }
     },
 });

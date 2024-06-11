@@ -9,13 +9,18 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'index',
       component: () => import('@/pages/index.vue'),
+      meta: { featured_game: '' },
+    },
+    {
+      path: '/osu',
+      component: () => import('@/pages/osu.vue'),
+      meta: { featured_game: 'osu' },
     },
     {
       path: '/discover/osu',
-      name: 'discoverOsu',
-      component: () => import('@/pages/showcase/osu/index.vue'),
+      component: () => import('@/pages/discover/osu/index.vue'),
+      meta: { featured_game: 'osu' },
     },
     {
       path: '/teams/:teamId',
@@ -29,15 +34,17 @@ router.beforeEach(async (to, from, next) => {
   const session = useSession()
   const global = useGlobal()
 
-  if (!session.isLoggedIn) await session.authorize()
-
-  if (!session.isLoggedIn && to.meta.requireAuth) {
-    global.cachedRoute = to.path
-    global.showNotification("error", "Login is required to access that route.", "error.session.required")
-    global.openDialog(markRaw(Login))
-    return
+  if (to.meta.requireAuth) {
+    if (!session.isLoggedIn) await session.authorize() // wait for the session to be authorized
+    if (!session.isLoggedIn) { // if the user is still not logged in
+      global.showNotification("error", "Login is required to access that route.", "error.session.required")
+      global.openDialog(markRaw(Login))
+      return
+    }
   }
 
+  if (!session.isLoggedIn) session.authorize() // authorize the session in the background
+  global.navMenu.featured_game = String(to.meta.featured_game)
   next()
 })
 

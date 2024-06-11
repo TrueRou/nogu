@@ -11,4 +11,9 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
+window.onerror = function (message, source, lineno, colno, error) {
+    return true
+}
+
+
 app.mount('#app')
