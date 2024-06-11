@@ -1,8 +1,11 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Security
+from nogu.app.models.combination import OsuTeamCombination, from_tuple
 from nogu.app.models.team import TeamVisibility, TeamWithMembers
 from nogu.app.models.user import UserSrv
-from sqlmodel import Session, select
+from sqlalchemy import func
+from sqlmodel import Session, col, select
+from sqlalchemy.orm import aliased
 from nogu.app.models.osu import *
 from nogu.app.models import Team, User, TeamSrv, TeamBase, TeamRole, TeamUserLink
 from nogu.app.database import require_session, add_model, partial_update_model
@@ -10,13 +13,24 @@ from nogu.app.database import require_session, add_model, partial_update_model
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-@router.get("/", response_model=list[TeamWithMembers])
-async def get_teams(limit: int = 20, offset: int = 0, active_only: bool = False, session: Session = Depends(require_session)):
-    sentence = select(Team).where(Team.visibility == TeamVisibility.PUBLIC).limit(limit).offset(offset).order_by(Team.updated_at.desc())
-    if active_only:
+@router.get("/", response_model=list[OsuTeamCombination])
+async def get_teams(limit: int = 20, offset: int = 0, status: int = -1, session: Session = Depends(require_session)):
+    StageSq = select(Stage.team_id, func.max(Stage.id).label("max_id")).group_by(Stage.team_id).subquery()
+    sentence = (
+        select(Team, Stage)
+        .join(StageSq, onclause=Team.id == StageSq.c.team_id, isouter=True)
+        .join(Stage, onclause=Stage.id == StageSq.c.max_id, isouter=True)
+        .where(Team.visibility == TeamVisibility.PUBLIC)
+        .limit(limit)
+        .offset(offset)
+        .order_by(Team.updated_at.desc())
+    )
+    if status == 0:
         sentence = sentence.where(Team.active == True)
+    if status == 1:
+        sentence = sentence.where(Team.active == False)
     teams = session.exec(sentence).all()
-    return teams
+    return from_tuple(teams, OsuTeamCombination)
 
 
 @router.get("/{team_id}", response_model=Optional[Team])

@@ -2,9 +2,11 @@
 import Login from '@/pages/auth/login.vue';
 import Register from '@/pages/auth/register.vue';
 import { useGlobal } from '@/store/global';
+import { useSession } from '@/store/session';
 import { markRaw, ref } from 'vue';
 
 const global = useGlobal();
+const session = useSession();
 const features = ref(
     [
         {
@@ -30,10 +32,16 @@ const features = ref(
                     style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                 <h2 class="text-xl font-bold ">Focusing on collecting, sorting, analyzing scores</h2>
                 <div class="flex mt-2">
-                    <button class="btn btn-primary mr-2 font-bold"
-                        @click="global.openDialog(markRaw(Register));">Register</button>
-                    <button class="btn btn-accent mr-2 font-bold"
-                        @click="global.openDialog(markRaw(Login));">Login</button>
+                    <template v-if="!session.isLoggedIn">
+                        <button class="btn btn-primary mr-2 font-bold"
+                            @click="global.openDialog(markRaw(Register));">Register</button>
+                        <button class="btn btn-accent mr-2 font-bold"
+                            @click="global.openDialog(markRaw(Login));">Login</button>
+                    </template>
+                    <template v-else>
+                        <button class="btn btn-primary mr-2 font-bold"
+                            @click="global.openDialog(markRaw(Login));">Continue</button>
+                    </template>
                 </div>
             </div>
             <img class="hidden h-64 sm:flex md:ml-24" src="https://s2.loli.net/2023/11/01/mrZisGMnxqtC8Tv.png">

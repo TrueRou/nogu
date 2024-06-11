@@ -769,7 +769,7 @@ export interface operations {
       query?: {
         limit?: number;
         offset?: number;
-        active_only?: boolean;
+        status?: number;
       };
     };
     responses: {

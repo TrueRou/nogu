@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from nogu import config
 
-engine = create_engine(config.mysql_url)
+engine = create_engine(config.mysql_url, echo=True)
 async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"))
 
 
@@ -27,12 +27,9 @@ def drop_db_and_tables(engine):
 def register_middleware(asgi_app):
     @asgi_app.middleware("http")
     async def session_middleware(request: Request, call_next):
-        response = Response("Internal server error", status_code=500)
-        try:
-            with Session(engine, expire_on_commit=False) as session:
-                request.state.session = session
-                response = await call_next(request)
-        finally:
+        with Session(engine, expire_on_commit=False) as session:
+            request.state.session = session
+            response = await call_next(request)
             return response
 
 

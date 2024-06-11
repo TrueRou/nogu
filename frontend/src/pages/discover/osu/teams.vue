@@ -10,7 +10,7 @@ const teamParams = reactive({
 })
 
 const fetchTeams = async () => {
-    const { data } = await client.GET('/teams/')
+    const { data } = await client.GET('/teams/', { params: { query: { status: teamParams.status } } })
     if (data) teams.value = data
 }
 
