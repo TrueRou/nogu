@@ -14,11 +14,12 @@ const alertStyle = computed(() => {
 
 <template>
   <div :class="global.dialog.isOpen ? 'saturate-50' : ''" class="transition-all ease-in-out">
-
     <NavBar />
     <RouterView v-slot="{ Component }">
       <keep-alive>
-        <component :is="Component" />
+        <div>
+          <component class="ml-auto mr-auto" :is="Component" />
+        </div>
       </keep-alive>
     </RouterView>
   </div>
