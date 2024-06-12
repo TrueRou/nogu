@@ -6,10 +6,13 @@
         <div class="max-w-screen-md mx-auto">
             <div class="flex justify-between">
                 <div class="flex flex-col justify-center">
-                    <span class="mx-auto my-12 font-extrabold text-transparent text-7xl bg-clip-text nogu-brand"
+                    <span
+                        class="mx-auto my-12 font-extrabold !tracking-[40%] text-transparent text-7xl bg-clip-text nogu-brand"
                         style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
-                    <h2 class="text-xl font-semibold ">Focusing on collecting, sorting, analyzing scores.</h2>
-                    <span class="max-w-[500px] font-light mt-6">More introduction to nogu and its featured games. This
+                    <h2 class="text-xl font-semibold tracking-wide">Focusing on collecting, sorting, analyzing scores.
+                    </h2>
+                    <span class="max-w-[500px] font-light mt-6 tracking-wide">More introduction to nogu and its featured
+                        games. This
                         page
                         is only for information represention and provide a route to the specific featured game
                         pages.</span>
@@ -19,7 +22,7 @@
         </div>
         <div class="py-4 space-y-4 bg-neutral">
             <div class="max-w-screen-md mx-auto space-y-4">
-                <div class="flex text-xl font-semibold">Featured Games</div>
+                <div class="flex text-xl font-semibold tracking-widest uppercase">Featured Games</div>
                 <div class="flex flex-wrap gap-2">
                     <RouterLink to="/osu" class="overflow-hidden">
                         <img class="flex object-cover w-36 h-44 rounded-2xl"
