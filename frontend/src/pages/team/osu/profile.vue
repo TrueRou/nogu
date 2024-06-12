@@ -48,7 +48,15 @@
             Sheet: https://www.google.com/sheets/about/
         </div>
         <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
-        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-48">
+        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
+
+        </div>
+        <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
+        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
+
+        </div>
+        <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
+        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
 
         </div>
     </div>

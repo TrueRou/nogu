@@ -1,5 +1,5 @@
-import { client } from '@/def/requests';
-import type { User } from '@/def/types';
+import { client } from '@/utils/requests';
+import type { User } from '@/def/typedef';
 import router from '@/router';
 import { defineStore } from 'pinia';
 

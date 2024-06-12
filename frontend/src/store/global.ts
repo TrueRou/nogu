@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { t } from '@/def/translations'
+import { t } from '@/utils/translations'
 
 export const useGlobal = defineStore('global', () => {
     const dialog = ref({

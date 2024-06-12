@@ -18,14 +18,14 @@ const router = createRouter({
       meta: { featured_game: 'osu' },
     },
     {
-      path: '/discover/osu',
+      path: '/osu/discover',
       component: () => import('@/pages/discover/osu/index.vue'),
       meta: { featured_game: 'osu' },
     },
     {
-      path: '/teams/:teamId',
-      name: 'team',
-      component: () => import('@/pages/team/index.vue'),
+      path: '/osu/teams/:teamId',
+      component: () => import('@/pages/team/osu/index.vue'),
+      meta: { featured_game: 'osu' },
     }
   ]
 })

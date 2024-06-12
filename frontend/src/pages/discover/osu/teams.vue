@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
-import teamBanner from '@/components/team/team-banner.vue';
-import type { TeamWithMembers } from '@/def/types';
-import { client } from '@/def/requests';
+import type { OsuTeamCombination } from '@/def/typedef';
+import { client } from '@/utils/requests';
+import MemberGizmo from '@/components/team/member-gizmo.vue';
+import { asIcon } from '@/utils/ruleset';
+import { useRouter } from 'vue-router';
 
-const teams = ref<TeamWithMembers[]>([])
+const router = useRouter()
+const teams = ref<OsuTeamCombination[]>([])
 const teamParams = reactive({
     status: -1
 })
+
 
 const fetchTeams = async () => {
     const { data } = await client.GET('/teams/', { params: { query: { status: teamParams.status } } })
@@ -28,6 +32,24 @@ watch([teamParams], async () => await fetchTeams(), { immediate: true })
             aria-label="Achieved" />
     </div>
     <div class="flex flex-col mt-2">
-        <teamBanner v-for="team in teams" :team="team" />
+        <template v-for="team in teams" :team="team.team">
+            <div class="flex w-full h-36 rounded-2xl"
+                style="background: url('https://assets.ppy.sh/beatmaps/1990406/covers/cover@2x.jpg?1699284105') center center no-repeat; background-size: cover;">
+                <div @click="router.push(`/osu/teams/${team.team.id}`)"
+                    class="flex cursor-pointer rounded-2xl w-full h-full flex-wrap backdrop-brightness-50 items-center justify-between"
+                    style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5) 25%, rgba(255, 255, 255, 0) 75%);">
+                    <div class="flex flex-col ml-6" @click.stop>
+                        <div class="flex">
+                            <span class="text-2xl font-bold shadow-md cursor-auto">{{ team.team.name }}</span>
+                        </div>
+                        <MemberGizmo :member="team.team.user_links" />
+                    </div>
+                    <div class="flex flex-col justify-between h-full p-5" @click.stop>
+                        <div class="flex w-8 h-8 cursor-auto"><img :src="asIcon(team.stage.ruleset)"
+                                onload="SVGInject(this)"></div>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 </template>

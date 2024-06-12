@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {
+    "@iconfu/svg-inject": "^1.2.3",
     "axios": "^1.6.0",
     "openapi-fetch": "^0.9.7",
     "pinia": "^2.1.6",

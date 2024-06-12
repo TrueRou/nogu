@@ -41,7 +41,7 @@ const currentGame = computed(() => {
         <div class="navbar-center">
             <template v-if="hasFeaturedGame">
                 <RouterLink class="btn btn-ghost normal-case text-lg font-normal rounded-3xl h-8 md:h-10 min-h-fit"
-                    to="/discover/osu">
+                    :to="currentGame.route + '/discover'">
                     <i class="fa-solid fa-globe"></i>
                     <b>Discover</b>
                 </RouterLink>
@@ -50,7 +50,7 @@ const currentGame = computed(() => {
         <div class="navbar-end">
             <RouterLink
                 class="btn btn-ghost btn-circle normal-case text-lg font-normal rounded-full h-10 w-10 min-h-fit"
-                to="/discover/osu">
+                to="/">
                 <i class="fa-solid fa-search"></i>
             </RouterLink>
             <div class="dropdown dropdown-end h-10">

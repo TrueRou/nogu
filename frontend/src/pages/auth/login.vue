@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { client } from '@/def/requests';
+import { client } from '@/utils/requests';
 import router from '@/router';
 import { useGlobal } from '@/store/global';
 import { ref } from 'vue';

@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import Login from '@/pages/auth/login.vue';
-import Register from '@/pages/auth/register.vue';
-import { useGlobal } from '@/store/global';
-import { markRaw } from 'vue';
-
-const global = useGlobal();
 </script>
 
 <template>
