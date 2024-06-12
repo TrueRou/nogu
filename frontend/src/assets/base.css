@@ -45,3 +45,11 @@ body {
 ::-webkit-scrollbar {
     display: none; /* Chrome Safari */
   }
+
+.nogu-brand-small {
+letter-spacing: 4px
+}
+
+.nogu-brand {
+    letter-spacing: 10px
+}

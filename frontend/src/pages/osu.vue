@@ -25,21 +25,21 @@ const features = ref(
 </script>
 
 <template>
-    <div class="flex flex-col justify-center content-center flex-wrap">
+    <div class="flex flex-col flex-wrap content-center justify-center">
         <div class="flex">
             <div class="flex flex-col justify-center">
-                <span class="text-5xl font-extrabold bg-clip-text text-transparent"
+                <span class="text-5xl font-extrabold text-transparent bg-clip-text nogu-brand"
                     style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                 <h2 class="text-xl font-bold ">Focusing on collecting, sorting, analyzing scores</h2>
                 <div class="flex mt-2">
                     <template v-if="!session.isLoggedIn">
-                        <button class="btn btn-primary mr-2 font-bold"
+                        <button class="mr-2 font-bold btn btn-primary"
                             @click="global.openDialog(markRaw(Register));">Register</button>
-                        <button class="btn btn-accent mr-2 font-bold"
+                        <button class="mr-2 font-bold btn btn-accent"
                             @click="global.openDialog(markRaw(Login));">Login</button>
                     </template>
                     <template v-else>
-                        <button class="btn btn-primary mr-2 font-bold"
+                        <button class="mr-2 font-bold btn btn-primary"
                             @click="global.openDialog(markRaw(Login));">Continue</button>
                     </template>
                 </div>
@@ -49,8 +49,8 @@ const features = ref(
         <div class="flex flex-wrap">
             <div v-for="feature in features" class="flex mt-10 w-80 md:w-60 md:mr-4">
                 <div class="flex flex-col">
-                    <span class="flex font-bold text-xl mb-2">{{ feature.title }}</span>
-                    <span class="jetbrains-mono text-sm">{{ feature.description }}</span>
+                    <span class="flex mb-2 text-xl font-bold">{{ feature.title }}</span>
+                    <span class="text-sm jetbrains-mono">{{ feature.description }}</span>
                 </div>
             </div>
         </div>

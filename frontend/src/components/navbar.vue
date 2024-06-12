@@ -1,11 +1,18 @@
 <script setup>
+import { computed, ref } from 'vue';
 import { useGlobal } from '@/store/global';
 import { useSession } from '@/store/session';
-import { computed } from 'vue';
 import osu_logo from '@/assets/images/osu/osu-logo.svg';
 
 const session = useSession();
 const global = useGlobal();
+
+
+const scrollTop = ref(0);
+
+window.addEventListener('scroll', onScroll)
+
+
 
 const featured_games = {
     '': {
@@ -27,51 +34,102 @@ const hasFeaturedGame = computed(() => {
 const currentGame = computed(() => {
     return featured_games[global.navMenu.featured_game];
 });
+
+function onScroll() {
+    scrollTop.value = document.documentElement.scrollTop;
+};
+
 </script>
 
 <template>
-    <div class="navbar min-h-fit h-12 md:h-14 bg-primary pt-0 pb-0">
-        <div class="navbar-start">
-            <RouterLink class="btn btn-ghost normal-case text-lg rounded-3xl h-8 md:h-10 min-h-fit"
-                :to="currentGame.route">
-                <img v-if="hasFeaturedGame" :src="currentGame.icon" width="24" height="24">
-                <span>NOGU</span>
-            </RouterLink>
-        </div>
-        <div class="navbar-center">
-            <template v-if="hasFeaturedGame">
-                <RouterLink class="btn btn-ghost normal-case text-lg font-normal rounded-3xl h-8 md:h-10 min-h-fit"
-                    :to="currentGame.route + '/discover'">
-                    <i class="fa-solid fa-globe"></i>
-                    <b>Discover</b>
+    <div class="sticky top-0 z-10 navbar-container" :class="{
+        detached: scrollTop > 0
+    }">
+        <div class="navbar">
+            <div class="x-spacer"></div>
+            <div class="navbar-start">
+                <RouterLink class="relative p-1 text-lg normal-case btn btn-ghost rounded-3xl h-10 min-h-fit"
+                    :to="currentGame.route">
+                    <img v-if="hasFeaturedGame" :src="currentGame.icon" class="h-7">
+                    <span class="nogu-brand-small">NOGU</span>
                 </RouterLink>
-            </template>
-        </div>
-        <div class="navbar-end">
-            <RouterLink
-                class="btn btn-ghost btn-circle normal-case text-lg font-normal rounded-full h-10 w-10 min-h-fit"
-                to="/">
-                <i class="fa-solid fa-search"></i>
-            </RouterLink>
-            <div class="dropdown dropdown-end h-10">
-                <label tabindex="0" class="btn btn-ghost btn-circle avatar p-0 w-10 h-fit min-h-fit">
-                    <div class="w-10 rounded-full">
-                        <img v-if="session.isLoggedIn" src="https://a.ppy.sb/1094" />
-                    </div>
-                </label>
-                <ul tabindex="0"
-                    class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
-                    <template v-if="session.isLoggedIn">
-                        <li><a>Profile</a></li>
-                        <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
-                    </template>
-                    <template v-else>
-                        <li><a>Login</a></li>
-                        <li><a>Register</a></li>
-                    </template>
-                </ul>
+            </div>
+            <div class="navbar-center">
+                <template v-if="hasFeaturedGame">
+                    <RouterLink class="text-lg font-normal normal-case btn btn-ghost rounded-3xl h-10 min-h-fit"
+                        :to="currentGame.route + '/discover'">
+                        <i class="fa-solid fa-globe"></i>
+                        <b>Discover</b>
+                    </RouterLink>
+                </template>
+            </div>
+            <div class="navbar-end">
+                <RouterLink
+                    class="w-10 h-10 p-1 text-lg font-normal normal-case rounded-full btn btn-ghost btn-circle min-h-fit"
+                    to="/">
+                    <i class="fa-solid fa-search"></i>
+                </RouterLink>
+                <div class="h-10 dropdown dropdown-end">
+                    <label tabindex="0" class="w-10 p-0 btn btn-ghost btn-circle avatar h-fit min-h-fit">
+                        <div class="rounded-full w-9">
+                            <img v-if="session.isLoggedIn" src="https://a.ppy.sb/1094" />
+                            <img v-else="session.isLoggedIn" src="https://a.ppy.sb/-1" />
+                        </div>
+                    </label>
+                    <ul tabindex="0"
+                        class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
+                        <template v-if="session.isLoggedIn">
+                            <li><a>Profile</a></li>
+                            <li><a>Settings</a></li>
+                            <li><a>Logout</a></li>
+                        </template>
+                        <template v-else>
+                            <li><a>Login</a></li>
+                            <li><a>Register</a></li>
+                        </template>
+                    </ul>
+                </div>
+                <div class="x-spacer"></div>
             </div>
         </div>
     </div>
+
 </template>
+
+
+<style lang="postcss">
+.navbar {
+    @apply transition-[border-radius] duration-500;
+    @apply p-1 top-0 h-12 min-h-fit md:h-14 from-primary/30 mix-blend-multiply bg-gradient-to-b;
+}
+
+
+.detached {
+    .navbar {
+        @apply bg-primary from-primary via-primary to-primary;
+    }
+}
+
+.navbar-container {
+    @apply pb-2;
+
+    /* Thank you guccho! */
+    transition-duration: .15s;
+    transition-property: padding translate;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+
+    &.detached {
+        @apply px-1 translate-y-1;
+        @apply md:px-[0.375rem] md:translate-y-[0.375rem];
+
+        .navbar {
+            @apply rounded-3xl md:rounded-xl;
+        }
+    }
+}
+
+
+.x-spacer {
+    @apply hidden w-2 md:block;
+}
+</style>
