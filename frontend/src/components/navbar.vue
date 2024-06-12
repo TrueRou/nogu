@@ -50,7 +50,7 @@ function onScroll() {
             <div class="navbar-start">
                 <RouterLink class="relative h-8 p-1 text-lg normal-case btn btn-ghost rounded-3xl md:h-10 min-h-fit"
                     :to="currentGame.route">
-                    <img v-if="hasFeaturedGame" :src="currentGame.icon" class="h-7 md:h-9">
+                    <img v-if="hasFeaturedGame" :src="currentGame.icon" class="h-7">
                     <span class="nogu-brand">NOGU</span>
                 </RouterLink>
             </div>
