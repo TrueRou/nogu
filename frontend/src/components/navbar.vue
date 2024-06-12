@@ -48,15 +48,15 @@ function onScroll() {
         <div class="navbar">
             <div class="x-spacer"></div>
             <div class="navbar-start">
-                <RouterLink class="relative h-8 p-1 text-lg normal-case btn btn-ghost rounded-3xl md:h-10 min-h-fit"
+                <RouterLink class="relative p-1 text-lg normal-case btn btn-ghost rounded-3xl h-10 min-h-fit"
                     :to="currentGame.route">
                     <img v-if="hasFeaturedGame" :src="currentGame.icon" class="h-7">
-                    <span class="nogu-brand">NOGU</span>
+                    <span class="nogu-brand-small">NOGU</span>
                 </RouterLink>
             </div>
             <div class="navbar-center">
                 <template v-if="hasFeaturedGame">
-                    <RouterLink class="h-8 text-lg font-normal normal-case btn btn-ghost rounded-3xl md:h-10 min-h-fit"
+                    <RouterLink class="text-lg font-normal normal-case btn btn-ghost rounded-3xl h-10 min-h-fit"
                         :to="currentGame.route + '/discover'">
                         <i class="fa-solid fa-globe"></i>
                         <b>Discover</b>
@@ -99,7 +99,7 @@ function onScroll() {
 
 <style lang="postcss">
 .navbar {
-    @apply transition-[border-radius] transition-colors duration-500;
+    @apply transition-[border-radius] duration-500;
     @apply p-1 top-0 h-12 min-h-fit md:h-14 from-primary/30 mix-blend-multiply bg-gradient-to-b;
 }
 

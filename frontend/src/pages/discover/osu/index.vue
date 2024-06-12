@@ -18,6 +18,6 @@ const selectedComponent = ref(markRaw(Playlsts))
                     class="btn btn-sm btn-accent btn-ghost mr-1" aria-label="Users" />
             </div>
         </div>
-        <component :is="selectedComponent"></component>
+        <component class="pl-1 pr-1" :is="selectedComponent"></component>
     </div>
 </template>
