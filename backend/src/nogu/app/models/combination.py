@@ -6,14 +6,18 @@ from sqlmodel import SQLModel
 T = TypeVar("T")
 
 
-def from_tuple(tuple: list[Tuple], type: Generic[T]) -> list[T]:
+def from_tuples(tuple: list[Tuple], type: Generic[T]) -> list[T]:
     results = []
     for item in tuple:
-        variables = []
-        for i in range(len(item)):
-            variables.append(item[i])
-        results.append(type(*variables))
+        results.append(from_tuple(item, type))
     return results
+
+
+def from_tuple(tuple: Tuple, type: Generic[T]) -> T:
+    variables = []
+    for i in range(len(tuple)):
+        variables.append(tuple[i])
+    return type(*variables)
 
 
 class OsuTeamCombination(SQLModel):

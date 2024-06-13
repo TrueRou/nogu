@@ -11,7 +11,7 @@ from nogu.app.constants.osu import Server
 from nogu.app.database import require_session, session_ctx
 from nogu.app.objects import Inspector
 
-router = APIRouter(prefix="/scores", tags=["scores"])
+router = APIRouter(prefix="/scores", tags=["osu-scores"])
 
 
 @router.get("/{score_id}", response_model=Score)

@@ -25,7 +25,7 @@ class BeatmapRequestOperator(Operator):
             return BeatmapEvent(beatmap=beatmap)
 
 
-router = APIRouter(prefix="/beatmaps", tags=["beatmaps"])
+router = APIRouter(prefix="/beatmaps", tags=["osu-beatmaps"])
 beatmap_request_operator = BeatmapRequestOperator(interval=config.beatmap_requests_interval)
 
 

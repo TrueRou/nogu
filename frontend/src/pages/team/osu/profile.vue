@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import type { OsuTeamCombination } from '@/def/typedef';
+import { client } from '@/utils/requests';
+import { ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const team = ref<OsuTeamCombination>()
+
+const route = useRoute();
+const { data } = await client.GET('/osu/teams/{team_id}', { params: { path: { team_id: Number(route.params.teamId) } } })
+if (data) team.value = data
 
 </script>
 <template>
@@ -14,9 +24,10 @@
                 <img class="rounded-lg" src="https://a.ppy.sb/1094" />
             </div>
             <div class="flex ml-2 mt-5 mb-10 flex-col justify-between">
-                <div class="flex mont font-semibold">Rhythm is just a click away!</div>
-                <div class="flex"><span class="mont text-2xl font-bold bg-clip-text text-transparent mt-2.5"
-                        style="background-image: linear-gradient(to top,#F093FB, #F5576C);">Team A</span></div>
+                <div class="flex mont font-semibold h-6">{{ team?.team.slogan }}</div>
+                <div class="flex"><span class="mont h-8 text-2xl font-bold bg-clip-text text-transparent mt-3"
+                        style="background-image: linear-gradient(to top,#F093FB, #F5576C);">{{ team?.team.name }}</span>
+                </div>
             </div>
         </div>
         <div class="flex -mt-16 w-full h-12 bg-neutral rounded-xl justify-between">

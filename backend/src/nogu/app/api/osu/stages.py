@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from nogu.app.models.osu import *
 from nogu.app.database import require_session, add_model, partial_update_model
 
-router = APIRouter(prefix="/stages", tags=["stages"])
+router = APIRouter(prefix="/stages", tags=["osu-stages"])
 
 
 @router.get("/{stage_id}", response_model=Stage)
