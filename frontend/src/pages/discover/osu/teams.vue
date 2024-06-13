@@ -14,7 +14,7 @@ const teamParams = reactive({
 
 
 const fetchTeams = async () => {
-    const { data } = await client.GET('/teams/', { params: { query: { status: teamParams.status } } })
+    const { data } = await client.GET('/osu/teams/', { params: { query: { status: teamParams.status } } })
     if (data) teams.value = data
 }
 

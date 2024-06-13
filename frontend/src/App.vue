@@ -17,9 +17,13 @@ const alertStyle = computed(() => {
     <NavBar />
     <RouterView v-slot="{ Component }">
       <keep-alive>
-        <div>
-          <component class="ml-auto mr-auto" :is="Component" />
-        </div>
+        <Suspense>
+          <template #default>
+            <div>
+              <component class="ml-auto mr-auto" :is="Component" />
+            </div>
+          </template>
+        </Suspense>
       </keep-alive>
     </RouterView>
   </div>

@@ -30,8 +30,8 @@ if (data) team.value = data
                 </div>
             </div>
         </div>
-        <div class="flex -mt-16 w-full h-12 bg-neutral rounded-xl justify-between">
-            <div class="flex content-center flex-wrap mont font-semibold ml-4">OCLC S10 Group Stage</div>
+        <div v-if="team?.stage" class="flex -mt-16 w-full h-12 bg-neutral rounded-xl justify-between">
+            <div class="flex content-center flex-wrap mont font-semibold ml-4">{{ team?.stage.name }}</div>
             <div class="flex h-full w-48 rounded-r-xl"
                 style="background: linear-gradient(to right, #382e32 1%, transparent 100%), url('https://assets.ppy.sh/beatmaps/1994349/covers/cover.jpg') center center no-repeat; background-size: cover;">
             </div>
@@ -57,14 +57,6 @@ if (data) team.value = data
             Welcome to our page<br>
             Main Sheet: https://www.google.com/sheets/about/<br>
             Sheet: https://www.google.com/sheets/about/
-        </div>
-        <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
-        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
-
-        </div>
-        <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
-        <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
-
         </div>
         <span class="ml-2 mont font-bold text-lg mt-2">Latest scores: </span>
         <div class="flex w-full flex-col bg-neutral rounded-xl p-2 h-96">
