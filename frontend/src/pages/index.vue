@@ -7,7 +7,7 @@
             <div class="flex justify-between">
                 <div class="flex flex-col justify-center">
                     <span
-                        class="mx-auto my-12 font-extrabold !tracking-[40%] text-transparent text-7xl bg-clip-text nogu-brand"
+                        class="mx-auto my-12 font-extrabold text-transparent text-7xl bg-clip-text nogu-brand"
                         style="background-image: linear-gradient(to top,#F093FB, #F5576C);">NOGU</span>
                     <h2 class="text-xl font-semibold tracking-wide">Focusing on collecting, sorting, analyzing scores.
                     </h2>
