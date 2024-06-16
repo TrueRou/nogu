@@ -47,7 +47,7 @@ body {
   }
 
 .nogu-brand-small {
-letter-spacing: 4px
+    @apply tracking-[0.3em];
 }
 
 .nogu-brand {
