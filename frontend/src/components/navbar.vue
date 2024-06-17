@@ -51,7 +51,7 @@ function onScroll() {
                 <RouterLink class="relative h-10 p-1 text-lg btn btn-ghost rounded-3xl min-h-fit"
                     :to="currentGame.route">
                     <img v-if="hasFeaturedGame" :src="currentGame.icon" class="h-7">
-                    <span class="nogu-brand-small">NOGU</span>
+                    <span class="align-middle nogu-brand-small">NOGU</span>
                 </RouterLink>
             </div>
             <div class="navbar-center">
