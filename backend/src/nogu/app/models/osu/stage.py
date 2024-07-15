@@ -2,13 +2,15 @@ import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
 from nogu.app.database import require_session
-from sqlmodel import Field, Relationship, SQLModel, Session
+from sqlalchemy import JSON, Column, event
+from sqlalchemy.orm import object_session
+from sqlmodel import Field, Relationship, SQLModel, Session, select
 from nogu.app.constants.exceptions import APIException
 
 from nogu.app.constants.osu import Mods, Ruleset, WinCondition
 from ..ast_condition import AstCondition
 from ..user import User, UserSrv
-from ..team import TeamSrv
+from ..team import TeamSrv, TeamUserLink
 
 
 class StageBase(SQLModel):
@@ -33,6 +35,7 @@ class Stage(StageBase, table=True):
     version: int = Field(default=0)
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
+    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
 
     team_id: int = Field(foreign_key="teams.id")
 
@@ -58,6 +61,46 @@ class StageMap(StageMapBase, table=True):
 
     stage_id: int = Field(foreign_key="osu_stages.id", primary_key=True)
     condition: AstCondition = Relationship()
+    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+
+
+class StageUser(SQLModel, table=True):
+    __tablename__ = "osu_stage_users"
+
+    stage_id: int | None = Field(foreign_key="osu_stages.id", primary_key=True)
+    user_id: int | None = Field(default=None, foreign_key="users.id", primary_key=True)
+    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+
+
+class StageMapUser(SQLModel, table=True):
+    __tablename__ = "osu_stage_map_users"
+
+    stage_id: int | None = Field(foreign_key="osu_stages.id", primary_key=True)
+    map_md5: str | None = Field(foreign_key="osu_beatmaps.md5", primary_key=True)
+    user_id: int | None = Field(default=None, foreign_key="users.id", primary_key=True)
+    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+
+
+@event.listens_for(TeamUserLink, "after_insert")
+def user_after_insert(mapper, connection, team_user_link: TeamUserLink):
+    session = object_session(team_user_link)
+    stages = session.scalars(select(Stage).where(Stage.team_id == team_user_link.team_id))
+    for stage in stages:
+        maps = session.scalars(select(StageMap).where(StageMap.stage_id == stage.id))
+        session.add(StageUser(stage_id=stage.id, user_id=team_user_link.user_id))
+        for map in maps:
+            session.add(StageMapUser(stage_id=stage.id, map_md5=map.map_md5, user_id=team_user_link.user_id))
+    session.commit()
+
+
+@event.listens_for(StageMap, "after_insert")
+def beatmap_after_insert(mapper, connection, stage_map: StageMap):
+    session = object_session(stage_map)
+    stage = session.get(Stage, stage_map.stage_id)
+    users = session.scalars(select(TeamUserLink).where(TeamUserLink.team_id == stage.team_id))
+    for user in users:
+        session.add(StageMapUser(stage_id=stage.id, map_md5=stage_map.map_md5, user_id=user.user_id))
+    session.commit()
 
 
 class StageSrv:

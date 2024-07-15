@@ -2,6 +2,7 @@ import datetime
 from fastapi import Depends, status
 from nogu.app.constants.exceptions import APIException
 from nogu.app.utils import ensure_throw
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 from ossapi.models import Score as BanchoScore
 from nogu.app import database
@@ -39,6 +40,7 @@ class Score(ScoreBase, table=True):
     full_combo: bool
     grade: str
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
 
     user_id: int = Field(index=True, foreign_key="users.id")
     stage_id: int | None = Field(index=True, foreign_key="osu_stages.id")

@@ -1,5 +1,5 @@
 import contextlib
-from fastapi import Request, Response
+from fastapi import Request
 from sqlalchemy import func
 from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
@@ -13,6 +13,7 @@ async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", 
 
 def create_db_and_tables(engine):
     import nogu.app.models  # make sure all models are imported (keep its record in metadata)
+    import nogu.app.analysis  # register sqlalchemy event listeners
 
     nogu.app.models.SQLModel.metadata.create_all(engine)
 
