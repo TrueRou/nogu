@@ -16,6 +16,7 @@ class TeamFactory(SQLAlchemyFactory[Team]): ...
 class StageFactory(SQLAlchemyFactory[Stage]):
     team_id = Ignore()
     playlist_id = Ignore()
+    analysis = Ignore()
 
 
 class UserFactory(SQLAlchemyFactory[User]):
@@ -26,6 +27,7 @@ class ScoreFactory(SQLAlchemyFactory[Score]):
     user_id = Ignore()
     stage_id = Ignore()
     beatmap_md5 = Ignore()
+    analysis = Ignore()
 
 
 class ScoreBaseFactory(ModelFactory[ScoreBase]):
@@ -42,6 +44,7 @@ class StageMapFactory(SQLAlchemyFactory[StageMap]):
     stage_id = Ignore()
     map_md5 = Ignore()
     condition_id = Ignore()
+    analysis = Ignore()
 
 
 class AstConditionFactory(SQLAlchemyFactory[AstCondition]):

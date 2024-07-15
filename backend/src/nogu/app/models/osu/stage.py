@@ -1,7 +1,7 @@
 import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
-from nogu.app.database import require_session
+from nogu.app.database import require_session, session_ctx
 from sqlalchemy import JSON, Column, event
 from sqlalchemy.orm import object_session
 from sqlmodel import Field, Relationship, SQLModel, Session, select
@@ -83,24 +83,24 @@ class StageMapUser(SQLModel, table=True):
 
 @event.listens_for(TeamUserLink, "after_insert")
 def user_after_insert(mapper, connection, team_user_link: TeamUserLink):
-    session = object_session(team_user_link)
-    stages = session.scalars(select(Stage).where(Stage.team_id == team_user_link.team_id))
-    for stage in stages:
-        maps = session.scalars(select(StageMap).where(StageMap.stage_id == stage.id))
-        session.add(StageUser(stage_id=stage.id, user_id=team_user_link.user_id))
-        for map in maps:
-            session.add(StageMapUser(stage_id=stage.id, map_md5=map.map_md5, user_id=team_user_link.user_id))
-    session.commit()
+    with session_ctx() as session:
+        stages = session.scalars(select(Stage).where(Stage.team_id == team_user_link.team_id))
+        for stage in stages:
+            maps = session.scalars(select(StageMap).where(StageMap.stage_id == stage.id))
+            session.add(StageUser(stage_id=stage.id, user_id=team_user_link.user_id))
+            for map in maps:
+                session.add(StageMapUser(stage_id=stage.id, map_md5=map.map_md5, user_id=team_user_link.user_id))
+        session.commit()
 
 
 @event.listens_for(StageMap, "after_insert")
 def beatmap_after_insert(mapper, connection, stage_map: StageMap):
-    session = object_session(stage_map)
-    stage = session.get(Stage, stage_map.stage_id)
-    users = session.scalars(select(TeamUserLink).where(TeamUserLink.team_id == stage.team_id))
-    for user in users:
-        session.add(StageMapUser(stage_id=stage.id, map_md5=stage_map.map_md5, user_id=user.user_id))
-    session.commit()
+    with session_ctx() as session:
+        stage = session.get(Stage, stage_map.stage_id)
+        users = session.scalars(select(TeamUserLink).where(TeamUserLink.team_id == stage.team_id))
+        for user in users:
+            session.add(StageMapUser(stage_id=stage.id, map_md5=stage_map.map_md5, user_id=user.user_id))
+        session.commit()
 
 
 class StageSrv:

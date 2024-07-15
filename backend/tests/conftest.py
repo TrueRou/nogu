@@ -8,7 +8,7 @@ from nogu.app import database
 
 @pytest.fixture(scope="session")
 def database_engine():
-    engine = create_engine(config.mysql_url + "-test", echo=False)  # use a different database for testing
+    engine = create_engine(config.mysql_url, echo=False)
     database.drop_db_and_tables(engine)  # drop the database before testing
     database.create_db_and_tables(engine)  # create the database before testing
     yield engine  # provide the fixture value

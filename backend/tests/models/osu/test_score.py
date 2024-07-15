@@ -1,3 +1,4 @@
+from nogu.app.analysis.osu import analyze_score
 from nogu.app.models.osu.score import Score, ScoreSrv
 from nogu.app.models.team import TeamVisibility
 import pytest
@@ -86,13 +87,17 @@ async def test_score_submit(db_session):
     score2 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap.md5, accuracy=95.0)
     score3 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap2.md5, accuracy=100.0)
     score4 = ScoreBaseFactory.build(user_id=user2.id, beatmap_md5=beatmap.md5, accuracy=95.0)
+    score5 = ScoreBaseFactory.build(user_id=user.id, beatmap_md5=beatmap.md5, accuracy=95.0)
 
     score1: Score = ScoreSrv.submit_score(db_session, score1, user)
     score2: Score = ScoreSrv.submit_score(db_session, score2, user)
     score3: Score = ScoreSrv.submit_score(db_session, score3, user)
     score4: Score = ScoreSrv.submit_score(db_session, score4, user2)
+    score5: Score = ScoreSrv.submit_score(db_session, score5, user)
 
     assert score3.stage_id == None  # stage map ×
     assert score1.stage_id == None  # stage map √ condition ×
     assert score4.stage_id == None  # stage map √ condition √ user ×
     assert score2.stage_id == stage.id  # stage map √ condition √ user √
+
+    analyze_score(score2.id)
