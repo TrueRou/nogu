@@ -20,7 +20,7 @@ async def get_teams(limit: int = 20, offset: int = 0, status: int = -1, session:
         select(Team, Stage)
         .join(StageSq, onclause=Team.id == StageSq.c.team_id, isouter=True)
         .join(Stage, onclause=Stage.id == StageSq.c.max_id, isouter=True)
-        .where(Team.visibility == TeamVisibility.PUBLIC)
+        .where(Team.visibility >= TeamVisibility.PROTECTED)
         .limit(limit)
         .offset(offset)
         .order_by(Team.updated_at.desc())

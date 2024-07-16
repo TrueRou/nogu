@@ -77,14 +77,14 @@ class TeamWithMembers(TeamRead):
 
 
 class TeamSrv:
-    def _ensure_privilege(session: Session, team: Team, user: User | None, role: TeamRole = None) -> tuple[bool, APIException]:
+    def _ensure_role(session: Session, team: Team, user: User | None, role: TeamRole = None) -> tuple[bool, APIException]:
         if user is None:
-            return False, APIException("Login is required to access that team.", "team.login-required", status.HTTP_401_UNAUTHORIZED)
+            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED)
         sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
         if role is not None:
             sentence = sentence.where(TeamUserLink.role <= role.value)
         if session.exec(sentence).first() is None:
-            return False, APIException("You have no privilege to do that.", "team.not-priv", status.HTTP_403_FORBIDDEN)
+            return False, APIException("You have no privilege to do that.", "model.no-priv", status.HTTP_403_FORBIDDEN)
         return True, None
 
     # scope: access, access-sensitive, member, admin, owner
@@ -97,19 +97,19 @@ class TeamSrv:
 
         if "access" in security.scopes or security.scopes == []:
             if team.visibility == TeamVisibility.PRIVATE:
-                ensure_throw(TeamSrv._ensure_privilege, session, team, user)
+                ensure_throw(TeamSrv._ensure_role, session, team, user)
 
         if "access-sensitive" in security.scopes:
             if team.visibility >= TeamVisibility.PROTECTED:
-                ensure_throw(TeamSrv._ensure_privilege, session, team, user)
+                ensure_throw(TeamSrv._ensure_role, session, team, user)
 
         if "member" in security.scopes:
-            ensure_throw(TeamSrv._ensure_privilege, session, team, user)
+            ensure_throw(TeamSrv._ensure_role, session, team, user)
 
         if "admin" in security.scopes:
-            ensure_throw(TeamSrv._ensure_privilege, session, team, user, TeamRole.ADMIN)
+            ensure_throw(TeamSrv._ensure_role, session, team, user, TeamRole.ADMIN)
 
         if "owner" in security.scopes:
-            ensure_throw(TeamSrv._ensure_privilege, session, team, user, TeamRole.OWNER)
+            ensure_throw(TeamSrv._ensure_role, session, team, user, TeamRole.OWNER)
 
         return team

@@ -2,8 +2,8 @@ import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
 from nogu.app.database import require_session, session_ctx
+from nogu.app.models.osu.beatmap import Beatmap
 from sqlalchemy import JSON, Column, event
-from sqlalchemy.orm import object_session
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 from nogu.app.constants.exceptions import APIException
 
@@ -113,3 +113,18 @@ class StageSrv:
             raise APIException("Stage not found", "stage.not-found", status.HTTP_404_NOT_FOUND)
         TeamSrv.require_team(security, stage.team_id, user)  # check if user have proper grant to the team
         return stage
+
+
+class StageMapSrv:
+    def as_col(stage_map: StageMap, beatmap: Beatmap) -> dict:
+        return {
+            "label": stage_map.label,
+            "description": stage_map.description,
+            "title": beatmap.title,
+            "artist": beatmap.artist,
+            "version": beatmap.version,
+            "creator": beatmap.creator,
+            "beatmapset_id": beatmap.set_id,
+            "beatmap_id": beatmap.id,
+            "analysis": stage_map.analysis,
+        }

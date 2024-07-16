@@ -12,6 +12,7 @@ from .playlist import (
     PlaylistMapUpdate,
     PlaylistUpdate,
     PlaylistVisibility,
+    PlaylistSrv,
 )
 from .score import Score, ScoreBase, ScoreSrv
 from .stage import (
@@ -22,4 +23,5 @@ from .stage import (
     StageMapUpdate,
     StageUpdate,
     StageSrv,
+    StageMapSrv,
 )

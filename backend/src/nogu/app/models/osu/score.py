@@ -73,7 +73,7 @@ class ScoreSrv:
         if team.visibility == TeamVisibility.PUBLIC:
             return True, None
         # You can fetch scores if you are in the team (not public) that the score belongs to.
-        return TeamSrv._ensure_privilege(session, team, user)
+        return TeamSrv._ensure_role(session, team, user)
 
     def require_score(score_id: int, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user_optional)):
         score = session.get(Score, score_id)

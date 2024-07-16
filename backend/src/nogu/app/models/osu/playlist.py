@@ -1,6 +1,12 @@
 import datetime
 from enum import IntEnum, auto
-from sqlmodel import Field, Relationship, SQLModel
+from fastapi import Depends, status
+from fastapi.security import SecurityScopes
+from nogu.app.constants.exceptions import APIException
+from nogu.app.database import require_session
+from nogu.app.models.user import User, UserSrv
+from nogu.app.utils import ensure_throw
+from sqlmodel import Field, Relationship, SQLModel, Session
 
 from nogu.app.constants.osu import Ruleset, WinCondition, Mods
 from ..ast_condition import AstCondition
@@ -74,3 +80,32 @@ class PlaylistMap(PlaylistMapBase, table=True):
     __tablename__ = "osu_playlist_maps"
 
     condition: AstCondition = Relationship()
+
+
+class PlaylistSrv:
+    def _ensure_ownership(session: Session, playlist: Playlist, user: User | None) -> tuple[bool, APIException]:
+        if user is None:
+            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED)
+        if playlist.user_id != user.id:
+            return False, APIException("You have no privilege to do that.", "model.no-priv", status.HTTP_403_FORBIDDEN)
+        return True, None
+
+    # scope: access, owner
+    def require_playlist(
+        security: SecurityScopes,
+        playlist_id: int,
+        session: Session = Depends(require_session),
+        user: User | None = Depends(UserSrv.require_user_optional),
+    ):
+        playlist = session.get(Playlist, playlist_id)
+        if playlist is None:
+            raise APIException("Playlist not found", "playlist.not-found", status.HTTP_404_NOT_FOUND)
+
+        if "access" in security.scopes or security.scopes == []:
+            if playlist.visibility == PlaylistVisibility.PRIVATE:
+                ensure_throw(PlaylistSrv._ensure_ownership, session, playlist, user)
+
+        if "owner" in security.scopes:
+            ensure_throw(PlaylistSrv._ensure_ownership, session, playlist, user)
+
+        return playlist

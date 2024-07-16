@@ -13,7 +13,7 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 @router.get("/", response_model=list[Team])
 async def get_teams(limit: int = 20, offset: int = 0, status: int = -1, session: Session = Depends(require_session)):
-    sentence = select(Team).where(Team.visibility == TeamVisibility.PUBLIC).limit(limit).offset(offset).order_by(Team.updated_at.desc())
+    sentence = select(Team).where(Team.visibility >= TeamVisibility.PROTECTED).limit(limit).offset(offset).order_by(Team.updated_at.desc())
     if status == 0:
         sentence = sentence.where(Team.active == True)
     if status == 1:

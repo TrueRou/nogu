@@ -15,7 +15,7 @@ def test_team_belongings(db_session):
     # check how many users belong to the team
     member_num = 0
     for user in users:
-        if TeamSrv._ensure_privilege(db_session, team, user)[0]:
+        if TeamSrv._ensure_role(db_session, team, user)[0]:
             member_num += 1
 
     assert member_num == 5
