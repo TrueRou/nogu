@@ -47,7 +47,7 @@ async def patch_stage(
     return stage
 
 
-@router.get("/beatmaps/", response_model=list[Beatmap])
+@router.get("/beatmaps/", response_model=list[StageMapPublic])
 async def get_stage_beatmaps(limit=20, offset=0, session: Session = Depends(require_session), stage: Stage = Security(StageSrv.require_stage)):
     sentence = select(StageMap).where(StageMap.stage_id == stage.id).limit(limit).offset(offset)
     beatmaps = session.exec(sentence).all()
@@ -61,6 +61,7 @@ async def add_stage_beatmaps(
     for stage_map in stage_maps:
         model = StageMap(**stage_map.model_dump(), stage_id=stage.id)
         session.add(model)
+    session.commit()
 
 
 @router.get("/sheet/", response_model=dict)

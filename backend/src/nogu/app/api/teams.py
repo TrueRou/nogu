@@ -1,6 +1,7 @@
+import random
 from typing import Optional
 from fastapi import APIRouter, Depends, Security
-from nogu.app.models.team import TeamBase, TeamRole, TeamVisibility
+from nogu.app.models.team import TeamBase, TeamInvite, TeamRole, TeamVisibility
 from nogu.app.models.user import UserSrv
 from sqlmodel import Session, select
 from nogu.app.models.osu import *
@@ -60,3 +61,21 @@ async def get_teams_me(
         sentence = sentence.where(Team.active == False)
     teams = session.exec(sentence).all()
     return teams
+
+
+@router.post("/{team_id}/invite", response_model=TeamInvite)
+async def generate_invite(
+    session: Session = Depends(require_session),
+    team: Team = Security(TeamSrv.require_team, scopes=["admin"]),
+):
+    invite = session.exec(select(TeamInvite).where(TeamInvite.team_id == team.id)).first()
+    if invite is None:
+        invite_code = "".join(random.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 8))
+        while session.exec(select(TeamInvite).where(TeamInvite.invite_code == invite_code)).first() is not None:
+            invite_code = "".join(random.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 8))
+        invite = TeamInvite(team_id=team.id, invite_code=invite_code)
+        add_model(session, invite)
+    else:
+        invite.expired_at = TeamInvite.postpone()
+        session.commit()
+    return invite

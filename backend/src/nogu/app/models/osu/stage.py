@@ -8,7 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel, Session, select
 from nogu.app.constants.exceptions import APIException
 
 from nogu.app.constants.osu import Mods, Ruleset, WinCondition
-from ..ast_condition import AstCondition
+from ..ast_condition import AstCondition, AstConditionPublic
 from ..user import User, UserSrv
 from ..team import TeamSrv, TeamUserLink
 
@@ -64,6 +64,10 @@ class StageMap(StageMapBase, table=True):
     analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
 
 
+class StageMapPublic(StageMapBase):
+    condition: AstConditionPublic
+
+
 class StageUser(SQLModel, table=True):
     __tablename__ = "osu_stage_users"
 
@@ -89,7 +93,7 @@ def user_after_insert(mapper, connection, team_user_link: TeamUserLink):
             maps = session.scalars(select(StageMap).where(StageMap.stage_id == stage.id))
             session.add(StageUser(stage_id=stage.id, user_id=team_user_link.user_id))
             for map in maps:
-                session.add(StageMapUser(stage_id=stage.id, map_md5=map.map_md5, user_id=team_user_link.user_id))
+                session.merge(StageMapUser(stage_id=stage.id, map_md5=map.map_md5, user_id=team_user_link.user_id))
         session.commit()
 
 
@@ -99,7 +103,7 @@ def beatmap_after_insert(mapper, connection, stage_map: StageMap):
         stage = session.get(Stage, stage_map.stage_id)
         users = session.scalars(select(TeamUserLink).where(TeamUserLink.team_id == stage.team_id))
         for user in users:
-            session.add(StageMapUser(stage_id=stage.id, map_md5=stage_map.map_md5, user_id=user.user_id))
+            session.merge(StageMapUser(stage_id=stage.id, map_md5=stage_map.map_md5, user_id=user.user_id))
         session.commit()
 
 
@@ -111,7 +115,7 @@ class StageSrv:
         stage = session.get(Stage, stage_id)
         if stage is None:
             raise APIException("Stage not found", "stage.not-found", status.HTTP_404_NOT_FOUND)
-        TeamSrv.require_team(security, stage.team_id, user)  # check if user have proper grant to the team
+        TeamSrv.require_team(security, stage.team_id, session, user)  # check if user have proper grant to the team
         return stage
 
 

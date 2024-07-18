@@ -1,3 +1,4 @@
+from nogu.app import database
 from nogu.app.models.user import UserSrv
 import ossapi
 from fastapi import Depends, APIRouter
@@ -46,15 +47,15 @@ async def request_identity(code: str):
 
 
 @router.get("/bancho/token")
-async def process_bancho_oauth(code: str, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user_optional)):
+async def process_bancho_oauth(code: str, session: Session = Depends(require_session), user: User | None = Depends(UserSrv.require_user_optional)):
     if user is None:
         return generate_redirect("login", "You need to login first for this operation.")
     # get the previous user account from the database
     sentence = select(UserAccount).where(UserAccount.user_id == user.id, UserAccount.osu_server == Server.BANCHO)
-    user_account: UserAccount = session.exec(sentence).first()
+    user_account: UserAccount | None = session.exec(sentence).first()
     # get the user information from the osu! API
     api_client = OssapiAsync(config.osu_api_v2_id, config.osu_api_v2_secret, config.osu_api_v2_callback, access_token=code)
-    api_user: ossapi.User = await safe_request(api_client.get_me)
+    api_user: ossapi.User | None = await safe_request(api_client.get_me)
 
     if api_user is None:
         return generate_redirect("home", "Failed to get user information from osu! API.")
@@ -87,5 +88,5 @@ async def process_bancho_oauth(code: str, session: Session = Depends(require_ses
             su_country=api_user.country_code,
             su_playtime=api_user.statistics.play_time,
         )
-        session.add(user_account)
+        database.add_model(session, user_account)
     return generate_redirect("home", "Successfully linked your bancho account.")

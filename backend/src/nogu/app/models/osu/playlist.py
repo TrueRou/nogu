@@ -9,7 +9,7 @@ from nogu.app.utils import ensure_throw
 from sqlmodel import Field, Relationship, SQLModel, Session
 
 from nogu.app.constants.osu import Ruleset, WinCondition, Mods
-from ..ast_condition import AstCondition
+from ..ast_condition import AstCondition, AstConditionPublic
 
 
 class PlaylistVisibility(IntEnum):
@@ -80,6 +80,10 @@ class PlaylistMap(PlaylistMapBase, table=True):
     __tablename__ = "osu_playlist_maps"
 
     condition: AstCondition = Relationship()
+
+
+class PlaylistMapPublic(PlaylistMapBase):
+    condition: AstConditionPublic
 
 
 class PlaylistSrv:

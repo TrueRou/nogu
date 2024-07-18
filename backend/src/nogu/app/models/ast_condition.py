@@ -2,6 +2,11 @@ import datetime
 from sqlmodel import Field, SQLModel
 
 
+class AstConditionPublic(SQLModel):
+    name: str
+    description: str | None
+
+
 class AstCondition(SQLModel, table=True):
     __tablename__ = "ast_conditions"
 

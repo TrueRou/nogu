@@ -30,7 +30,7 @@ async def patch_playlist(
     return playlist
 
 
-@router.get("/beatmaps/", response_model=list[Beatmap])
+@router.get("/beatmaps/", response_model=list[PlaylistMapPublic])
 async def get_playlist_beatmaps(
     limit=20, offset=0, session: Session = Depends(require_session), playlist: Playlist = Security(PlaylistSrv.require_playlist)
 ):
@@ -48,3 +48,4 @@ async def add_playlist_beatmaps(
     for playlist_map in playlist_maps:
         model = PlaylistMap(**playlist_map.model_dump(), playlist_id=playlist.id)
         session.add(model)
+    session.commit()

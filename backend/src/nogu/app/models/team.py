@@ -68,6 +68,17 @@ class TeamUserLink(SQLModel, table=True):
     user: User = Relationship(sa_relationship_kwargs={"lazy": "subquery"})
 
 
+class TeamInvite(SQLModel, table=True):
+    __tablename__ = "team_invites"
+
+    def postpone():
+        return datetime.datetime.utcnow() + datetime.timedelta(days=7)
+
+    team_id: int = Field(foreign_key="teams.id", primary_key=True)
+    invite_code: str
+    expired_at: datetime.datetime = Field(default_factory=postpone)
+
+
 class TeamWithMembers(TeamRead):
     class TeamUserLinkPublic(SQLModel):
         role: TeamRole

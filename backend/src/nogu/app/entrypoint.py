@@ -5,12 +5,12 @@ from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 
 from nogu.app import database, api
-from nogu.app.database import require_session, session_ctx
+from nogu.app.database import session_ctx
 from nogu.app.logging import log, Ansi
 from nogu.app.api.users import parse_exception
 from nogu.app.constants.exceptions import APIException
@@ -71,6 +71,11 @@ def init_events(asgi_app: FastAPI) -> None:
 
 
 def init_exception_handlers(asgi_app: FastAPI) -> None:
+    @asgi_app.exception_handler(IntegrityError)
+    async def integrity_error_handler(request, exception: IntegrityError):
+        log(f"Integrity error: {exception}", Ansi.RED)
+        return APIException("Integrity error", "database", status.HTTP_409_CONFLICT).response()
+
     @asgi_app.exception_handler(APIException)
     async def api_exception_handler(request, exception: APIException):
         return exception.response()  # normalize response (with header)
