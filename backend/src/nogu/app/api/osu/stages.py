@@ -66,10 +66,10 @@ async def add_stage_beatmaps(
 
 @router.get("/sheet/", response_model=dict)
 async def get_sheet(session: Session = Depends(require_session), stage: Stage = Security(StageSrv.require_stage, scopes=["access-sensitive"])):
-    stage_maps = session.exec(select(StageMap, Beatmap).join(Beatmap, onclause=StageMap.map_md5 == Beatmap.md5).where(StageMap.stage_id == stage.id))
-    stage_users = session.exec(select(StageUser, User).join(User, onclause=StageUser.user_id == User.id).where(StageUser.stage_id == stage.id))
+    stage_maps = session.exec(select(StageMap, Beatmap).join(Beatmap).where(StageMap.stage_id == stage.id)).all()
+    stage_users = session.exec(select(StageUser, User).join(User).where(StageUser.stage_id == stage.id)).all()
     stage_map_users = session.exec(select(StageMapUser).where(StageMapUser.stage_id == stage.id))
-    rows, cols, cells = {}
+    rows, cols, cells = {}, {}, {}
     rows = {stage_user.user_id: {"username": user.username, "analysis": stage_user.analysis} for stage_user, user in stage_users}
     cols = {stage_map.map_md5: StageMapSrv.as_col(stage_map, beatmap) for stage_map, beatmap in stage_maps}
     for stage_map, _ in stage_maps:

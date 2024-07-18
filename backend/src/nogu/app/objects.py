@@ -3,10 +3,9 @@ import asyncio
 import re
 from abc import abstractmethod, ABCMeta
 from typing import TypeVar, Any
-
+from pydantic import BaseModel, TypeAdapter
+from sqlalchemy import JSON, TypeDecorator
 from starlette.requests import Request
-
-from nogu.app.logging import log
 
 T = TypeVar("T")
 
@@ -127,3 +126,25 @@ class Operator(metaclass=ABCMeta):
                 self.skip_next_interval = False
                 continue
             await asyncio.sleep(self.interval)
+
+
+class PydanticJson(TypeDecorator):
+    impl = JSON
+    cache_ok = True
+
+    def __init__(self, model: type[BaseModel]):
+        super().__init__(none_as_null=True)
+        self.model = model
+
+    def result_processor(self, dialect, coltype):
+        string_process = self._str_impl.result_processor(dialect, coltype)
+        json_deserializer = TypeAdapter(self.model).validate_json
+
+        def process(value):
+            if value is None or value == "{}":
+                return None
+            if string_process:
+                value = string_process(value)
+            return json_deserializer(value)
+
+        return process

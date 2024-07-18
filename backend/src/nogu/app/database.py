@@ -1,5 +1,6 @@
 import contextlib
 from fastapi import Request
+from pydantic import TypeAdapter
 from sqlalchemy import func
 from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
@@ -7,7 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from nogu import config
 
-engine = create_engine(config.mysql_url, echo=False)
+
+def pydantic_json_serializer(obj):
+    if isinstance(obj, SQLModel):
+        return obj.model_dump_json()
+
+
+engine = create_engine(config.mysql_url, json_serializer=pydantic_json_serializer, echo=False)
 async_engine = create_async_engine(config.mysql_url.replace("mysql+pymysql://", "mysql+aiomysql://"))
 
 

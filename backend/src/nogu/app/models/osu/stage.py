@@ -2,7 +2,9 @@ import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
 from nogu.app.database import require_session, session_ctx
+from nogu.app.models.osu.analysis import StageAnalysis, StageMapAnalysis, StageMapUserAnalysis, StageUserAnalysis
 from nogu.app.models.osu.beatmap import Beatmap
+from nogu.app.objects import PydanticJson
 from sqlalchemy import JSON, Column, event
 from sqlmodel import Field, Relationship, SQLModel, Session, select
 from nogu.app.constants.exceptions import APIException
@@ -35,7 +37,7 @@ class Stage(StageBase, table=True):
     version: int = Field(default=0)
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)  # we have to mannually update this column
-    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    analysis: StageAnalysis = Field(sa_column=Column(PydanticJson(StageAnalysis)), default_factory=dict)
 
     team_id: int = Field(foreign_key="teams.id")
 
@@ -61,7 +63,7 @@ class StageMap(StageMapBase, table=True):
 
     stage_id: int = Field(foreign_key="osu_stages.id", primary_key=True)
     condition: AstCondition = Relationship()
-    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    analysis: StageMapAnalysis = Field(sa_column=Column(PydanticJson(StageMapAnalysis)), default_factory=dict)
 
 
 class StageMapPublic(StageMapBase):
@@ -73,7 +75,7 @@ class StageUser(SQLModel, table=True):
 
     stage_id: int | None = Field(foreign_key="osu_stages.id", primary_key=True)
     user_id: int | None = Field(default=None, foreign_key="users.id", primary_key=True)
-    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    analysis: StageUserAnalysis = Field(sa_column=Column(PydanticJson(StageUserAnalysis)), default_factory=dict)
 
 
 class StageMapUser(SQLModel, table=True):
@@ -82,7 +84,7 @@ class StageMapUser(SQLModel, table=True):
     stage_id: int | None = Field(foreign_key="osu_stages.id", primary_key=True)
     map_md5: str | None = Field(foreign_key="osu_beatmaps.md5", primary_key=True)
     user_id: int | None = Field(default=None, foreign_key="users.id", primary_key=True)
-    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    analysis: StageMapUserAnalysis = Field(sa_column=Column(PydanticJson(StageMapUserAnalysis)), default_factory=dict)
 
 
 @event.listens_for(TeamUserLink, "after_insert")

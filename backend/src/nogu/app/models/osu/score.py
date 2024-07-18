@@ -1,6 +1,7 @@
 import datetime
 from fastapi import Depends, status
 from nogu.app.constants.exceptions import APIException
+from nogu.app.models.osu.analysis import ScoreAnalysis
 from nogu.app.utils import ensure_throw
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, SQLModel, Session, select
@@ -8,7 +9,7 @@ from ossapi.models import Score as BanchoScore
 from nogu.app import database
 from nogu.app.database import require_session
 from nogu.app.models.osu.beatmap import Beatmap, BeatmapSrv
-from nogu.app.objects import AstChecker
+from nogu.app.objects import AstChecker, PydanticJson
 from nogu.app.constants.osu import Server, Mods, Ruleset
 
 from .performance import Performance
@@ -40,7 +41,7 @@ class Score(ScoreBase, table=True):
     full_combo: bool
     grade: str
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    analysis: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    analysis: ScoreAnalysis = Field(sa_column=Column(PydanticJson(ScoreAnalysis)), default_factory=dict)
 
     user_id: int = Field(index=True, foreign_key="users.id")
     stage_id: int | None = Field(index=True, foreign_key="osu_stages.id")

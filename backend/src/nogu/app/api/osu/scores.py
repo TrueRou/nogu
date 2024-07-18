@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from nogu.app.analysis import osu
 from ossapi import MatchResponse, MatchEvent, OssapiAsync
 from sqlmodel import Session, select
 
@@ -21,7 +22,9 @@ async def get_score(score: Score = Depends(ScoreSrv.require_score)):
 
 @router.post("/", response_model=Score)
 async def submit_score(score: ScoreBase, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user)):
-    score = ScoreSrv.submit_score(session, score, user)
+    score: Score = ScoreSrv.submit_score(session, score, user)
+    if score.stage_id is not None:
+        osu.analyze_score(score.id)
     return score
 
 
@@ -29,7 +32,9 @@ async def submit_score(score: ScoreBase, session: Session = Depends(require_sess
 async def submit_score_partial(
     keywords: str, beatmap_md5: str, session: Session = Depends(require_session), user: User = Depends(UserSrv.require_user)
 ):
-    score = ScoreSrv.submit_partial(session, keywords, beatmap_md5, user)
+    score: Score = ScoreSrv.submit_partial(session, keywords, beatmap_md5, user)
+    if score.stage_id is not None:
+        osu.analyze_score(score.id)
     return score
 
 
@@ -55,7 +60,9 @@ class BanchoMatchInspector(Inspector):
                 sentence = select(User).join(UserAccount).where(UserAccount.su_id == score.user_id, UserAccount.osu_server == Server.BANCHO)
                 user = session.exec(sentence).first()
                 if user is not None:
-                    ScoreSrv.submit_inspected(session, score, user)
+                    score: Score = ScoreSrv.submit_inspected(session, score, user)
+                    if score.stage_id is not None:
+                        osu.analyze_score(score.id)
 
 
 bancho_match_inspector = BanchoMatchInspector(
