@@ -4,27 +4,27 @@ import { useSession } from "@/store/session";
 import createClient, { type Middleware } from "openapi-fetch";
 
 const myMiddleware: Middleware = {
-    async onRequest(req, options) {
+    async onRequest({ request, options }) {
         const accessToken = localStorage.getItem("accessToken")
         if (accessToken !== null) {
             // we don't expire the token, so we can always use it
-            req.headers.set("Authorization", `Bearer ${accessToken}`);
+            request.headers.set("Authorization", `Bearer ${accessToken}`);
         }
         return undefined; // return undefined to leave request unchanged
     },
-    async onResponse(res, options) {
-        const data = await res.clone().json();
+    async onResponse({ request, response, options }) {
+        const data = await response.clone().json();
         const global = useGlobal();
         const session = useSession();
 
-        if (!res.ok && data) {
+        if (!response.ok && data) {
             if (data.settled) {
                 global.showNotification("error", data.message, data.i18n_node);
                 console.log(data); // log the settled error
             }
 
             // handle for not settled unauthenticated errors
-            if (res.status === 401) {
+            if (response.status === 401) {
                 session.logout(); // logout the user and leave the rest to the router
             }
         }

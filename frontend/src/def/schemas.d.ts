@@ -3,1071 +3,1750 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
-  "/": {
-    /** Root */
-    get: operations["root__get"];
-  };
-  "/users/me": {
-    /** Users:Current User */
-    get: operations["users_current_user_users_me_get"];
-    /** Users:Patch Current User */
-    patch: operations["users_patch_current_user_users_me_patch"];
-  };
-  "/users/{id}": {
-    /** Users:User */
-    get: operations["users_user_users__id__get"];
-    /** Users:Delete User */
-    delete: operations["users_delete_user_users__id__delete"];
-    /** Users:Patch User */
-    patch: operations["users_patch_user_users__id__patch"];
-  };
-  "/auth/jwt/login": {
-    /** Auth:Jwt.Login */
-    post: operations["auth_jwt_login_auth_jwt_login_post"];
-  };
-  "/auth/jwt/logout": {
-    /** Auth:Jwt.Logout */
-    post: operations["auth_jwt_logout_auth_jwt_logout_post"];
-  };
-  "/auth/register": {
-    /** Register:Register */
-    post: operations["register_register_auth_register_post"];
-  };
-  "/teams/": {
-    /** Get Teams */
-    get: operations["get_teams_teams__get"];
-  };
-  "/teams/{team_id}": {
-    /** Get Team */
-    get: operations["get_team_teams__team_id__get"];
-    /** Create Team */
-    post: operations["create_team_teams__team_id__post"];
-    /** Patch Team */
-    patch: operations["patch_team_teams__team_id__patch"];
-  };
-  "/teams/me/": {
-    /** Get Teams Me */
-    get: operations["get_teams_me_teams_me__get"];
-  };
-  "/oauth/bancho/token": {
-    /** Process Bancho Oauth */
-    get: operations["process_bancho_oauth_oauth_bancho_token_get"];
-  };
-  "/osu/scores/{score_id}": {
-    /** Get Score */
-    get: operations["get_score_osu_scores__score_id__get"];
-  };
-  "/osu/scores/": {
-    /** Submit Score */
-    post: operations["submit_score_osu_scores__post"];
-  };
-  "/osu/scores/partial/": {
-    /** Submit Score Partial */
-    post: operations["submit_score_partial_osu_scores_partial__post"];
-  };
-  "/osu/scores/inspect/bancho/{match_id}": {
-    /** Inspect Bancho Match */
-    post: operations["inspect_bancho_match_osu_scores_inspect_bancho__match_id__post"];
-  };
-  "/osu/beatmaps/{ident}": {
-    /** Get Beatmap */
-    get: operations["get_beatmap_osu_beatmaps__ident__get"];
-  };
-  "/osu/beatmaps/stream/": {
-    /** Stream Beatmap */
-    post: operations["stream_beatmap_osu_beatmaps_stream__post"];
-  };
-  "/osu/teams/": {
-    /** Get Teams */
-    get: operations["get_teams_osu_teams__get"];
-  };
-  "/osu/teams/{team_id}": {
-    /** Get Team */
-    get: operations["get_team_osu_teams__team_id__get"];
-  };
-  "/osu/teams/me/": {
-    /** Get Teams Me */
-    get: operations["get_teams_me_osu_teams_me__get"];
-  };
-  "/osu/teams/scores/": {
-    /** Get Scores */
-    get: operations["get_scores_osu_teams_scores__get"];
-  };
-  "/osu/teams/stages/": {
-    /** Get Stages */
-    get: operations["get_stages_osu_teams_stages__get"];
-  };
-  "/osu/stages/{stage_id}": {
-    /** Get Stage */
-    get: operations["get_stage_osu_stages__stage_id__get"];
-    /** Patch Stage */
-    patch: operations["patch_stage_osu_stages__stage_id__patch"];
-  };
-  "/osu/stages/": {
-    /** Create Stage */
-    post: operations["create_stage_osu_stages__post"];
-  };
-  "/osu/stages/beatmaps/": {
-    /** Get Stage Beatmaps */
-    get: operations["get_stage_beatmaps_osu_stages_beatmaps__get"];
-    /** Add Stage Beatmaps */
-    post: operations["add_stage_beatmaps_osu_stages_beatmaps__post"];
-  };
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Root */
+        get: operations["root__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Users:Current User */
+        get: operations["users_current_user_users_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Users:Patch Current User */
+        patch: operations["users_patch_current_user_users_me_patch"];
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Users:User */
+        get: operations["users_user_users__id__get"];
+        put?: never;
+        post?: never;
+        /** Users:Delete User */
+        delete: operations["users_delete_user_users__id__delete"];
+        options?: never;
+        head?: never;
+        /** Users:Patch User */
+        patch: operations["users_patch_user_users__id__patch"];
+        trace?: never;
+    };
+    "/auth/jwt/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Auth:Jwt.Login */
+        post: operations["auth_jwt_login_auth_jwt_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/jwt/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Auth:Jwt.Logout */
+        post: operations["auth_jwt_logout_auth_jwt_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register:Register */
+        post: operations["register_register_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Teams */
+        get: operations["get_teams_teams__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{team_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Team */
+        get: operations["get_team_teams__team_id__get"];
+        put?: never;
+        /** Create Team */
+        post: operations["create_team_teams__team_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch Team */
+        patch: operations["patch_team_teams__team_id__patch"];
+        trace?: never;
+    };
+    "/teams/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Teams Me */
+        get: operations["get_teams_me_teams_me__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{team_id}/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate Invite */
+        post: operations["generate_invite_teams__team_id__invite_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/bancho/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Process Bancho Oauth */
+        get: operations["process_bancho_oauth_oauth_bancho_token_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/scores/{score_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Score */
+        get: operations["get_score_osu_scores__score_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/scores/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Score */
+        post: operations["submit_score_osu_scores__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/scores/partial/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Score Partial */
+        post: operations["submit_score_partial_osu_scores_partial__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/scores/inspect/bancho/{match_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Inspect Bancho Match */
+        post: operations["inspect_bancho_match_osu_scores_inspect_bancho__match_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/beatmaps/{ident}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Beatmap */
+        get: operations["get_beatmap_osu_beatmaps__ident__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/beatmaps/stream/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stream Beatmap */
+        post: operations["stream_beatmap_osu_beatmaps_stream__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/teams/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Teams */
+        get: operations["get_teams_osu_teams__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/teams/{team_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Team */
+        get: operations["get_team_osu_teams__team_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/teams/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Teams Me */
+        get: operations["get_teams_me_osu_teams_me__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/teams/scores/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Scores */
+        get: operations["get_scores_osu_teams_scores__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/teams/stages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Stages */
+        get: operations["get_stages_osu_teams_stages__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/stages/{stage_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Stage */
+        get: operations["get_stage_osu_stages__stage_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch Stage */
+        patch: operations["patch_stage_osu_stages__stage_id__patch"];
+        trace?: never;
+    };
+    "/osu/stages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Stage */
+        post: operations["create_stage_osu_stages__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/stages/beatmaps/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Stage Beatmaps */
+        get: operations["get_stage_beatmaps_osu_stages_beatmaps__get"];
+        put?: never;
+        /** Add Stage Beatmaps */
+        post: operations["add_stage_beatmaps_osu_stages_beatmaps__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/osu/stages/sheet/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sheet */
+        get: operations["get_sheet_osu_stages_sheet__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{invite_code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify Invite */
+        get: operations["verify_invite_invites__invite_code__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
-  schemas: {
-    /** BearerResponse */
-    BearerResponse: {
-      /** Access Token */
-      access_token: string;
-      /** Token Type */
-      token_type: string;
+    schemas: {
+        /** AstConditionPublic */
+        AstConditionPublic: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+        };
+        /** BearerResponse */
+        BearerResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Token Type */
+            token_type: string;
+        };
+        /** Beatmap */
+        Beatmap: {
+            /** Md5 */
+            md5: string;
+            /** Id */
+            id: number | null;
+            /** Set Id */
+            set_id: number | null;
+            /** Ranked Status */
+            ranked_status: number;
+            /** Artist */
+            artist: string;
+            /** Title */
+            title: string;
+            /** Version */
+            version: string;
+            /** Creator */
+            creator: string;
+            /** Filename */
+            filename: string;
+            /** Total Length */
+            total_length: number;
+            /** Max Combo */
+            max_combo: number;
+            ruleset: components["schemas"]["Ruleset"];
+            /** Bpm */
+            bpm: number;
+            /** Cs */
+            cs: number;
+            /** Ar */
+            ar: number;
+            /** Od */
+            od: number;
+            /** Hp */
+            hp: number;
+            /** Star Rating */
+            star_rating: number;
+            /**
+             * Osu Server
+             * @default 2
+             */
+            osu_server: number;
+            /**
+             * Server Updated At
+             * Format: date-time
+             */
+            server_updated_at: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /**
+             * Checked At
+             * Format: date-time
+             */
+            checked_at?: string;
+            /** Uploaded By */
+            uploaded_by?: number | null;
+        };
+        /** Body_auth_jwt_login_auth_jwt_login_post */
+        Body_auth_jwt_login_auth_jwt_login_post: {
+            /** Grant Type */
+            grant_type?: string | null;
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+            /**
+             * Scope
+             * @default
+             */
+            scope: string;
+            /** Client Id */
+            client_id?: string | null;
+            /** Client Secret */
+            client_secret?: string | null;
+        };
+        /** ErrorModel */
+        ErrorModel: {
+            /** Detail */
+            detail: string | {
+                [key: string]: string | undefined;
+            };
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * Mods
+         * @enum {integer}
+         */
+        Mods: 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096 | 8192 | 16384 | 32768 | 65536 | 131072 | 262144 | 524288 | 1048576 | 2097152 | 4194304 | 8388608 | 16777216 | 33554432 | 67108864 | 134217728 | 268435456 | 536870912 | 1073741824;
+        /** OsuTeamCombination */
+        OsuTeamCombination: {
+            team: components["schemas"]["TeamWithMembers"];
+            stage: components["schemas"]["Stage"];
+        };
+        /**
+         * Ruleset
+         * @enum {integer}
+         */
+        Ruleset: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8;
+        /** Score */
+        Score: {
+            /** Score */
+            score: number;
+            /** Accuracy */
+            accuracy: number;
+            /** Highest Combo */
+            highest_combo: number;
+            mods: components["schemas"]["Mods"];
+            /** Num 300S */
+            num_300s: number;
+            /** Num 100S */
+            num_100s: number;
+            /** Num 50S */
+            num_50s: number;
+            /** Num Misses */
+            num_misses: number;
+            /** Num Gekis */
+            num_gekis: number;
+            /** Num Katus */
+            num_katus: number;
+            ruleset: components["schemas"]["Ruleset"];
+            /**
+             * Osu Server
+             * @default 2
+             */
+            osu_server: number;
+            /** Beatmap Md5 */
+            beatmap_md5: string;
+            /** Id */
+            id?: number | null;
+            /** Full Combo */
+            full_combo: boolean;
+            /** Grade */
+            grade: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            analysis?: components["schemas"]["ScoreAnalysis"];
+            /** User Id */
+            user_id: number;
+            /** Stage Id */
+            stage_id: number | null;
+        };
+        /** ScoreAnalysis */
+        ScoreAnalysis: {
+            /** Completeness */
+            completeness: number;
+        };
+        /** ScoreBase */
+        ScoreBase: {
+            /** Score */
+            score: number;
+            /** Accuracy */
+            accuracy: number;
+            /** Highest Combo */
+            highest_combo: number;
+            mods: components["schemas"]["Mods"];
+            /** Num 300S */
+            num_300s: number;
+            /** Num 100S */
+            num_100s: number;
+            /** Num 50S */
+            num_50s: number;
+            /** Num Misses */
+            num_misses: number;
+            /** Num Gekis */
+            num_gekis: number;
+            /** Num Katus */
+            num_katus: number;
+            ruleset: components["schemas"]["Ruleset"];
+            /**
+             * Osu Server
+             * @default 2
+             */
+            osu_server: number;
+            /** Beatmap Md5 */
+            beatmap_md5: string;
+        };
+        /** Stage */
+        Stage: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            ruleset: components["schemas"]["Ruleset"];
+            win_condition: components["schemas"]["WinCondition"];
+            /** Playlist Id */
+            playlist_id: number | null;
+            /** Id */
+            id?: number | null;
+            /**
+             * Version
+             * @default 0
+             */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at?: string;
+            analysis?: components["schemas"]["StageAnalysis"];
+            /** Team Id */
+            team_id: number;
+        };
+        /** StageAnalysis */
+        StageAnalysis: {
+            /** Play Count */
+            play_count: number;
+        };
+        /** StageBase */
+        StageBase: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            ruleset: components["schemas"]["Ruleset"];
+            win_condition: components["schemas"]["WinCondition"];
+            /** Playlist Id */
+            playlist_id: number | null;
+        };
+        /** StageMapBase */
+        StageMapBase: {
+            /** Map Md5 */
+            map_md5: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string | null;
+            represent_mods: components["schemas"]["Mods"];
+            /** Condition Id */
+            condition_id: number;
+        };
+        /** StageMapPublic */
+        StageMapPublic: {
+            /** Map Md5 */
+            map_md5: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string | null;
+            represent_mods: components["schemas"]["Mods"];
+            /** Condition Id */
+            condition_id: number;
+            condition: components["schemas"]["AstConditionPublic"];
+        };
+        /** StageUpdate */
+        StageUpdate: {
+            /** Name */
+            name: string | null;
+            /** Description */
+            description: string | null;
+            win_condition: components["schemas"]["WinCondition"] | null;
+        };
+        /** Team */
+        Team: {
+            /** Name */
+            name: string;
+            /** Slogan */
+            slogan: string | null;
+            /** @default 2 */
+            visibility: components["schemas"]["TeamVisibility"];
+            /** Active Until */
+            active_until: string | null;
+            /** Id */
+            id?: number | null;
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at?: string;
+        };
+        /** TeamBase */
+        TeamBase: {
+            /** Name */
+            name: string;
+            /** Slogan */
+            slogan: string | null;
+            /** @default 2 */
+            visibility: components["schemas"]["TeamVisibility"];
+            /** Active Until */
+            active_until: string | null;
+        };
+        /** TeamInvite */
+        TeamInvite: {
+            /** Team Id */
+            team_id: number;
+            /** Invite Code */
+            invite_code: string;
+            /**
+             * Expired At
+             * Format: date-time
+             */
+            expired_at?: string;
+        };
+        /**
+         * TeamRole
+         * @enum {integer}
+         */
+        TeamRole: 1 | 2 | 3;
+        /** TeamUserLink */
+        TeamUserLink: {
+            /** Team Id */
+            team_id?: number | null;
+            /** User Id */
+            user_id?: number | null;
+            /** @default 3 */
+            role: components["schemas"]["TeamRole"];
+            /**
+             * Joined At
+             * Format: date-time
+             */
+            joined_at?: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at?: string;
+        };
+        /** TeamUserLinkPublic */
+        TeamUserLinkPublic: {
+            role: components["schemas"]["TeamRole"];
+            user: components["schemas"]["UserRead"];
+        };
+        /**
+         * TeamVisibility
+         * @enum {integer}
+         */
+        TeamVisibility: 1 | 2 | 3;
+        /** TeamWithMembers */
+        TeamWithMembers: {
+            /** Name */
+            name: string;
+            /** Slogan */
+            slogan: string | null;
+            /** @default 2 */
+            visibility: components["schemas"]["TeamVisibility"];
+            /** Active Until */
+            active_until: string | null;
+            /** Id */
+            id: number;
+            /** Active */
+            active: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** User Links */
+            user_links: components["schemas"]["TeamUserLinkPublic"][];
+        };
+        /** User */
+        User: {
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+            /**
+             * Country
+             * @default XX
+             */
+            country: string;
+            /** Id */
+            id?: number | null;
+            /** Hashed Password */
+            hashed_password: string;
+            /** @default 1 */
+            privileges: components["schemas"]["UserPriv"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at?: string;
+        };
+        /**
+         * UserPriv
+         * @enum {integer}
+         */
+        UserPriv: 1 | 2;
+        /** UserRead */
+        UserRead: {
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+            /**
+             * Country
+             * @default XX
+             */
+            country: string;
+            /** Id */
+            id: number;
+            privileges: components["schemas"]["UserPriv"];
+        };
+        /** UserUpdate */
+        UserUpdate: {
+            /** Password */
+            password: string | null;
+            /** Email */
+            email: string | null;
+            /** Username */
+            username: string | null;
+            /** Country */
+            country: string | null;
+        };
+        /** UserWrite */
+        UserWrite: {
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+            /**
+             * Country
+             * @default XX
+             */
+            country: string;
+            /** Password */
+            password: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+        /**
+         * WinCondition
+         * @enum {integer}
+         */
+        WinCondition: 1 | 2 | 3 | 4;
     };
-    /** Beatmap */
-    Beatmap: {
-      /** Md5 */
-      md5: string;
-      /** Id */
-      id: number | null;
-      /** Set Id */
-      set_id: number | null;
-      /** Ranked Status */
-      ranked_status: number;
-      /** Artist */
-      artist: string;
-      /** Title */
-      title: string;
-      /** Version */
-      version: string;
-      /** Creator */
-      creator: string;
-      /** Filename */
-      filename: string;
-      /** Total Length */
-      total_length: number;
-      /** Max Combo */
-      max_combo: number;
-      ruleset: components["schemas"]["Ruleset"];
-      /** Bpm */
-      bpm: number;
-      /** Cs */
-      cs: number;
-      /** Ar */
-      ar: number;
-      /** Od */
-      od: number;
-      /** Hp */
-      hp: number;
-      /** Star Rating */
-      star_rating: number;
-      /**
-       * Osu Server
-       * @default 2
-       */
-      osu_server?: number;
-      /**
-       * Server Updated At
-       * Format: date-time
-       */
-      server_updated_at: string;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at?: string;
-      /**
-       * Checked At
-       * Format: date-time
-       */
-      checked_at?: string;
-      /** Uploaded By */
-      uploaded_by?: number | null;
-    };
-    /** Body_auth_jwt_login_auth_jwt_login_post */
-    Body_auth_jwt_login_auth_jwt_login_post: {
-      /** Grant Type */
-      grant_type?: string | null;
-      /** Username */
-      username: string;
-      /** Password */
-      password: string;
-      /**
-       * Scope
-       * @default
-       */
-      scope?: string;
-      /** Client Id */
-      client_id?: string | null;
-      /** Client Secret */
-      client_secret?: string | null;
-    };
-    /** ErrorModel */
-    ErrorModel: {
-      /** Detail */
-      detail: string | {
-        [key: string]: string;
-      };
-    };
-    /** HTTPValidationError */
-    HTTPValidationError: {
-      /** Detail */
-      detail?: components["schemas"]["ValidationError"][];
-    };
-    /**
-     * Mods
-     * @enum {integer}
-     */
-    Mods: 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096 | 8192 | 16384 | 32768 | 65536 | 131072 | 262144 | 524288 | 1048576 | 2097152 | 4194304 | 8388608 | 16777216 | 33554432 | 67108864 | 134217728 | 268435456 | 536870912 | 1073741824;
-    /** OsuTeamCombination */
-    OsuTeamCombination: {
-      team: components["schemas"]["TeamWithMembers"];
-      stage: components["schemas"]["Stage"];
-    };
-    /**
-     * Ruleset
-     * @enum {integer}
-     */
-    Ruleset: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8;
-    /** Score */
-    Score: {
-      /** Score */
-      score: number;
-      /** Accuracy */
-      accuracy: number;
-      /** Highest Combo */
-      highest_combo: number;
-      mods: components["schemas"]["Mods"];
-      /** Num 300S */
-      num_300s: number;
-      /** Num 100S */
-      num_100s: number;
-      /** Num 50S */
-      num_50s: number;
-      /** Num Misses */
-      num_misses: number;
-      /** Num Gekis */
-      num_gekis: number;
-      /** Num Katus */
-      num_katus: number;
-      ruleset: components["schemas"]["Ruleset"];
-      /**
-       * Osu Server
-       * @default 2
-       */
-      osu_server?: number;
-      /** Beatmap Md5 */
-      beatmap_md5: string;
-      /** Id */
-      id?: number | null;
-      /** Full Combo */
-      full_combo: boolean;
-      /** Grade */
-      grade: string;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at?: string;
-      /** User Id */
-      user_id: number;
-      /** Stage Id */
-      stage_id: number | null;
-    };
-    /** ScoreBase */
-    ScoreBase: {
-      /** Score */
-      score: number;
-      /** Accuracy */
-      accuracy: number;
-      /** Highest Combo */
-      highest_combo: number;
-      mods: components["schemas"]["Mods"];
-      /** Num 300S */
-      num_300s: number;
-      /** Num 100S */
-      num_100s: number;
-      /** Num 50S */
-      num_50s: number;
-      /** Num Misses */
-      num_misses: number;
-      /** Num Gekis */
-      num_gekis: number;
-      /** Num Katus */
-      num_katus: number;
-      ruleset: components["schemas"]["Ruleset"];
-      /**
-       * Osu Server
-       * @default 2
-       */
-      osu_server?: number;
-      /** Beatmap Md5 */
-      beatmap_md5: string;
-    };
-    /** Stage */
-    Stage: {
-      /** Name */
-      name: string;
-      /** Description */
-      description: string | null;
-      ruleset: components["schemas"]["Ruleset"];
-      win_condition: components["schemas"]["WinCondition"];
-      /** Playlist Id */
-      playlist_id: number | null;
-      /** Id */
-      id?: number | null;
-      /**
-       * Version
-       * @default 0
-       */
-      version?: number;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at?: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at?: string;
-      /** Team Id */
-      team_id: number;
-    };
-    /** StageBase */
-    StageBase: {
-      /** Name */
-      name: string;
-      /** Description */
-      description: string | null;
-      ruleset: components["schemas"]["Ruleset"];
-      win_condition: components["schemas"]["WinCondition"];
-      /** Playlist Id */
-      playlist_id: number | null;
-    };
-    /** StageMapBase */
-    StageMapBase: {
-      /** Map Md5 */
-      map_md5: string;
-      /** Label */
-      label: string;
-      /** Description */
-      description: string | null;
-      represent_mods: components["schemas"]["Mods"];
-      /** Condition Id */
-      condition_id: number;
-    };
-    /** StageUpdate */
-    StageUpdate: {
-      /** Name */
-      name: string | null;
-      /** Description */
-      description: string | null;
-      win_condition: components["schemas"]["WinCondition"] | null;
-    };
-    /** Team */
-    Team: {
-      /** Name */
-      name: string;
-      /** Slogan */
-      slogan: string | null;
-      /** @default 2 */
-      visibility?: components["schemas"]["TeamVisibility"];
-      /** Active Until */
-      active_until: string | null;
-      /** Id */
-      id?: number | null;
-      /**
-       * Active
-       * @default true
-       */
-      active?: boolean;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at?: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at?: string;
-    };
-    /** TeamBase */
-    TeamBase: {
-      /** Name */
-      name: string;
-      /** Slogan */
-      slogan: string | null;
-      /** @default 2 */
-      visibility?: components["schemas"]["TeamVisibility"];
-      /** Active Until */
-      active_until: string | null;
-    };
-    /**
-     * TeamRole
-     * @enum {integer}
-     */
-    TeamRole: 1 | 2 | 3;
-    /** TeamUserLinkPublic */
-    TeamUserLinkPublic: {
-      role: components["schemas"]["TeamRole"];
-      user: components["schemas"]["UserRead"];
-    };
-    /**
-     * TeamVisibility
-     * @enum {integer}
-     */
-    TeamVisibility: 1 | 2 | 3;
-    /** TeamWithMembers */
-    TeamWithMembers: {
-      /** Name */
-      name: string;
-      /** Slogan */
-      slogan: string | null;
-      /** @default 2 */
-      visibility?: components["schemas"]["TeamVisibility"];
-      /** Active Until */
-      active_until: string | null;
-      /** Id */
-      id: number;
-      /** Active */
-      active: boolean;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
-      /** User Links */
-      user_links: components["schemas"]["TeamUserLinkPublic"][];
-    };
-    /** User */
-    User: {
-      /** Username */
-      username: string;
-      /** Email */
-      email: string;
-      /**
-       * Country
-       * @default XX
-       */
-      country?: string;
-      /** Id */
-      id?: number | null;
-      /** Hashed Password */
-      hashed_password: string;
-      /** @default 1 */
-      privileges?: components["schemas"]["UserPriv"];
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at?: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at?: string;
-    };
-    /**
-     * UserPriv
-     * @enum {integer}
-     */
-    UserPriv: 1 | 2;
-    /** UserRead */
-    UserRead: {
-      /** Username */
-      username: string;
-      /** Email */
-      email: string;
-      /**
-       * Country
-       * @default XX
-       */
-      country?: string;
-      /** Id */
-      id: number;
-      privileges: components["schemas"]["UserPriv"];
-    };
-    /** UserUpdate */
-    UserUpdate: {
-      /** Password */
-      password: string | null;
-      /** Email */
-      email: string | null;
-      /** Username */
-      username: string | null;
-      /** Country */
-      country: string | null;
-    };
-    /** UserWrite */
-    UserWrite: {
-      /** Username */
-      username: string;
-      /** Email */
-      email: string;
-      /**
-       * Country
-       * @default XX
-       */
-      country?: string;
-      /** Password */
-      password: string;
-    };
-    /** ValidationError */
-    ValidationError: {
-      /** Location */
-      loc: (string | number)[];
-      /** Message */
-      msg: string;
-      /** Error Type */
-      type: string;
-    };
-    /**
-     * WinCondition
-     * @enum {integer}
-     */
-    WinCondition: 1 | 2 | 3 | 4;
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
-export type external = Record<string, never>;
-
 export interface operations {
-
-  /** Root */
-  root__get: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+    root__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Users:Current User */
-  users_current_user_users_me_get: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["User"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
         };
-      };
     };
-  };
-  /** Users:Patch Current User */
-  users_patch_current_user_users_me_patch: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["User"];
+    users_current_user_users_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Users:User */
-  users_user_users__id__get: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["User"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Users:Delete User */
-  users_delete_user_users__id__delete: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      204: {
-        content: never;
-      };
-    };
-  };
-  /** Users:Patch User */
-  users_patch_user_users__id__patch: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["User"];
+    users_patch_current_user_users_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Auth:Jwt.Login */
-  auth_jwt_login_auth_jwt_login_post: {
-    requestBody: {
-      content: {
-        "application/x-www-form-urlencoded": components["schemas"]["Body_auth_jwt_login_auth_jwt_login_post"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BearerResponse"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
         };
-      };
-    };
-  };
-  /** Auth:Jwt.Logout */
-  auth_jwt_logout_auth_jwt_logout_post: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Register:Register */
-  register_register_auth_register_post: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserWrite"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        content: {
-          "application/json": components["schemas"]["UserRead"];
+    users_user_users__id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Teams */
-  get_teams_teams__get: {
-    parameters: {
-      query?: {
-        limit?: number;
-        offset?: number;
-        status?: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Team"][];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Get Team */
-  get_team_teams__team_id__get: {
-    parameters: {
-      path: {
-        team_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Team"] | null;
+    users_delete_user_users__id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Create Team */
-  create_team_teams__team_id__post: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TeamBase"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Team"] | null;
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
-      };
     };
-  };
-  /** Patch Team */
-  patch_team_teams__team_id__patch: {
-    parameters: {
-      path: {
-        team_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TeamBase"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Team"] | null;
+    users_patch_user_users__id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Teams Me */
-  get_teams_me_teams_me__get: {
-    parameters: {
-      query?: {
-        limit?: number;
-        offset?: number;
-        status?: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Team"][];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
         };
-      };
-    };
-  };
-  /** Process Bancho Oauth */
-  process_bancho_oauth_oauth_bancho_token_get: {
-    parameters: {
-      query: {
-        code: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Get Score */
-  get_score_osu_scores__score_id__get: {
-    parameters: {
-      path: {
-        score_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Score"];
+    auth_jwt_login_auth_jwt_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Submit Score */
-  submit_score_osu_scores__post: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ScoreBase"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Score"];
+        requestBody: {
+            content: {
+                "application/x-www-form-urlencoded": components["schemas"]["Body_auth_jwt_login_auth_jwt_login_post"];
+            };
         };
-      };
-    };
-  };
-  /** Submit Score Partial */
-  submit_score_partial_osu_scores_partial__post: {
-    parameters: {
-      query: {
-        keywords: string;
-        beatmap_md5: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Score"];
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BearerResponse"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Inspect Bancho Match */
-  inspect_bancho_match_osu_scores_inspect_bancho__match_id__post: {
-    parameters: {
-      path: {
-        match_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+    auth_jwt_logout_auth_jwt_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Beatmap */
-  get_beatmap_osu_beatmaps__ident__get: {
-    parameters: {
-      path: {
-        ident: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Beatmap"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
         };
-      };
     };
-  };
-  /** Stream Beatmap */
-  stream_beatmap_osu_beatmaps_stream__post: {
-    requestBody: {
-      content: {
-        "application/json": string[];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+    register_register_auth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Teams */
-  get_teams_osu_teams__get: {
-    parameters: {
-      query?: {
-        limit?: number;
-        offset?: number;
-        status?: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OsuTeamCombination"][];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserWrite"];
+            };
         };
-      };
-    };
-  };
-  /** Get Team */
-  get_team_osu_teams__team_id__get: {
-    parameters: {
-      path: {
-        team_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OsuTeamCombination"] | null;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRead"];
+                };
+            };
         };
-      };
     };
-  };
-  /** Get Teams Me */
-  get_teams_me_osu_teams_me__get: {
-    parameters: {
-      query?: {
-        limit?: number;
-        offset?: number;
-        status?: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OsuTeamCombination"][];
+    get_teams_teams__get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Scores */
-  get_scores_osu_teams_scores__get: {
-    parameters: {
-      query: {
-        limit?: number;
-        offset?: number;
-        team_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Score"][];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
         };
-      };
     };
-  };
-  /** Get Stages */
-  get_stages_osu_teams_stages__get: {
-    parameters: {
-      query: {
-        limit?: number;
-        offset?: number;
-        team_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Stage"][];
+    get_team_teams__team_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: number;
+            };
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Get Stage */
-  get_stage_osu_stages__stage_id__get: {
-    parameters: {
-      path: {
-        stage_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Stage"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"] | null;
+                };
+            };
         };
-      };
     };
-  };
-  /** Patch Stage */
-  patch_stage_osu_stages__stage_id__patch: {
-    parameters: {
-      path: {
-        stage_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Stage"];
+    create_team_teams__team_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  /** Create Stage */
-  create_stage_osu_stages__post: {
-    parameters: {
-      query: {
-        team_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageBase"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Stage"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamBase"];
+            };
         };
-      };
-    };
-  };
-  /** Get Stage Beatmaps */
-  get_stage_beatmaps_osu_stages_beatmaps__get: {
-    parameters: {
-      query: {
-        limit?: unknown;
-        offset?: unknown;
-        stage_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Beatmap"][];
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"] | null;
+                };
+            };
         };
-      };
     };
-  };
-  /** Add Stage Beatmaps */
-  add_stage_beatmaps_osu_stages_beatmaps__post: {
-    parameters: {
-      query: {
-        stage_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageMapBase"][];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
+    patch_team_teams__team_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: number;
+            };
+            cookie?: never;
         };
-      };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamBase"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"] | null;
+                };
+            };
+        };
     };
-  };
+    get_teams_me_teams_me__get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+        };
+    };
+    generate_invite_teams__team_id__invite_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvite"];
+                };
+            };
+        };
+    };
+    process_bancho_oauth_oauth_bancho_token_get: {
+        parameters: {
+            query: {
+                code: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_score_osu_scores__score_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                score_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Score"];
+                };
+            };
+        };
+    };
+    submit_score_osu_scores__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScoreBase"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Score"];
+                };
+            };
+        };
+    };
+    submit_score_partial_osu_scores_partial__post: {
+        parameters: {
+            query: {
+                keywords: string;
+                beatmap_md5: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Score"];
+                };
+            };
+        };
+    };
+    inspect_bancho_match_osu_scores_inspect_bancho__match_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_beatmap_osu_beatmaps__ident__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ident: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Beatmap"];
+                };
+            };
+        };
+    };
+    stream_beatmap_osu_beatmaps_stream__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string[];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_teams_osu_teams__get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OsuTeamCombination"][];
+                };
+            };
+        };
+    };
+    get_team_osu_teams__team_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OsuTeamCombination"] | null;
+                };
+            };
+        };
+    };
+    get_teams_me_osu_teams_me__get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OsuTeamCombination"][];
+                };
+            };
+        };
+    };
+    get_scores_osu_teams_scores__get: {
+        parameters: {
+            query: {
+                limit?: number;
+                offset?: number;
+                team_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Score"][];
+                };
+            };
+        };
+    };
+    get_stages_osu_teams_stages__get: {
+        parameters: {
+            query: {
+                limit?: number;
+                offset?: number;
+                team_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Stage"][];
+                };
+            };
+        };
+    };
+    get_stage_osu_stages__stage_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stage_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Stage"];
+                };
+            };
+        };
+    };
+    patch_stage_osu_stages__stage_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stage_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Stage"];
+                };
+            };
+        };
+    };
+    create_stage_osu_stages__post: {
+        parameters: {
+            query: {
+                team_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageBase"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Stage"];
+                };
+            };
+        };
+    };
+    get_stage_beatmaps_osu_stages_beatmaps__get: {
+        parameters: {
+            query: {
+                limit?: unknown;
+                offset?: unknown;
+                stage_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StageMapPublic"][];
+                };
+            };
+        };
+    };
+    add_stage_beatmaps_osu_stages_beatmaps__post: {
+        parameters: {
+            query: {
+                stage_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageMapBase"][];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_sheet_osu_stages_sheet__get: {
+        parameters: {
+            query: {
+                stage_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    verify_invite_invites__invite_code__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invite_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamUserLink"];
+                };
+            };
+        };
+    };
 }
