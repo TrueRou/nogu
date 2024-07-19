@@ -8,11 +8,13 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
+    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@iconfu/svg-inject": "^1.2.3",
     "axios": "^1.6.0",
+    "patch-package": "^8.0.0",
     "pinia": "^2.1.6",
     "qs": "^6.11.2",
     "timeago.js": "^4.0.2",
@@ -27,6 +29,7 @@
     "@vue/tsconfig": "^0.4.0",
     "autoprefixer": "^10.4.16",
     "daisyui": "^4.12.10",
+    "less": "^4.2.0",
     "npm-run-all2": "^6.0.6",
     "openapi-fetch": "^0.10.2",
     "openapi-typescript": "^7.0.4",

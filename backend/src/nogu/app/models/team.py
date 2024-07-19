@@ -90,7 +90,7 @@ class TeamWithMembers(TeamRead):
 class TeamSrv:
     def _ensure_role(session: Session, team: Team, user: User | None, role: TeamRole = None) -> tuple[bool, APIException]:
         if user is None:
-            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED)
+            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED, settled=False)
         sentence = select(TeamUserLink).where(TeamUserLink.team_id == team.id, TeamUserLink.user_id == user.id)
         if role is not None:
             sentence = sentence.where(TeamUserLink.role <= role.value)

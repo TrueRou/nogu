@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Profile from './profile.vue';
+import Sheet from './sheet.vue';
 import { markRaw, ref } from 'vue';
 
 const selectedComponent = ref(markRaw(Profile))
@@ -12,10 +13,13 @@ const selectedComponent = ref(markRaw(Profile))
                 <input v-model="selectedComponent" :value="markRaw(Profile)"
                     class="flex btn h-full w-32 md:h-6 md:w-full btn-ghost rounded-none normal-case" type="radio"
                     aria-label="Profile">
+                <input v-model="selectedComponent" :value="markRaw(Sheet)"
+                    class="flex btn h-full w-32 md:h-6 md:w-full btn-ghost rounded-none normal-case" type="radio"
+                    aria-label="Sheet">
                 <input v-model="selectedComponent" :value="null"
                     class="flex btn h-full w-32 md:h-6 md:w-full btn-ghost rounded-none normal-case" type="radio"
                     aria-label="Analysis">
-                <input v-model="selectedComponent" :value="2"
+                <input v-model="selectedComponent" :value="null"
                     class="flex btn h-full w-32 md:h-6 md:w-full btn-ghost rounded-none normal-case" type="radio"
                     aria-label="Member">
             </div>

@@ -89,7 +89,7 @@ class PlaylistMapPublic(PlaylistMapBase):
 class PlaylistSrv:
     def _ensure_ownership(session: Session, playlist: Playlist, user: User | None) -> tuple[bool, APIException]:
         if user is None:
-            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED)
+            return False, APIException("Login is required to access that model.", "model.login-required", status.HTTP_401_UNAUTHORIZED, settled=False)
         if playlist.user_id != user.id:
             return False, APIException("You have no privilege to do that.", "model.no-priv", status.HTTP_403_FORBIDDEN)
         return True, None

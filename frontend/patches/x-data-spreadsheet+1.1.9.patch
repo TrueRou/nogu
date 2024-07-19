@@ -1,0 +1,289 @@
+diff --git a/node_modules/x-data-spreadsheet/src/component/scrollbar.js b/node_modules/x-data-spreadsheet/src/component/scrollbar.js
+index 99b045c..d26d342 100644
+--- a/node_modules/x-data-spreadsheet/src/component/scrollbar.js
++++ b/node_modules/x-data-spreadsheet/src/component/scrollbar.js
+@@ -7,7 +7,7 @@ export default class Scrollbar {
+     this.moveFn = null;
+     this.el = h('div', `${cssPrefix}-scrollbar ${vertical ? 'vertical' : 'horizontal'}`)
+       .child(this.contentEl = h('div', ''))
+-      .on('mousemove.stop', () => {})
++      .on('mousemove.stop', () => { })
+       .on('scroll.stop', (evt) => {
+         const { scrollTop, scrollLeft } = evt.target;
+         // console.log('scrollTop:', scrollTop);
+@@ -32,8 +32,9 @@ export default class Scrollbar {
+     // console.log('distance:', distance, ', contentDistance:', contentDistance);
+     if (contentDistance > d) {
+       const cssKey = this.vertical ? 'height' : 'width';
++      const minus = this.vertical ? 14 : 0;
+       // console.log('d:', d);
+-      this.el.css(cssKey, `${d - 15}px`).show();
++      this.el.css(cssKey, `${d - minus}px`).show();
+       this.contentEl
+         .css(this.vertical ? 'width' : 'height', '1px')
+         .css(cssKey, `${contentDistance}px`);
+diff --git a/node_modules/x-data-spreadsheet/src/component/sheet.js b/node_modules/x-data-spreadsheet/src/component/sheet.js
+index 086b8c4..40985a9 100644
+--- a/node_modules/x-data-spreadsheet/src/component/sheet.js
++++ b/node_modules/x-data-spreadsheet/src/component/sheet.js
+@@ -136,7 +136,7 @@ function overlayerMousemove(evt) {
+     rowResizer, colResizer, tableEl, data,
+   } = this;
+   const { rows, cols } = data;
+-  if (offsetX > cols.indexWidth && offsetY > rows.height) {
++  if (offsetX > cols.indexWidth && offsetY > rows.indexHeight) {
+     rowResizer.hide();
+     colResizer.hide();
+     return;
+@@ -157,7 +157,7 @@ function overlayerMousemove(evt) {
+     rowResizer.hide();
+   }
+   if (cRect.ri === -1 && cRect.ci >= 0) {
+-    cRect.height = rows.height;
++    cRect.height = rows.indexHeight;
+     colResizer.show(cRect, {
+       height: tRect.height,
+     });
+@@ -973,9 +973,9 @@ export default class Sheet {
+     const { width, height } = this.getRect();
+     return {
+       width: width - cols.indexWidth,
+-      height: height - rows.height,
++      height: height - rows.indexHeight,
+       left: cols.indexWidth,
+-      top: rows.height,
++      top: rows.indexHeight,
+     };
+   }
+ }
+diff --git a/node_modules/x-data-spreadsheet/src/component/table.js b/node_modules/x-data-spreadsheet/src/component/table.js
+index 41e1e14..4377549 100644
+--- a/node_modules/x-data-spreadsheet/src/component/table.js
++++ b/node_modules/x-data-spreadsheet/src/component/table.js
+@@ -191,6 +191,17 @@ function renderFixedHeaders(type, viewRange, w, h, tx, ty) {
+   const nty = ty + h;
+   const ntx = tx + w;
+ 
++  // 如果都为0，则不渲染，判断方法根据条件即可，我这里认为为0时即隐藏，你也可以传递一个boolean值。
++  if (w === 0 && h === 0) {
++    // 画边线
++    draw.save();
++    draw.attr(tableFixedHeaderStyle());
++    draw.line([0, 0], [0, sumHeight]);
++    draw.restore();
++
++    return;
++  }
++
+   draw.save();
+   // draw rect background
+   draw.attr(tableFixedHeaderCleanStyle);
+@@ -318,7 +329,7 @@ class Table {
+     // fixed width of header
+     const fw = cols.indexWidth;
+     // fixed height of header
+-    const fh = rows.height;
++    const fh = rows.indexHeight;
+ 
+     this.draw.resize(data.viewWidth(), data.viewHeight());
+     this.clear();
+diff --git a/node_modules/x-data-spreadsheet/src/core/data_proxy.js b/node_modules/x-data-spreadsheet/src/core/data_proxy.js
+index 0e2011a..6c25685 100644
+--- a/node_modules/x-data-spreadsheet/src/core/data_proxy.js
++++ b/node_modules/x-data-spreadsheet/src/core/data_proxy.js
+@@ -81,6 +81,7 @@ const defaultSettings = {
+   row: {
+     len: 100,
+     height: 25,
++    indexHeight: 25,
+   },
+   col: {
+     len: 26,
+@@ -116,7 +117,7 @@ const hasOwnProperty = (obj, name) => Object.prototype.hasOwnProperty.call(obj,
+ 
+ // src: cellRange
+ // dst: cellRange
+-function canPaste(src, dst, error = () => {}) {
++function canPaste(src, dst, error = () => { }) {
+   const { merges } = this;
+   const cellRange = dst.clone();
+   const [srn, scn] = src.size();
+@@ -282,8 +283,11 @@ function getCellRowByY(y, scrollOffsety) {
+   const { rows } = this;
+   const fsh = this.freezeTotalHeight();
+   // console.log('y:', y, ', fsh:', fsh);
+-  let inits = rows.height;
+-  if (fsh + rows.height < y) inits -= scrollOffsety;
++
++  let inits = rows.indexHeight; // rows.height -> rows.indexHeight，修复引用
++  if (fsh + rows.indexHeight < y) { // rows.height -> rows.indexHeight，修复引用
++    inits -= scrollOffsety;
++  }
+ 
+   // handle ri in autofilter
+   const frset = this.exceptRowSet;
+@@ -299,12 +303,15 @@ function getCellRowByY(y, scrollOffsety) {
+     }
+   }
+   top -= height;
+-  // console.log('ri:', ri, ', top:', top, ', height:', height);
+ 
+-  if (top <= 0) {
+-    return { ri: -1, top: 0, height };
++  // 表示鼠标在 A B C D 行所在的位置，这时为了标尺功能正确，直接重置 top 为 0
++  if (y <= rows.indexHeight) {
++    top = 0;
+   }
+ 
++  if (top <= 0 && rows.indexHeight > 0) { // 修复整列选中bug
++    return { ri: -1, top: 0, height: rows.indexHeight }; // height -> height: rows.indexHeight，修复引用
++  }
+   return { ri: ri - 1, top, height };
+ }
+ 
+@@ -321,7 +328,7 @@ function getCellColByX(x, scrollOffsetx) {
+     x,
+     i => cols.getWidth(i),
+   );
+-  if (left <= 0) {
++  if (left <= 0 && cols.indexWidth > 0) { // 修复整行选中bug
+     return { ci: -1, left: 0, width: cols.indexWidth };
+   }
+   return { ci: ci - 1, left, width };
+@@ -348,7 +355,7 @@ export default class DataProxy {
+     this.history = new History();
+     this.clipboard = new Clipboard();
+     this.autoFilter = new AutoFilter();
+-    this.change = () => {};
++    this.change = () => { };
+     this.exceptRowSet = new Set();
+     this.sortedRowMap = new Map();
+     this.unsortedRowMap = new Map();
+@@ -438,7 +445,7 @@ export default class DataProxy {
+       }
+       copyText += '\n';
+     }
+-    navigator.clipboard.writeText(copyText).then(() => {}, (err) => {
++    navigator.clipboard.writeText(copyText).then(() => { }, (err) => {
+       console.log('text copy to the system clipboard error  ', copyText, err);
+     });
+   }
+@@ -448,7 +455,7 @@ export default class DataProxy {
+   }
+ 
+   // what: all | text | format
+-  paste(what = 'all', error = () => {}) {
++  paste(what = 'all', error = () => { }) {
+     // console.log('sIndexes:', sIndexes);
+     const { clipboard, selector } = this;
+     if (clipboard.isClear()) return false;
+@@ -473,7 +480,7 @@ export default class DataProxy {
+     });
+   }
+ 
+-  autofill(cellRange, what, error = () => {}) {
++  autofill(cellRange, what, error = () => { }) {
+     const srcRange = this.selector.range;
+     if (!canPaste.call(this, srcRange, cellRange, error)) return false;
+     this.changeData(() => {
+@@ -499,9 +506,9 @@ export default class DataProxy {
+     if (ri < 0) nri = rows.len - 1;
+     if (ci < 0) nci = cols.len - 1;
+     if (nri > cri) [sri, eri] = [cri, nri];
+-    else [sri, eri] = [nri, cri];
++    else[sri, eri] = [nri, cri];
+     if (nci > cci) [sci, eci] = [cci, nci];
+-    else [sci, eci] = [nci, cci];
++    else[sci, eci] = [nci, cci];
+     selector.range = merges.union(new CellRange(
+       sri, sci, eri, eci,
+     ));
+@@ -625,14 +632,10 @@ export default class DataProxy {
+   }
+ 
+   xyInSelectedRect(x, y) {
+-    const {
+-      left, top, width, height,
+-    } = this.getSelectedRect();
++    const { left, top, width, height } = this.getSelectedRect();
+     const x1 = x - this.cols.indexWidth;
+-    const y1 = y - this.rows.height;
+-    // console.log('x:', x, ',y:', y, 'left:', left, 'top:', top);
+-    return x1 > left && x1 < (left + width)
+-      && y1 > top && y1 < (top + height);
++    const y1 = y - this.rows.indexHeight; // rows.height -> rows.indexHeight，修复引用
++    return x1 > left && x1 < left + width && y1 > top && y1 < top + height;
+   }
+ 
+   getSelectedRect() {
+diff --git a/node_modules/x-data-spreadsheet/src/core/row.js b/node_modules/x-data-spreadsheet/src/core/row.js
+index dc3243a..d6c3a24 100644
+--- a/node_modules/x-data-spreadsheet/src/core/row.js
++++ b/node_modules/x-data-spreadsheet/src/core/row.js
+@@ -2,11 +2,12 @@ import helper from './helper';
+ import { expr2expr } from './alphabet';
+ 
+ class Rows {
+-  constructor({ len, height }) {
++  constructor({ len, height, indexHeight }) {
+     this._ = {};
+     this.len = len;
+     // default row height
+     this.height = height;
++    this.indexHeight = indexHeight;
+   }
+ 
+   getHeight(ri) {
+@@ -110,7 +111,7 @@ class Rows {
+   }
+ 
+   // what: all | format | text
+-  copyPaste(srcCellRange, dstCellRange, what, autofill = false, cb = () => {}) {
++  copyPaste(srcCellRange, dstCellRange, what, autofill = false, cb = () => { }) {
+     const {
+       sri, sci, eri, eci,
+     } = srcCellRange;
+diff --git a/node_modules/x-data-spreadsheet/src/index.d.ts b/node_modules/x-data-spreadsheet/src/index.d.ts
+index 948a8e9..0aec84d 100644
+--- a/node_modules/x-data-spreadsheet/src/index.d.ts
++++ b/node_modules/x-data-spreadsheet/src/index.d.ts
+@@ -12,6 +12,7 @@ declare module 'x-data-spreadsheet' {
+     row?: {
+       len: number;
+       height: number;
++      indexHeight: number;
+     };
+     col?: {
+       len: number;
+@@ -121,13 +122,13 @@ declare module 'x-data-spreadsheet' {
+       left?: string[];
+     };
+   }
+-  export interface Editor {}
+-  export interface Element {}
++  export interface Editor { }
++  export interface Element { }
+ 
+-  export interface Row {}
+-  export interface Table {}
+-  export interface Cell {}
+-  export interface Sheet {}
++  export interface Row { }
++  export interface Table { }
++  export interface Cell { }
++  export interface Sheet { }
+ 
+   export default class Spreadsheet {
+     constructor(container: string | HTMLElement, opts?: Options);
+diff --git a/node_modules/x-data-spreadsheet/src/index.js b/node_modules/x-data-spreadsheet/src/index.js
+index 479a0b7..0b8d57b 100644
+--- a/node_modules/x-data-spreadsheet/src/index.js
++++ b/node_modules/x-data-spreadsheet/src/index.js
+@@ -23,6 +23,7 @@ class Spreadsheet {
+     }, (index) => {
+       const d = this.datas[index];
+       this.sheet.resetData(d);
++      this.sheet.trigger('swap', index);
+     }, () => {
+       this.deleteSheet();
+     }, (index, value) => {
