@@ -26,4 +26,5 @@ from .stage import (
     StageUpdate,
     StageSrv,
     StageMapSrv,
+    StageUserSrv,
 )

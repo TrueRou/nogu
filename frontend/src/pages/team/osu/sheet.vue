@@ -20,9 +20,16 @@ if (stages.value.length == 0) {
 const fillData = async (sheet: Spreadsheet, index: number) => {
     const stage_id: number = stages.value[index - 1]?.id ?? 0; // index is 1-based, null value won't be used
     const record = (await client.GET('/osu/stages/sheet/', { params: { query: { stage_id: stage_id } } })).data
-    if (record) {
-        console.log(record["rows"])
+    if (!record) return
+    for (var i = 0; i < record.rows.length; i++) {
+        sheet.cellText(1, i + 3, record.rows[i]?.username ?? '', index)
     }
+    for (var i = 0; i < record.cols.length; i++) {
+        sheet.cellText(i + 2, 0, '' + record.cols[i]?.beatmap_id, index)
+        // sheet.cellText(i + 2, 1, '' + record.cols[i]?.label, index)
+        sheet.cellText(i + 2, 2, record.cols[i]?.title ?? '', index)
+    }
+    sheet.reRender()
 }
 
 const modifyMenu = (menu: any) => {

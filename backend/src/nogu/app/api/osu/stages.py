@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 from fastapi.security import SecurityScopes
+from nogu.app.models.osu.analysis import StageSheet
 from nogu.app.models.osu.stage import StageMapUser, StageUser
 from nogu.app.models.team import Team, TeamSrv
 from nogu.app.models.user import User, UserSrv
@@ -64,18 +65,18 @@ async def add_stage_beatmaps(
     session.commit()
 
 
-@router.get("/sheet/", response_model=dict)
+@router.get("/sheet/", response_model=StageSheet)
 async def get_sheet(session: Session = Depends(require_session), stage: Stage = Security(StageSrv.require_stage, scopes=["access-sensitive"])):
     stage_maps = session.exec(select(StageMap, Beatmap).join(Beatmap).where(StageMap.stage_id == stage.id)).all()
     stage_users = session.exec(select(StageUser, User).join(User).where(StageUser.stage_id == stage.id)).all()
     stage_map_users = session.exec(select(StageMapUser).where(StageMapUser.stage_id == stage.id))
-    rows, cols, cells = {}, {}, {}
-    rows = {stage_user.user_id: {"username": user.username, "analysis": stage_user.analysis} for stage_user, user in stage_users}
-    cols = {stage_map.map_md5: StageMapSrv.as_col(stage_map, beatmap) for stage_map, beatmap in stage_maps}
+    rows, cols, cells = [], [], {}
+    rows = [StageUserSrv.as_row(stage_user, user) for stage_user, user in stage_users]
+    cols = [StageMapSrv.as_col(stage_map, beatmap) for stage_map, beatmap in stage_maps]
     for stage_map, _ in stage_maps:
         cells[stage_map.map_md5] = {}
         for stage_user, _ in stage_users:
             cells[stage_map.map_md5][stage_user.user_id] = None
     for stage_map_user in stage_map_users:
         cells[stage_map_user.map_md5][stage_map_user.user_id] = stage_map_user.analysis
-    return {"rows": rows, "cols": cols, "cells": cells}
+    return StageSheet(rows=rows, cols=cols, cells=cells)

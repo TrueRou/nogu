@@ -2,7 +2,7 @@ import datetime
 from fastapi import Depends, status
 from fastapi.security import SecurityScopes
 from nogu.app.database import require_session, session_ctx
-from nogu.app.models.osu.analysis import StageAnalysis, StageMapAnalysis, StageMapUserAnalysis, StageUserAnalysis
+from nogu.app.models.osu.analysis import StageAnalysis, StageMapAnalysis, StageMapSheet, StageMapUserAnalysis, StageUserAnalysis, StageUserSheet
 from nogu.app.models.osu.beatmap import Beatmap
 from nogu.app.objects import PydanticJson
 from sqlalchemy import JSON, Column, event
@@ -122,15 +122,21 @@ class StageSrv:
 
 
 class StageMapSrv:
-    def as_col(stage_map: StageMap, beatmap: Beatmap) -> dict:
-        return {
-            "label": stage_map.label,
-            "description": stage_map.description,
-            "title": beatmap.title,
-            "artist": beatmap.artist,
-            "version": beatmap.version,
-            "creator": beatmap.creator,
-            "beatmapset_id": beatmap.set_id,
-            "beatmap_id": beatmap.id,
-            "analysis": stage_map.analysis,
-        }
+    def as_col(stage_map: StageMap, beatmap: Beatmap) -> StageMapSheet:
+        return StageMapSheet(
+            map_md5=stage_map.map_md5,
+            label=stage_map.label,
+            description=stage_map.description,
+            title=beatmap.title,
+            artist=beatmap.artist,
+            version=beatmap.version,
+            creator=beatmap.creator,
+            beatmapset_id=beatmap.set_id,
+            beatmap_id=beatmap.id,
+            analysis=stage_map.analysis,
+        )
+
+
+class StageUserSrv:
+    def as_row(stage_user: StageUser, user: User) -> StageUserSheet:
+        return StageUserSheet(user_id=user.id, username=user.username, analysis=stage_user.analysis)

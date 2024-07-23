@@ -721,6 +721,19 @@ export interface components {
             /** Playlist Id */
             playlist_id: number | null;
         };
+        /** StageMapAnalysis */
+        StageMapAnalysis: {
+            /** Play Count */
+            play_count: number;
+            /** Average Accuracy */
+            average_accuracy: number;
+            /** Average Misses */
+            average_misses: number;
+            /** Average Score */
+            average_score: number;
+            /** Average Completeness */
+            average_completeness: number;
+        };
         /** StageMapBase */
         StageMapBase: {
             /** Map Md5 */
@@ -746,6 +759,54 @@ export interface components {
             condition_id: number;
             condition: components["schemas"]["AstConditionPublic"];
         };
+        /** StageMapSheet */
+        StageMapSheet: {
+            /** Map Md5 */
+            map_md5: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+            /** Title */
+            title: string;
+            /** Artist */
+            artist: string;
+            /** Version */
+            version: string;
+            /** Creator */
+            creator: string;
+            /** Beatmapset Id */
+            beatmapset_id: number;
+            /** Beatmap Id */
+            beatmap_id: number;
+            analysis: components["schemas"]["StageMapAnalysis"] | null;
+        };
+        /** StageMapUserAnalysis */
+        StageMapUserAnalysis: {
+            /** Play Count */
+            play_count: number;
+            /** Average Accuracy */
+            average_accuracy: number;
+            /** Average Misses */
+            average_misses: number;
+            /** Average Score */
+            average_score: number;
+            /** Average Completeness */
+            average_completeness: number;
+        };
+        /** StageSheet */
+        StageSheet: {
+            /** Rows */
+            rows: components["schemas"]["StageUserSheet"][];
+            /** Cols */
+            cols: components["schemas"]["StageMapSheet"][];
+            /** Cells */
+            cells: {
+                [key: string]: ({
+                    [key: string]: (components["schemas"]["StageMapUserAnalysis"] | null) | undefined;
+                } | null) | undefined;
+            };
+        };
         /** StageUpdate */
         StageUpdate: {
             /** Name */
@@ -753,6 +814,23 @@ export interface components {
             /** Description */
             description: string | null;
             win_condition: components["schemas"]["WinCondition"] | null;
+        };
+        /** StageUserAnalysis */
+        StageUserAnalysis: {
+            /** Play Count */
+            play_count: number;
+            /** Average Accuracy */
+            average_accuracy: number;
+            /** Average Completeness */
+            average_completeness: number;
+        };
+        /** StageUserSheet */
+        StageUserSheet: {
+            /** User Id */
+            user_id: number;
+            /** Username */
+            username: string;
+            analysis: components["schemas"]["StageUserAnalysis"] | null;
         };
         /** Team */
         Team: {
@@ -1722,7 +1800,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StageSheet"];
                 };
             };
         };
