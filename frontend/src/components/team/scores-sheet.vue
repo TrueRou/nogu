@@ -51,7 +51,7 @@ const options: Options = {
 onMounted(async () => {
     const sheet: any = new Spreadsheet("#x-spreadsheet", options)
     props.sheets.forEach(title => sheet.addSheet(title, true))
-    emit('fillData', sheet, props.sheets.length) // Manually fill the last sheet with data
+    // emit('fillData', sheet, props.sheets.length) // Manually fill the last sheet with data
     sheet.on('swap', (index: number) => emit('fillData', sheet, index))
     emit('modifyMenu', sheet.sheet.contextMenu)
     const lastButton: Element & { click: () => void } | null = document.querySelector("#x-spreadsheet > div > div.x-spreadsheet-bottombar > ul > li:last-child")
